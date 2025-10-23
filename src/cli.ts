@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { Command } from 'commander';
+import { initProject } from './tools/init.js';
 import { validateNaming } from './tools/naming.js';
 import { validateOrphans } from './tools/orphans.js';
 import { validateSpecOrphans } from './tools/spec-orphans.js';
@@ -10,7 +11,29 @@ import { validateMigration } from './tools/validate.js';
 
 const program = new Command();
 
-program.name('mdoc').version('1.0.0').description('문서 검증 및 동기화 도구');
+program
+  .name('edgedoc')
+  .version('1.0.0')
+  .description('Edge-based documentation validation and sync tool');
+
+// Init command
+program
+  .command('init')
+  .description('프로젝트 초기화 (config 및 가이드 생성)')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로 (기본값: 현재 디렉토리)', process.cwd())
+  .option('-f, --force', '기존 파일 덮어쓰기')
+  .action(async (options) => {
+    try {
+      const result = await initProject({
+        projectPath: options.project,
+        force: options.force,
+      });
+      process.exit(result.success ? 0 : 1);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
 
 // Validate commands
 const validate = program.command('validate').description('문서 검증');

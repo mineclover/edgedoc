@@ -1,10 +1,10 @@
-# mdoc-tools
+# edgedoc
 
-문서 검증 및 동기화 도구 (CLI + MCP)
+Edge-based Documentation Validation & Sync Tool (CLI + MCP)
 
 ## 소개
 
-`mdoc-tools`는 문서 기반 프로젝트에서 점진적 마이그레이션과 문서 일관성을 검증하는 CLI 도구입니다. TypeScript로 작성되었으며 Bun 런타임을 활용합니다.
+`edgedoc`는 edge 기반 양방향 참조 체계를 사용하는 문서 검증 및 동기화 도구입니다. 문서 간 관계를 그래프 구조로 관리하며, 점진적 마이그레이션과 문서 일관성을 검증합니다. TypeScript로 작성되었으며 Bun 런타임을 활용합니다.
 
 ### 주요 기능
 
@@ -26,7 +26,7 @@
 ### 의존성 설치
 
 \`\`\`bash
-cd mdoc-tools
+cd edgedoc
 bun install
 \`\`\`
 
@@ -88,34 +88,34 @@ bun run build:binary
 
 기본 검증 (현재 디렉토리):
 \`\`\`bash
-mdoc validate migration
+edgedoc validate migration
 \`\`\`
 
 특정 프로젝트 경로 지정:
 \`\`\`bash
-mdoc validate migration --project /path/to/project
+edgedoc validate migration --project /path/to/project
 \`\`\`
 
 마크다운 리포트 생성:
 \`\`\`bash
-mdoc validate migration --markdown
+edgedoc validate migration --markdown
 \`\`\`
 
 모든 옵션 조합:
 \`\`\`bash
-mdoc validate migration -p ~/my-project -m
+edgedoc validate migration -p ~/my-project -m
 \`\`\`
 
 #### 2. 네이밍 컨벤션 검증
 
 인터페이스 및 공용 타입 파일명 검증:
 \`\`\`bash
-mdoc validate naming
+edgedoc validate naming
 \`\`\`
 
 특정 프로젝트 경로 지정:
 \`\`\`bash
-mdoc validate naming -p ~/my-project
+edgedoc validate naming -p ~/my-project
 \`\`\`
 
 **검증 항목**:
@@ -129,7 +129,7 @@ mdoc validate naming -p ~/my-project
 
 모든 검증을 한 번에 실행:
 \`\`\`bash
-mdoc validate all -p ~/my-project
+edgedoc validate all -p ~/my-project
 \`\`\`
 
 #### 4. 옵션
@@ -140,7 +140,7 @@ mdoc validate all -p ~/my-project
 ## 프로젝트 구조
 
 \`\`\`
-mdoc-tools/
+edgedoc/
 ├── src/
 │   ├── cli.ts              # CLI 진입점 (Commander.js)
 │   ├── index.ts            # MCP 서버 (개발 중)

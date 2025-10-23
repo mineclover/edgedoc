@@ -1,10 +1,10 @@
 {
-  "name": "mdoc-tools",
+  "name": "edgedoc",
   "version": "1.0.0",
-  "description": "문서 검증 및 동기화 도구 (CLI + MCP)",
+  "description": "Edge-based documentation validation and sync tool (CLI + MCP)",
   "type": "module",
   "bin": {
-    "mdoc": "./dist/cli.js"
+    "edgedoc": "./dist/cli.js"
   },
   "scripts": {
     "dev": "bun run src/cli.ts",
@@ -15,13 +15,25 @@
     "test": "bun test"
   },
   "keywords": [
-    "mcp",
-    "cli",
     "documentation",
-    "validation"
+    "validation",
+    "markdown",
+    "lint",
+    "cli",
+    "mcp",
+    "migration",
+    "sync"
   ],
-  "author": "",
+  "author": "astralclover",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/astralclover/edgedoc.git"
+  },
+  "homepage": "https://github.com/astralclover/edgedoc#readme",
+  "bugs": {
+    "url": "https://github.com/astralclover/edgedoc/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.1",
     "commander": "^12.1.0",

@@ -1,0 +1,34 @@
+{
+  "name": "mdoc-tools",
+  "version": "1.0.0",
+  "description": "문서 검증 및 동기화 도구 (CLI + MCP)",
+  "type": "module",
+  "bin": {
+    "mdoc": "./dist/cli.js"
+  },
+  "scripts": {
+    "dev": "bun run src/cli.ts",
+    "dev:mcp": "bun run src/index.ts",
+    "build": "bun build src/cli.ts --outdir dist --target bun",
+    "build:mcp": "bun build src/index.ts --outdir dist --target bun",
+    "build:binary": "bun build src/cli.ts --compile --outfile mdoc",
+    "test": "bun test"
+  },
+  "keywords": [
+    "mcp",
+    "cli",
+    "documentation",
+    "validation"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.1",
+    "commander": "^12.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  }
+}

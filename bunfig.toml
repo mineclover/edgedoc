@@ -1,0 +1,7 @@
+[install]
+# Install dependencies
+auto = "auto"
+
+[test]
+# Test configuration
+coverage = true

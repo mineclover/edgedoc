@@ -1,0 +1,9 @@
+{
+  "$schema": "./schema/mdoc-config.schema.json",
+  "validation": {
+    "sharedTypes": {
+      "maxPairs": 12,
+      "warnAtPairs": 8
+    }
+  }
+}

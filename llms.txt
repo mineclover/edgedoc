@@ -1,0 +1,288 @@
+# mdoc-tools Documentation Management System
+
+> CLI + MCP Server for documentation validation and management following SSOT principles
+
+## Quick Start
+
+```bash
+# Validate all documentation
+mdoc validate all
+
+# Validate naming conventions
+mdoc validate naming
+
+# Find orphaned files
+mdoc validate orphans
+
+# Validate migration progress
+mdoc validate migration
+```
+
+## Core Concepts
+
+### SSOT (Single Source of Truth)
+- **Shared types** are defined ONLY in `shared/` directory
+- **Features and interfaces** reference only (never define)
+- No duplicate type definitions allowed
+- Reference format: Frontmatter `shared_types` + 🔗 link
+
+### Pair Concept
+- Format: `XX--YY` (two-digit component numbers)
+- Normalization: smaller number always first (`01--02` ✓, `02--01` ✗)
+- Used for interface file naming
+
+### Shared Type Naming
+- Format: `{pair1}_{pair2}_{pair3}.md`
+- Example: `01--02_01--03_02--03.md`
+- Rules:
+  - All pairs must be normalized
+  - Pairs must be sorted lexicographically
+  - Separated by underscore (`_`)
+  - No duplicate pairs
+
+## Validation Types
+
+### 1. Naming Conventions (`mdoc validate naming`)
+Validates:
+- Interface files: `XX--YY.md` format
+- Shared type files: `XX--YY_YY--ZZ.md` format (sorted)
+- Frontmatter required fields
+- interfaces array count matching
+- Bidirectional reference consistency
+
+### 2. Orphan Files (`mdoc validate orphans`)
+Finds files that are:
+- Not documented
+- Not referenced in code
+- Classifies by type (source, config, other)
+- Checks import status
+
+### 3. Migration (`mdoc validate migration`)
+Validates tasks/ → tasks-v2/ migration:
+- Missing sections
+- Type definition errors
+- Documentation completeness
+
+### 4. Structure (planned)
+Will validate:
+- Circular dependencies
+- Interface consistency
+- Frontmatter required fields
+- Example code prohibition
+- Shared type SSOT compliance
+
+## Frontmatter Structures
+
+### Interface Files (interfaces/*.md)
+```yaml
+---
+from: "01"                    # Required
+to: "02"                      # Required
+type: "service"               # Required
+status: "defined"             # Required
+shared_types:                 # Optional
+  - "01--02_02--03"
+---
+```
+
+### Shared Type Files (shared/*.md)
+```yaml
+---
+interfaces:                   # Required (sorted array)
+  - "01--02"
+  - "02--03"
+type: "shared"                # Required
+status: "defined"             # Required
+---
+```
+
+### Feature Files (features/*.md)
+```yaml
+---
+entry_point: "src/features/Feature.tsx"
+code_references:
+  - "src/features/Feature.tsx"
+  - "src/services/FeatureService.ts"
+type: "feature"
+status: "implemented"
+---
+```
+
+## Reference Patterns
+
+### Correct Reference
+```markdown
+---
+shared_types:
+  - "03--04_06--05"
+---
+
+## Type Definition
+
+> 🔗 **Shared Type**: `LayerNode` is defined in [../shared/03--04_06--05.md](../shared/03--04_06--05.md)
+
+### Interface-Specific Types Only
+\```typescript
+interface CanvasConfig {
+  width: number;
+  height: number;
+  zoom: number;
+}
+// LayerNode referenced only, not defined
+\```
+```
+
+### Selective Field Usage
+```markdown
+> 🔗 **Shared Type**: `ImageAsset` defined in [01--02_02--03_02--05.md](../shared/01--02_02--03_02--05.md)
+> **Selective Usage**: Only `id`, `name`, `width`, `height`, `blob` fields
+
+\```typescript
+interface DragStartEvent {
+  imageAsset: Pick<ImageAsset, 'id' | 'name' | 'width' | 'height' | 'blob'>;
+}
+\```
+```
+
+## Common Errors
+
+### Error: "Pairs not sorted"
+**Cause**: Shared type filename pairs not in alphabetical order
+
+**Fix**:
+```bash
+# Wrong: 02--03_01--02.md
+# Correct: 01--02_02--03.md
+
+# Sort pairs
+IFS='_' read -ra PAIRS <<< "02--03_01--02"
+sorted=($(printf '%s\n' "${PAIRS[@]}" | sort))
+echo "${sorted[@]}" | tr ' ' '_'  # Output: 01--02_02--03
+```
+
+### Error: "Bidirectional reference mismatch"
+**Cause**: Shared type and interface references don't match
+
+**Fix**:
+1. Check `shared/01--02_02--03.md`
+   - Ensure `interfaces` includes both "01--02" and "02--03"
+2. Check `interfaces/01--02.md`
+   - Add `shared_types: ["01--02_02--03"]`
+3. Check `interfaces/02--03.md`
+   - Add `shared_types: ["01--02_02--03"]`
+
+### Error: "SSOT Violation"
+**Cause**: Defining shared types outside `shared/` directory
+
+**Fix**:
+1. Move type definition to `shared/`
+2. Change original location to reference
+3. Add `shared_types` to frontmatter
+4. Run validation
+
+## Workflows
+
+### Daily Development
+```bash
+# Before development
+mdoc validate all
+
+# After creating files
+mdoc validate orphans
+
+# Before commit
+mdoc validate all && git commit
+```
+
+### Creating Shared Types
+1. Identify type duplication/same source
+2. Validate candidate (100% match OR same source with Pick<>)
+3. Create `shared/XX--YY_YY--ZZ.md` with sorted pairs
+4. Update all interface references
+5. Validate: `mdoc validate naming && mdoc validate all`
+
+### Fixing Violations
+```bash
+# Find specific errors
+mdoc validate naming
+
+# Check orphans
+mdoc validate orphans
+
+# Full validation
+mdoc validate all
+```
+
+## Best Practices
+
+### DO ✅
+1. Always validate before committing
+2. Document new files immediately
+3. Follow naming conventions strictly
+4. Reference shared types, never duplicate
+5. Maintain bidirectional consistency
+
+### DON'T ❌
+1. Don't commit without validation
+2. Don't leave orphan files undocumented
+3. Don't ignore naming conventions
+4. Don't define shared types outside `shared/`
+5. Don't create code without documentation
+
+## Key Principle
+
+**"Code without documentation does not exist"**
+
+All documentation follows SSOT:
+1. One place to define (`shared/`)
+2. Multiple places to reference (`features/`, `interfaces/`)
+3. Always validate (`mdoc validate all`)
+4. Keep bidirectional consistency
+
+## File Locations
+
+- **Authority**: `tasks/SHARED_TYPES.md` (Single Source of Truth)
+- **CLI**: `mdoc-tools/src/cli.ts`
+- **Types**: `mdoc-tools/src/shared/types.ts`
+- **Validators**: `mdoc-tools/src/tools/*.ts`
+
+## Error Codes
+
+- `format`: File naming format error
+- `sorting`: Sorting/ordering error
+- `duplicate`: Duplicate definition found
+- `frontmatter`: Missing required frontmatter field
+- `reference`: Bidirectional reference mismatch
+
+## Integration
+
+### Git Hooks
+```bash
+# .husky/pre-commit
+mdoc validate naming || exit 1
+
+# .husky/pre-push
+mdoc validate all || exit 1
+```
+
+### CI/CD
+```yaml
+# GitHub Actions
+- name: Validate Documentation
+  run: |
+    cd mdoc-tools && bun install && bun run build
+    ./mdoc validate all
+```
+
+## Version
+
+- **CLI Version**: 1.0.0
+- **MCP Server**: Phase 2 (In Development)
+- **Last Updated**: 2025-10-24
+
+## Resources
+
+- **SSOT Spec**: `tasks/SHARED_TYPES.md`
+- **Workflows**: `mdoc-tools/docs/WORKFLOWS.md`
+- **MCP Spec**: `mdoc-tools/docs/MCP_SPEC.md`
+- **Validation**: `mdoc-tools/docs/VALIDATION.md`

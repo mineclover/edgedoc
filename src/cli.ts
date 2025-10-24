@@ -20,6 +20,12 @@ import {
   getTasksByCode,
   printTasksForCode,
 } from './tools/tasks-list.js';
+import {
+  listDetailsBlocks,
+  printDetailsBlocks,
+  openDetailsBlocks,
+  closeDetailsBlocks,
+} from './tools/docs-toggle.js';
 
 const program = new Command();
 
@@ -232,28 +238,66 @@ docs
   .command('list <file>')
   .description('details 블록 목록')
   .action(async (file) => {
-    console.log(`📋 ${file}의 details 블록 목록`);
-    // TODO: 구현
+    try {
+      const blocks = listDetailsBlocks(file);
+      printDetailsBlocks(file, blocks);
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
   });
 
 docs
   .command('open <file>')
   .description('details 블록 열기')
-  .option('--index <number>', '블록 인덱스')
+  .option('--index <numbers...>', '블록 인덱스 (여러 개 가능)')
   .option('--all', '모든 블록')
-  .action(async (file, _options) => {
-    console.log(`📖 ${file} 블록 열기`);
-    // TODO: 구현
+  .action(async (file, options) => {
+    try {
+      const indices = options.index ? options.index.map((n: string) => parseInt(n, 10)) : undefined;
+      const result = openDetailsBlocks(file, {
+        indices,
+        all: options.all,
+      });
+
+      if (result.modified > 0) {
+        console.log(`✅ ${result.modified}/${result.total} block(s) opened`);
+      } else {
+        console.log('ℹ️  No blocks were modified (already open)');
+      }
+
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
   });
 
 docs
   .command('close <file>')
   .description('details 블록 닫기')
-  .option('--index <number>', '블록 인덱스')
+  .option('--index <numbers...>', '블록 인덱스 (여러 개 가능)')
   .option('--all', '모든 블록')
-  .action(async (file, _options) => {
-    console.log(`📕 ${file} 블록 닫기`);
-    // TODO: 구현
+  .action(async (file, options) => {
+    try {
+      const indices = options.index ? options.index.map((n: string) => parseInt(n, 10)) : undefined;
+      const result = closeDetailsBlocks(file, {
+        indices,
+        all: options.all,
+      });
+
+      if (result.modified > 0) {
+        console.log(`✅ ${result.modified}/${result.total} block(s) closed`);
+      } else {
+        console.log('ℹ️  No blocks were modified (already closed)');
+      }
+
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
   });
 
 // Analyze commands

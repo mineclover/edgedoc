@@ -221,6 +221,31 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: 'validate_interfaces',
+        description: 'Validate interfaces (bidirectional links + sibling coverage)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+            feature: {
+              type: 'string',
+              description: 'Filter by specific feature ID',
+            },
+            namespace: {
+              type: 'string',
+              description: 'Filter by specific namespace',
+            },
+            verbose: {
+              type: 'boolean',
+              description: 'Show detailed output',
+            },
+          },
+        },
+      },
+      {
         name: 'list_terms',
         description: 'List all defined terms with statistics',
         inputSchema: {
@@ -269,6 +294,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'string',
               description: 'Filter by priority (high, medium, low)',
             },
+            code: {
+              type: 'string',
+              description: 'Reverse lookup: find tasks by code file path',
+            },
+            interface: {
+              type: 'string',
+              description: 'Reverse lookup: find tasks by interface ID',
+            },
+            term: {
+              type: 'string',
+              description: 'Reverse lookup: find tasks by term name',
+            },
           },
         },
       },
@@ -301,6 +338,66 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description: 'Project directory path (defaults to current directory)',
             },
           },
+        },
+      },
+      {
+        name: 'docs_list',
+        description: 'List all <details> blocks in a markdown file',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            file: {
+              type: 'string',
+              description: 'Path to markdown file',
+            },
+          },
+          required: ['file'],
+        },
+      },
+      {
+        name: 'docs_open',
+        description: 'Open <details> blocks in markdown file',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            file: {
+              type: 'string',
+              description: 'Path to markdown file',
+            },
+            indices: {
+              type: 'array',
+              items: { type: 'number' },
+              description: 'Block indices to open (optional, defaults to all)',
+            },
+            all: {
+              type: 'boolean',
+              description: 'Open all blocks',
+            },
+          },
+          required: ['file'],
+        },
+      },
+      {
+        name: 'docs_close',
+        description: 'Close <details> blocks in markdown file',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            file: {
+              type: 'string',
+              description: 'Path to markdown file',
+            },
+            indices: {
+              type: 'array',
+              items: { type: 'number' },
+              description: 'Block indices to close (optional, defaults to all)',
+            },
+            all: {
+              type: 'boolean',
+              description: 'Close all blocks',
+            },
+          },
+          required: ['file'],
         },
       },
     ],
@@ -407,6 +504,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       }
 
+      case 'validate_interfaces': {
+        cliArgs = ['validate', 'interfaces'];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        if (args?.feature) {
+          cliArgs.push('--feature', args.feature as string);
+        }
+        if (args?.namespace) {
+          cliArgs.push('--namespace', args.namespace as string);
+        }
+        if (args?.verbose) {
+          cliArgs.push('--verbose');
+        }
+        break;
+      }
+
       case 'list_terms': {
         cliArgs = ['terms', 'list'];
         if (args?.projectPath) {
@@ -434,6 +548,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (args?.priority) {
           cliArgs.push('--priority', args.priority as string);
         }
+        if (args?.code) {
+          cliArgs.push('--code', args.code as string);
+        }
+        if (args?.interface) {
+          cliArgs.push('--interface', args.interface as string);
+        }
+        if (args?.term) {
+          cliArgs.push('--term', args.term as string);
+        }
         break;
       }
 
@@ -449,6 +572,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         cliArgs = ['tasks', 'progress'];
         if (args?.projectPath) {
           cliArgs.push('--project', args.projectPath as string);
+        }
+        break;
+      }
+
+      case 'docs_list': {
+        cliArgs = ['docs', 'list', args?.file as string];
+        break;
+      }
+
+      case 'docs_open': {
+        cliArgs = ['docs', 'open', args?.file as string];
+        if (args?.indices && Array.isArray(args.indices)) {
+          cliArgs.push('--index', ...(args.indices as number[]).map(String));
+        }
+        if (args?.all) {
+          cliArgs.push('--all');
+        }
+        break;
+      }
+
+      case 'docs_close': {
+        cliArgs = ['docs', 'close', args?.file as string];
+        if (args?.indices && Array.isArray(args.indices)) {
+          cliArgs.push('--index', ...(args.indices as number[]).map(String));
+        }
+        if (args?.all) {
+          cliArgs.push('--all');
         }
         break;
       }

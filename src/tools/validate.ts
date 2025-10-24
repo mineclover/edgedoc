@@ -155,6 +155,19 @@ export async function validateMigration(
     }
   }
 
+  // Skip if no migration config
+  if (!config.migration) {
+    console.log(`⚠️  migration 설정 없음 - 마이그레이션 검증 스킵\n`);
+    return {
+      success: true,
+      totalFiles: 0,
+      passedFiles: 0,
+      failedFiles: 0,
+      totalErrors: 0,
+      details: {},
+    };
+  }
+
   const tasksDir = join(projectDir, config.migration.sourceDir);
   const tasksV2Dir = join(projectDir, config.migration.targetDir);
 

@@ -182,9 +182,14 @@ validate
 program
   .command('sync')
   .description('코드 참조 동기화')
-  .action(async () => {
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로')
+  .option('--dry-run', '실제 파일 변경 없이 시뮬레이션')
+  .action(async (options) => {
     try {
-      const result = await syncCodeRefs();
+      const result = await syncCodeRefs({
+        projectPath: options.project,
+        dryRun: options.dryRun,
+      });
       process.exit(result.success ? 0 : 1);
     } catch (error) {
       console.error('❌ 오류:', error);

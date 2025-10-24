@@ -45,5 +45,11 @@
   "devDependencies": {
     "@types/node": "^22.10.5",
     "typescript": "^5.7.2"
-  }
+  },
+  "trustedDependencies": [
+    "tree-sitter",
+    "tree-sitter-javascript",
+    "tree-sitter-markdown",
+    "tree-sitter-typescript"
+  ]
 }

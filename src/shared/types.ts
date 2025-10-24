@@ -30,6 +30,11 @@ export interface SyncResult {
   failedBlocks: number;
 }
 
+export interface SyncOptions {
+  projectPath?: string;
+  dryRun?: boolean;
+}
+
 export interface NamingValidationResult {
   success: boolean;
   totalFiles: number;

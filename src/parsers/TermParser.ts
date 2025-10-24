@@ -103,13 +103,54 @@ export class TermParser {
       metadata.parent = parentMatch[1];
     }
 
-    // Extract first paragraph as definition
-    const paragraphs = content.split('\n\n').filter((p) => {
-      return p.trim().length > 0 && !p.match(/^\*\*\w+\*\*:/);
-    });
+    // Extract first paragraph as definition (skip metadata lines)
+    const contentLines = content.split('\n');
+    let definitionLines: string[] = [];
+    let inMetadata = true;
 
-    if (paragraphs.length > 0) {
-      metadata.definition = paragraphs[0].trim().replace(/\n/g, ' ');
+    for (const line of contentLines) {
+      const trimmed = line.trim();
+
+      // Skip empty lines
+      if (trimmed.length === 0) {
+        if (inMetadata) {
+          inMetadata = false; // End of metadata block
+        }
+        continue;
+      }
+
+      // Skip metadata lines (starting with **)
+      if (trimmed.startsWith('**')) {
+        continue;
+      }
+
+      // Skip code blocks, special sections
+      if (trimmed.startsWith('```') || trimmed.startsWith('---')) {
+        break;
+      }
+
+      // Collect definition lines (stop at next section marker)
+      if (!inMetadata) {
+        definitionLines.push(trimmed);
+
+        // Stop at first complete paragraph (next empty line or section)
+        if (definitionLines.length > 0) {
+          // Check if next lines start a new section
+          const nextLineIndex = contentLines.indexOf(line) + 1;
+          if (
+            nextLineIndex < contentLines.length &&
+            (contentLines[nextLineIndex].trim() === '' ||
+              contentLines[nextLineIndex].trim().startsWith('**') ||
+              contentLines[nextLineIndex].trim().startsWith('---'))
+          ) {
+            break;
+          }
+        }
+      }
+    }
+
+    if (definitionLines.length > 0) {
+      metadata.definition = definitionLines.join(' ').trim();
     }
 
     return metadata;

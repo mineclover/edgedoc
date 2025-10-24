@@ -99,7 +99,7 @@ edgedoc sync                   # code_references 자동 업데이트
 |------|------|------|
 | `## [[Term]]` | 용어 정의 (헤딩) | `validate terms` |
 | `[[Term]]` | 용어 참조 (본문) | `validate terms` |
-| frontmatter | 문서 메타데이터 | `validate structure` |
+| [[Frontmatter]] | 문서 메타데이터 | `validate structure` |
 | `code_references` | 코드 파일 목록 | `validate orphans` |
 
 ---

@@ -4,7 +4,7 @@
 **Language**: bilingual (English/Korean)
 **Last Updated**: 2025-10-24
 
-프로젝트 전체에서 사용되는 핵심 용어를 정의합니다.
+edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다.
 
 ---
 
@@ -126,8 +126,8 @@ class InternalHelper { }              // ❌ Not exported
 - Method-level 추적 (선택적)
 
 **검증 방법**:
-1. Entry point에서 모든 exported interface 추출
-2. Interface 사용 그래프 구축
+1. [[Entry Point Module]]에서 모든 exported interface 추출
+2. [[Interface Graph]]를 사용하여 interface 사용 관계 구축
 3. 각 public interface가 문서화되었는지 확인
 4. Orphan interface (exported but undocumented) 보고
 
@@ -245,9 +245,9 @@ edgedoc validate spec-orphans
 **Type**: entity
 **Scope**: global
 **Aliases**: 인터페이스 그래프
-**Related**: [[Code Interface]], [[Top-Level Interface]]
+**Related**: [[Code Interface]], [[Top-Level Interface]], [[Export Analyzer]]
 
-[[Code Interface]] 간의 사용 관계를 추적하는 그래프 자료구조를 의미한다.
+[[Code Interface]] 간의 사용 관계를 추적하는 그래프 자료구조를 의미한다. [[Export Analyzer]]로 추출한 인터페이스 정보를 기반으로 구성된다.
 
 **구성 요소**:
 - **Nodes**: 각 [[Code Interface]]
@@ -317,7 +317,7 @@ edgedoc validate spec-orphans
 **Type**: entity
 **Scope**: global
 **Aliases**: 파싱 결과
-**Related**: [[Language Parser]], [[Import Info]], [[Export Info]]
+**Related**: [[Language Parser]]
 
 소스 코드 파싱의 결과를 담는 데이터 구조를 의미한다.
 
@@ -476,8 +476,8 @@ code_references:
 - 에러 복구 (syntax error가 있어도 파싱 계속)
 
 **사용처**:
-- [[TypeScript Parser]] 구현
-- [[Python Parser]] 구현
+- TypeScript Parser 구현
+- Python Parser 구현
 - 소스 코드 분석
 
 **외부 라이브러리**:

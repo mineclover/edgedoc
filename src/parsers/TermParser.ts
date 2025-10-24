@@ -15,6 +15,10 @@ export class TermParser {
     const headingPattern = /^(#{2,})\s+\[\[([^\]]+)\]\]/gm;
 
     const lines = markdown.split('\n');
+
+    // Track code block state
+    const codeBlockRanges = this.findCodeBlockRanges(lines);
+
     let match;
 
     while ((match = headingPattern.exec(markdown)) !== null) {
@@ -22,6 +26,11 @@ export class TermParser {
       const level = match[1].length;
       const term = match[2];
       const line = markdown.substring(0, match.index).split('\n').length;
+
+      // Skip if inside code block
+      if (this.isInsideCodeBlock(line, codeBlockRanges)) {
+        continue;
+      }
 
       // Determine scope
       const scope = file.includes('GLOSSARY') ? 'global' : 'document';
@@ -164,11 +173,19 @@ export class TermParser {
     const references: TermReference[] = [];
     const lines = markdown.split('\n');
 
+    // Track code block state
+    const codeBlockRanges = this.findCodeBlockRanges(lines);
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
       // Skip headings (definitions)
       if (line.match(/^#{2,}\s+\[\[/)) {
+        continue;
+      }
+
+      // Skip if inside code block
+      if (this.isInsideCodeBlock(i + 1, codeBlockRanges)) {
         continue;
       }
 
@@ -187,6 +204,53 @@ export class TermParser {
     }
 
     return references;
+  }
+
+  /**
+   * Find all code block ranges in markdown
+   */
+  private static findCodeBlockRanges(lines: string[]): Array<[number, number]> {
+    const ranges: Array<[number, number]> = [];
+    let inCodeBlock = false;
+    let blockStart = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (line.startsWith('```')) {
+        if (!inCodeBlock) {
+          // Start of code block
+          inCodeBlock = true;
+          blockStart = i + 1; // Line numbers are 1-indexed
+        } else {
+          // End of code block
+          inCodeBlock = false;
+          ranges.push([blockStart, i + 1]);
+        }
+      }
+    }
+
+    // Handle unclosed code block
+    if (inCodeBlock && blockStart !== -1) {
+      ranges.push([blockStart, lines.length]);
+    }
+
+    return ranges;
+  }
+
+  /**
+   * Check if a line is inside a code block
+   */
+  private static isInsideCodeBlock(
+    lineNumber: number,
+    codeBlockRanges: Array<[number, number]>
+  ): boolean {
+    for (const [start, end] of codeBlockRanges) {
+      if (lineNumber >= start && lineNumber <= end) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

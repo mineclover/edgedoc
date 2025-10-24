@@ -1,6 +1,6 @@
 {
   "name": "edgedoc",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Edge-based documentation validation and sync tool (CLI + MCP)",
   "type": "module",
   "bin": {
@@ -39,6 +39,7 @@
     "commander": "^12.1.0",
     "tree-sitter": "^0.25.0",
     "tree-sitter-markdown": "^0.7.1",
+    "tree-sitter-python": "^0.25.0",
     "tree-sitter-typescript": "^0.23.2",
     "zod": "^3.23.8"
   },
@@ -50,6 +51,7 @@
     "tree-sitter",
     "tree-sitter-javascript",
     "tree-sitter-markdown",
+    "tree-sitter-python",
     "tree-sitter-typescript"
   ]
 }

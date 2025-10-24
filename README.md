@@ -15,7 +15,23 @@ Edge-based Documentation Validation & Sync Tool (CLI + MCP)
 - ✅ **섹션 검증**: 문서 섹션 누락 감지
 - ✅ **타입 검증**: TypeScript 타입 정의 누락 감지
 - ✅ **리포트 생성**: 마크다운 형식 검증 리포트
+- ✅ **다국어 지원**: TypeScript, JavaScript, Python 파일 자동 파싱
 - 🔄 **MCP 서버**: AI 에이전트 통합 (개발 중)
+
+### 지원하는 언어
+
+edgedoc는 Tree-sitter 기반 파서를 사용하여 다음 언어를 지원합니다:
+
+| 언어 | 파일 확장자 | Import/Export 지원 |
+|------|------------|-------------------|
+| **TypeScript** | `.ts`, `.tsx` | ✅ 완전 지원 |
+| **JavaScript** | `.js`, `.jsx` | ✅ 완전 지원 |
+| **Python** | `.py` | ✅ 완전 지원 |
+
+Python 지원:
+- `import` / `from ... import` 문 파싱
+- 함수, 클래스, 변수 정의 추출 (top-level만)
+- 언더스코어(_)로 시작하는 private 이름 자동 제외
 
 ## 설치
 
@@ -30,12 +46,13 @@ cd edgedoc
 bun install
 \`\`\`
 
-## 설정 (mdoc.config.json)
+## Configuration (mdoc.config.json)
 
-프로젝트 루트에 `mdoc.config.json` 파일을 생성하여 검증 규칙을 커스터마이징할 수 있습니다:
+Create `mdoc.config.json` in your project root to customize validation rules:
 
 ```json
 {
+  "language": "en",
   "validation": {
     "sharedTypes": {
       "maxPairs": 12,
@@ -45,7 +62,20 @@ bun install
 }
 ```
 
-### 주요 설정 항목
+### Configuration Options
+
+#### language
+- **Type**: `"en"` | `"ko"`
+- **Default**: `"en"`
+- **Description**: Display language for command output
+  - `"en"` - English (default)
+  - `"ko"` - Korean (한국어)
+
+```json
+{
+  "language": "ko"  // Use Korean messages
+}
+```
 
 #### validation.sharedTypes
 - **maxPairs**: 공유 타입 파일명에 허용되는 최대 쌍 개수 (기본: 12)

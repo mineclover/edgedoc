@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { basename, join, relative, resolve, dirname } from 'node:path';
 import type { ValidationOptions } from '../shared/types.js';
 import { fileExists, getMarkdownFiles } from '../shared/utils.js';
-import { TypeScriptParser } from '../parsers/TypeScriptParser.js';
+import { ParserFactory } from '../parsers/ParserFactory.js';
 
 /**
  * Spec orphan detection result
@@ -17,7 +17,7 @@ export interface SpecOrphanResult {
 export interface SpecOrphanExport {
   file: string;
   exportName: string;
-  exportType: 'interface' | 'type' | 'class' | 'function' | 'const';
+  exportType: 'interface' | 'type' | 'class' | 'function' | 'const' | 'variable';
   reason: 'not_documented' | 'not_imported';
 }
 
@@ -79,18 +79,20 @@ function extractCodeReferences(projectPath: string): Map<string, CodeReference> 
 }
 
 /**
- * Extract exports from a TypeScript file (Tree-sitter 기반)
+ * Extract exports from a source file (Tree-sitter 기반)
  */
 function extractExports(filePath: string): Array<{
   name: string;
-  type: 'interface' | 'type' | 'class' | 'function' | 'const';
+  type: 'interface' | 'type' | 'class' | 'function' | 'const' | 'variable';
 }> {
   try {
-    const content = readFileSync(filePath, 'utf-8');
-    const parser = new TypeScriptParser();
-    const isTsx = filePath.endsWith('.tsx');
+    const parser = ParserFactory.getParser(filePath);
+    if (!parser) {
+      return []; // No parser for this file type
+    }
 
-    const { exports } = parser.parse(content, isTsx);
+    const content = readFileSync(filePath, 'utf-8');
+    const { exports } = parser.parse(content, filePath);
 
     return exports.map(exp => ({
       name: exp.name,
@@ -103,15 +105,17 @@ function extractExports(filePath: string): Array<{
 }
 
 /**
- * Extract imports from a TypeScript file (Tree-sitter 기반)
+ * Extract imports from a source file (Tree-sitter 기반)
  */
 function extractImports(filePath: string): string[] {
   try {
-    const content = readFileSync(filePath, 'utf-8');
-    const parser = new TypeScriptParser();
-    const isTsx = filePath.endsWith('.tsx');
+    const parser = ParserFactory.getParser(filePath);
+    if (!parser) {
+      return []; // No parser for this file type
+    }
 
-    const { imports } = parser.parse(content, isTsx);
+    const content = readFileSync(filePath, 'utf-8');
+    const { imports } = parser.parse(content, filePath);
 
     return imports.map(imp => imp.source);
   } catch (error) {

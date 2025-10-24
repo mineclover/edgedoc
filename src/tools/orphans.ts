@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, resolve, dirname } from 'node:path';
 import type { OrphanFile, OrphanFilesResult, OrphanOptions } from '../shared/types.js';
 import { fileExists, getMarkdownFiles } from '../shared/utils.js';
-import { TypeScriptParser } from '../parsers/TypeScriptParser.js';
+import { ParserFactory } from '../parsers/ParserFactory.js';
 
 /**
  * 파일 경로 추출 정규식
@@ -126,20 +126,18 @@ function buildImportGraph(
   projectDir: string
 ): Map<string, Set<string>> {
   const graph = new Map<string, Set<string>>();
-  const parser = new TypeScriptParser();
 
   for (const sourceFile of allSourceFiles) {
-    const ext = sourceFile.split('.').pop() || '';
-    if (!['ts', 'tsx', 'js', 'jsx'].includes(ext)) {
-      continue;
+    const parser = ParserFactory.getParser(sourceFile);
+    if (!parser) {
+      continue; // Skip files without a parser
     }
 
     try {
       const fullPath = join(projectDir, sourceFile);
       const content = readFileSync(fullPath, 'utf-8');
-      const isTsx = sourceFile.endsWith('.tsx') || sourceFile.endsWith('.jsx');
 
-      const { imports } = parser.parse(content, isTsx);
+      const { imports } = parser.parse(content, sourceFile);
 
       const importedFiles = new Set<string>();
 

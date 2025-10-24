@@ -1,15 +1,17 @@
 import { TypeScriptParser } from '../../src/parsers/TypeScriptParser.js';
+import { PythonParser } from '../../src/parsers/PythonParser.js';
 
 /**
- * Manual Test: Tree-sitter TypeScript Parser
+ * Manual Test: Tree-sitter Parsers
  *
- * This test validates the TypeScriptParser's ability to extract imports and exports
- * from TypeScript/TSX source code.
+ * This test validates the TypeScriptParser and PythonParser's ability to extract
+ * imports and exports from source code.
  *
  * Run: bun tests/manual/tree-sitter-parser.test.ts
  */
 
-const parser = new TypeScriptParser();
+const tsParser = new TypeScriptParser();
+const pyParser = new PythonParser();
 
 console.log('🧪 Testing Tree-sitter TypeScript Parser\n');
 
@@ -21,7 +23,7 @@ import { join, relative } from 'node:path';
 import { TypeScriptParser } from './parsers/TypeScriptParser.js';
 `;
 
-const result1 = parser.parse(namedImports, false);
+const result1 = tsParser.parse(namedImports, 'test.ts');
 console.log('  Imports found:', result1.imports.length);
 console.log('  Sources:', result1.imports.map(i => i.source));
 if (result1.imports.length !== 3) {
@@ -42,7 +44,7 @@ import React from 'react';
 import Parser from 'tree-sitter';
 `;
 
-const result2 = parser.parse(defaultImports, false);
+const result2 = tsParser.parse(defaultImports, 'test.ts');
 console.log('  Imports found:', result2.imports.length);
 console.log('  Sources:', result2.imports.map(i => i.source));
 if (result2.imports.length !== 2) {
@@ -60,7 +62,7 @@ import type { SyncOptions, SyncResult } from '../shared/types.js';
 import { type ValidationOptions } from './tools.js';
 `;
 
-const result3 = parser.parse(typeImports, false);
+const result3 = tsParser.parse(typeImports, "test.ts");
 console.log('  Imports found:', result3.imports.length);
 console.log('  Sources:', result3.imports.map(i => i.source));
 if (result3.imports.length !== 2) {
@@ -75,7 +77,7 @@ import * as Utils from './utils.js';
 import * as path from 'node:path';
 `;
 
-const result4 = parser.parse(namespaceImports, false);
+const result4 = tsParser.parse(namespaceImports, "test.ts");
 console.log('  Imports found:', result4.imports.length);
 console.log('  Sources:', result4.imports.map(i => i.source));
 if (result4.imports.length !== 2) {
@@ -100,7 +102,7 @@ export function syncCodeRefs() {}
 export class TypeScriptParser {}
 `;
 
-const result5 = parser.parse(namedExports, false);
+const result5 = tsParser.parse(namedExports, "test.ts");
 console.log('  Exports found:', result5.exports.length);
 console.log('  Names:', result5.exports.map(e => e.name));
 if (result5.exports.length !== 5) {
@@ -129,7 +131,7 @@ export function Button({ label }: ButtonProps) {
 }
 `;
 
-const result6 = parser.parse(tsxCode, true);
+const result6 = tsParser.parse(tsxCode, "test.tsx");
 console.log('  Imports found:', result6.imports.length);
 console.log('  Exports found:', result6.exports.length);
 if (result6.imports.length !== 2) {
@@ -159,7 +161,7 @@ export async function syncCodeRefs(options: SyncOptions = {}): Promise<SyncResul
 }
 `;
 
-const result7 = parser.parse(complexCode, false);
+const result7 = tsParser.parse(complexCode, "test.ts");
 console.log('  Imports found:', result7.imports.length);
 console.log('  Exports found:', result7.exports.length);
 if (result7.imports.length !== 4) {
@@ -171,5 +173,103 @@ if (result7.exports.length !== 1) {
 console.log('  ✅ Passed\n');
 
 console.log('━'.repeat(50));
-console.log('✅ All tests passed!');
+console.log('✅ All TypeScript tests passed!\n');
+
+// Python Tests
+console.log('🐍 Testing Tree-sitter Python Parser\n');
+
+// Test 8: Python imports
+console.log('Test 8: Python Imports');
+const pythonImports = `
+import os
+import sys
+from typing import List, Dict
+from pathlib import Path
+from . import utils
+`;
+
+const result8 = pyParser.parse(pythonImports, 'test.py');
+console.log('  Imports found:', result8.imports.length);
+console.log('  Sources:', result8.imports.map(i => i.source));
+if (result8.imports.length !== 5) {
+  throw new Error(`Expected 5 imports, found ${result8.imports.length}`);
+}
+if (!result8.imports.some(i => i.source === 'os')) {
+  throw new Error('Should find os import');
+}
+if (!result8.imports.some(i => i.source === 'typing')) {
+  throw new Error('Should find typing import');
+}
+console.log('  ✅ Passed\n');
+
+// Test 9: Python function and class exports
+console.log('Test 9: Python Exports');
+const pythonExports = `
+def hello_world():
+    print("Hello")
+
+class MyClass:
+    def __init__(self):
+        pass
+
+VERSION = "1.0.0"
+
+def _private_function():
+    pass
+
+_PRIVATE_VAR = "secret"
+`;
+
+const result9 = pyParser.parse(pythonExports, 'test.py');
+console.log('  Exports found:', result9.exports.length);
+console.log('  Names:', result9.exports.map(e => e.name));
+if (result9.exports.length !== 3) {
+  throw new Error(`Expected 3 exports (hello_world, MyClass, VERSION), found ${result9.exports.length}`);
+}
+const expectedPyExports = ['hello_world', 'MyClass', 'VERSION'];
+for (const expected of expectedPyExports) {
+  if (!result9.exports.some(e => e.name === expected)) {
+    throw new Error(`Should find export: ${expected}`);
+  }
+}
+// Verify private names are excluded
+if (result9.exports.some(e => e.name.startsWith('_'))) {
+  throw new Error('Should not export private names starting with _');
+}
+console.log('  ✅ Passed\n');
+
+// Test 10: Python complex example
+console.log('Test 10: Python Complex Example');
+const pythonComplex = `
+from typing import Optional, List
+import json
+from .utils import helper_function
+
+class DataProcessor:
+    def __init__(self, config: dict):
+        self.config = config
+
+    def process(self, data: List[str]) -> Optional[dict]:
+        return {"result": "processed"}
+
+def main():
+    processor = DataProcessor({})
+    return processor.process([])
+
+CONSTANT = 42
+`;
+
+const result10 = pyParser.parse(pythonComplex, 'test.py');
+console.log('  Imports found:', result10.imports.length);
+console.log('  Exports found:', result10.exports.length);
+if (result10.imports.length !== 3) {
+  throw new Error(`Expected 3 imports, found ${result10.imports.length}`);
+}
+if (result10.exports.length !== 3) {
+  throw new Error(`Expected 3 exports (DataProcessor, main, CONSTANT), found ${result10.exports.length}`);
+}
+console.log('  ✅ Passed\n');
+
+console.log('━'.repeat(50));
+console.log('✅ All tests passed! (TypeScript + Python)');
 console.log('━'.repeat(50));

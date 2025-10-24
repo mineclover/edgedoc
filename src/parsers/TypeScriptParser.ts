@@ -1,26 +1,10 @@
 import Parser from 'tree-sitter';
 import TypeScript from 'tree-sitter-typescript';
+import type { ILanguageParser, ParseResult, ImportInfo, ExportInfo } from './ILanguageParser.js';
 
-export interface ImportInfo {
-  source: string;
-  names: string[];
-  isTypeOnly: boolean;
-  location: { line: number; column: number };
-}
-
-export interface ExportInfo {
-  name: string;
-  type: 'interface' | 'type' | 'class' | 'function' | 'const';
-  isDefault: boolean;
-  location: { line: number; column: number };
-}
-
-export interface ParseResult {
-  imports: ImportInfo[];
-  exports: ExportInfo[];
-}
-
-export class TypeScriptParser {
+export class TypeScriptParser implements ILanguageParser {
+  readonly supportedExtensions = ['ts', 'tsx', 'js', 'jsx'];
+  readonly languageName = 'TypeScript';
   private parser: Parser;
   private language: any;
 
@@ -31,9 +15,19 @@ export class TypeScriptParser {
   }
 
   /**
+   * Check if this parser can handle the given file
+   */
+  canParse(filePath: string): boolean {
+    const ext = filePath.split('.').pop()?.toLowerCase() || '';
+    return this.supportedExtensions.includes(ext);
+  }
+
+  /**
    * Parse TypeScript/TSX source code
    */
-  parse(sourceCode: string, isTsx = false): ParseResult {
+  parse(sourceCode: string, filePath: string): ParseResult {
+    const isTsx = filePath.endsWith('.tsx') || filePath.endsWith('.jsx');
+
     if (isTsx) {
       this.language = TypeScript.tsx;
       this.parser.setLanguage(this.language);

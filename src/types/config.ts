@@ -1,4 +1,5 @@
 export interface MdocConfig {
+  language?: 'en' | 'ko';  // Default: 'en'
   migration?: {
     sourceDir: string;
     targetDir: string;
@@ -20,6 +21,7 @@ export interface MdocConfig {
 }
 
 export const DEFAULT_CONFIG: MdocConfig = {
+  language: 'en',
   migration: {
     sourceDir: 'tasks',
     targetDir: 'tasks-v2',

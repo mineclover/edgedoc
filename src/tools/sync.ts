@@ -2,7 +2,9 @@ import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import type { SyncResult, SyncOptions } from '../shared/types.js';
 import { fileExists, getMarkdownFiles } from '../shared/utils.js';
-import { TypeScriptParser } from '../parsers/TypeScriptParser.js';
+import { ParserFactory } from '../parsers/ParserFactory.js';
+import { t } from '../shared/i18n.js';
+import { loadConfig } from '../utils/config.js';
 
 interface CodeFile {
   path: string;
@@ -22,6 +24,7 @@ interface DocumentInfo {
  */
 function collectSourceFiles(projectDir: string): string[] {
   const files: string[] = [];
+  const supportedExts = ParserFactory.getSupportedExtensions();
 
   function scan(dir: string) {
     try {
@@ -44,8 +47,8 @@ function collectSourceFiles(projectDir: string): string[] {
         if (stat.isDirectory()) {
           scan(fullPath);
         } else if (stat.isFile()) {
-          const ext = fullPath.split('.').pop() || '';
-          if (['ts', 'tsx', 'js', 'jsx'].includes(ext)) {
+          const ext = fullPath.split('.').pop()?.toLowerCase() || '';
+          if (supportedExts.includes(ext)) {
             files.push(relativePath);
           }
         }
@@ -64,16 +67,18 @@ function collectSourceFiles(projectDir: string): string[] {
  */
 function analyzeCodeFiles(projectDir: string, files: string[]): Map<string, CodeFile> {
   const codeFiles = new Map<string, CodeFile>();
-  const parser = new TypeScriptParser();
 
   for (const file of files) {
     const fullPath = join(projectDir, file);
 
     try {
-      const content = readFileSync(fullPath, 'utf-8');
-      const isTsx = file.endsWith('.tsx') || file.endsWith('.jsx');
+      const parser = ParserFactory.getParser(file);
+      if (!parser) {
+        continue; // Skip files without a parser
+      }
 
-      const { imports, exports } = parser.parse(content, isTsx);
+      const content = readFileSync(fullPath, 'utf-8');
+      const { imports, exports } = parser.parse(content, file);
 
       codeFiles.set(file, {
         path: file,
@@ -257,31 +262,35 @@ function updateFrontmatter(content: string, newRefs: string[]): string {
 export async function syncCodeRefs(options: SyncOptions = {}): Promise<SyncResult> {
   const projectDir = options.projectPath || process.cwd();
 
-  console.log('🔄 코드 참조 동기화 시작...\n');
-  console.log(`📁 프로젝트 경로: ${projectDir}\n`);
+  // Load config to set language
+  loadConfig(projectDir);
+  const msg = t();
+
+  console.log(`${msg.sync.starting}\n`);
+  console.log(`${msg.sync.projectPath}: ${projectDir}\n`);
 
   // 1. Scan all source files
-  console.log('📂 코드 파일 스캔 중...');
+  console.log(msg.sync.scanningFiles);
   const sourceFiles = collectSourceFiles(projectDir);
-  console.log(`   → ${sourceFiles.length}개 파일 발견\n`);
+  console.log(`   → ${sourceFiles.length} ${msg.sync.filesFound}\n`);
 
   // 2. Analyze code with Tree-sitter
-  console.log('🔗 코드 분석 중 (Tree-sitter)...');
+  console.log(msg.sync.analyzingCode);
   const codeFiles = analyzeCodeFiles(projectDir, sourceFiles);
-  console.log(`   → ${codeFiles.size}개 파일 분석됨\n`);
+  console.log(`   → ${codeFiles.size} ${msg.sync.filesAnalyzed}\n`);
 
   // 3. Build dependency graph
-  console.log('📊 의존성 그래프 구축 중...');
+  console.log(msg.sync.buildingGraph);
   const depGraph = buildDependencyGraph(codeFiles, projectDir);
-  console.log(`   → ${depGraph.size}개 파일의 의존성 추적됨\n`);
+  console.log(`   → ${depGraph.size} ${msg.sync.dependenciesTracked}\n`);
 
   // 4. Parse documents
-  console.log('📖 문서 파싱 중...');
+  console.log(msg.sync.parsingDocs);
   const documents = parseDocuments(projectDir);
-  console.log(`   → ${documents.length}개 문서 발견\n`);
+  console.log(`   → ${documents.length} ${msg.sync.docsFound}\n`);
 
   // 5. Update documents
-  console.log('📝 문서 업데이트 중...\n');
+  console.log(`${msg.sync.updatingDocs}\n`);
 
   let totalBlocks = 0;
   let updatedBlocks = 0;

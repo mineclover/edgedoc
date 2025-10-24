@@ -13,6 +13,7 @@ import { validateTerms } from './tools/validate-terms.js';
 import { listTerms, findTerm } from './tools/term-commands.js';
 import { buildReferenceIndex } from './tools/build-reference-index.js';
 import { queryGraph } from './tools/graph-query.js';
+import { listTasks, printTasksList, getTaskDetails } from './tools/tasks-list.js';
 
 const program = new Command();
 
@@ -291,6 +292,109 @@ terms
   .action(async (query, options) => {
     try {
       await findTerm(query, { projectPath: options.project });
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Tasks commands
+const tasks = program.command('tasks').description('작업 관리');
+
+tasks
+  .command('list')
+  .description('Feature 목록 및 진행률')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('--status <status>', 'Status 필터 (planned, in_progress, active)')
+  .option('--priority <priority>', 'Priority 필터 (high, medium, low)')
+  .option('-v, --verbose', '상세 출력')
+  .action(async (options) => {
+    try {
+      const taskList = await listTasks({
+        projectPath: options.project,
+        status: options.status,
+        priority: options.priority,
+      });
+      printTasksList(taskList, { verbose: options.verbose });
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+tasks
+  .command('get <task-id>')
+  .description('특정 Feature 상세 정보')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (taskId, options) => {
+    try {
+      const taskList = await listTasks({ projectPath: options.project });
+      const task = getTaskDetails(taskList, taskId);
+
+      if (!task) {
+        console.error(`❌ Task "${taskId}" not found`);
+        process.exit(1);
+      }
+
+      console.log(`📦 Task: ${task.id}\n`);
+      console.log(`Title: ${task.title}`);
+      console.log(`Status: ${task.status}`);
+      if (task.priority) {
+        console.log(`Priority: ${task.priority}`);
+      }
+      console.log(`File: ${task.file}\n`);
+
+      if (task.checkboxes.total > 0) {
+        const progressBar = '█'.repeat(Math.floor(task.checkboxes.progress / 10));
+        const emptyBar = '░'.repeat(10 - Math.floor(task.checkboxes.progress / 10));
+        console.log('📊 Progress:');
+        console.log(
+          `   ${progressBar}${emptyBar} ${task.checkboxes.checked}/${task.checkboxes.total} (${task.checkboxes.progress}%)\n`
+        );
+      }
+
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+tasks
+  .command('progress')
+  .description('전체 프로젝트 진행률')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      const taskList = await listTasks({ projectPath: options.project });
+
+      const total = taskList.length;
+      const byStatus = taskList.reduce(
+        (acc, task) => {
+          acc[task.status] = (acc[task.status] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
+
+      const totalCheckboxes = taskList.reduce((sum, task) => sum + task.checkboxes.total, 0);
+      const checkedCheckboxes = taskList.reduce((sum, task) => sum + task.checkboxes.checked, 0);
+      const overallProgress =
+        totalCheckboxes > 0 ? Math.round((checkedCheckboxes / totalCheckboxes) * 100) : 0;
+
+      console.log('📊 Project Progress\n');
+      console.log(`Total Features: ${total}`);
+      console.log(`  Active: ${byStatus.active || 0}`);
+      console.log(`  In Progress: ${byStatus.in_progress || 0}`);
+      console.log(`  Planned: ${byStatus.planned || 0}\n`);
+
+      console.log('Checkboxes:');
+      const progressBar = '█'.repeat(Math.floor(overallProgress / 5));
+      const emptyBar = '░'.repeat(20 - Math.floor(overallProgress / 5));
+      console.log(`  ${progressBar}${emptyBar} ${checkedCheckboxes}/${totalCheckboxes} (${overallProgress}%)\n`);
+
       process.exit(0);
     } catch (error) {
       console.error('❌ 오류:', error);

@@ -251,6 +251,58 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['query'],
         },
       },
+      {
+        name: 'tasks_list',
+        description: 'List all features with checkbox progress',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+            status: {
+              type: 'string',
+              description: 'Filter by status (planned, in_progress, active, implemented)',
+            },
+            priority: {
+              type: 'string',
+              description: 'Filter by priority (high, medium, low)',
+            },
+          },
+        },
+      },
+      {
+        name: 'tasks_get',
+        description: 'Get detailed progress for a specific feature',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            taskId: {
+              type: 'string',
+              description: 'Feature ID or name',
+            },
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+          },
+          required: ['taskId'],
+        },
+      },
+      {
+        name: 'tasks_progress',
+        description: 'Show overall project progress dashboard',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+          },
+        },
+      },
     ],
   };
 });
@@ -365,6 +417,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'find_term': {
         cliArgs = ['terms', 'find', args?.query as string];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        break;
+      }
+
+      case 'tasks_list': {
+        cliArgs = ['tasks', 'list'];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        if (args?.status) {
+          cliArgs.push('--status', args.status as string);
+        }
+        if (args?.priority) {
+          cliArgs.push('--priority', args.priority as string);
+        }
+        break;
+      }
+
+      case 'tasks_get': {
+        cliArgs = ['tasks', 'get', args?.taskId as string];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        break;
+      }
+
+      case 'tasks_progress': {
+        cliArgs = ['tasks', 'progress'];
         if (args?.projectPath) {
           cliArgs.push('--project', args.projectPath as string);
         }

@@ -1,11 +1,22 @@
 ---
 feature: "03_ValidateOrphans"
 entry_point: "src/cli.ts:52-70"
-code_references:
-  - "src/cli.ts"
-  - "src/tools/orphans.ts"
 type: "validation"
 status: "implemented"
+code_references:
+  - "src/cli.ts"
+  - "src/parsers/TypeScriptParser.ts"
+  - "src/shared/types.ts"
+  - "src/shared/utils.ts"
+  - "src/tools/init.ts"
+  - "src/tools/naming.ts"
+  - "src/tools/orphans.ts"
+  - "src/tools/spec-orphans.ts"
+  - "src/tools/structure.ts"
+  - "src/tools/sync.ts"
+  - "src/tools/validate.ts"
+  - "src/types/config.ts"
+  - "src/utils/config.ts"
 ---
 
 # 03_ValidateOrphans - 고아 파일 검증

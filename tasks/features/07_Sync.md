@@ -1,11 +1,22 @@
 ---
 feature: "07_Sync"
 entry_point: "src/cli.ts:158-170"
-code_references:
-  - "src/cli.ts"
-  - "src/tools/sync.ts"
 type: "synchronization"
 status: "planned"
+code_references:
+  - "src/cli.ts"
+  - "src/parsers/TypeScriptParser.ts"
+  - "src/shared/types.ts"
+  - "src/shared/utils.ts"
+  - "src/tools/init.ts"
+  - "src/tools/naming.ts"
+  - "src/tools/orphans.ts"
+  - "src/tools/spec-orphans.ts"
+  - "src/tools/structure.ts"
+  - "src/tools/sync.ts"
+  - "src/tools/validate.ts"
+  - "src/types/config.ts"
+  - "src/utils/config.ts"
 ---
 
 # 07_Sync - 코드 참조 동기화

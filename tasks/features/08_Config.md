@@ -1,12 +1,11 @@
 ---
 feature: "08_Config"
 entry_point: "src/utils/config.ts"
+type: "configuration"
+status: "implemented"
 code_references:
   - "src/types/config.ts"
   - "src/utils/config.ts"
-  - "mdoc.config.example.json"
-type: "configuration"
-status: "implemented"
 ---
 
 # 08_Config - 설정 시스템

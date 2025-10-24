@@ -1,11 +1,22 @@
 ---
 feature: "05_ValidateSpecOrphans"
 entry_point: "src/cli.ts:88-102"
-code_references:
-  - "src/cli.ts"
-  - "src/tools/spec-orphans.ts"
 type: "validation"
 status: "implemented"
+code_references:
+  - "src/cli.ts"
+  - "src/parsers/TypeScriptParser.ts"
+  - "src/shared/types.ts"
+  - "src/shared/utils.ts"
+  - "src/tools/init.ts"
+  - "src/tools/naming.ts"
+  - "src/tools/orphans.ts"
+  - "src/tools/spec-orphans.ts"
+  - "src/tools/structure.ts"
+  - "src/tools/sync.ts"
+  - "src/tools/validate.ts"
+  - "src/types/config.ts"
+  - "src/utils/config.ts"
 ---
 
 # 05_ValidateSpecOrphans - 스펙 고아 코드 검증

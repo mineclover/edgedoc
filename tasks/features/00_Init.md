@@ -1,11 +1,6 @@
 ---
 feature: "00_Init"
 entry_point: "src/cli.ts"
-code_references:
-  - "src/cli.ts"
-  - "src/shared/types.ts"
-  - "src/shared/utils.ts"
-  - "src/index.ts"
 interfaces:
   - "00--01"
   - "00--02"
@@ -16,6 +11,20 @@ interfaces:
   - "00--07"
 type: "initialization"
 status: "implemented"
+code_references:
+  - "src/cli.ts"
+  - "src/parsers/TypeScriptParser.ts"
+  - "src/shared/types.ts"
+  - "src/shared/utils.ts"
+  - "src/tools/init.ts"
+  - "src/tools/naming.ts"
+  - "src/tools/orphans.ts"
+  - "src/tools/spec-orphans.ts"
+  - "src/tools/structure.ts"
+  - "src/tools/sync.ts"
+  - "src/tools/validate.ts"
+  - "src/types/config.ts"
+  - "src/utils/config.ts"
 ---
 
 # 00_Init - CLI 초기화

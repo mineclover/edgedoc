@@ -121,10 +121,17 @@ function buildDependencyGraph(
  * Resolve import path to file path
  */
 function resolveImportPath(importPath: string, fromDir: string, projectDir: string): string | null {
-  const extensions = ['.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx'];
+  // Remove existing extension if present
+  let basePath = importPath;
+  const hasExt = /\.(js|jsx|ts|tsx)$/.test(importPath);
+  if (hasExt) {
+    basePath = importPath.replace(/\.(js|jsx|ts|tsx)$/, '');
+  }
+
+  const extensions = ['.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx', '/index.js', '/index.jsx'];
 
   for (const ext of extensions) {
-    const fullPath = join(fromDir, importPath + ext);
+    const fullPath = join(fromDir, basePath + ext);
     if (fileExists(fullPath)) {
       return relative(projectDir, fullPath);
     }

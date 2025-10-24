@@ -1,10 +1,22 @@
 ---
 feature: "06_ValidateAll"
 entry_point: "src/cli.ts:104-156"
-code_references:
-  - "src/cli.ts"
 type: "orchestration"
 status: "implemented"
+code_references:
+  - "src/cli.ts"
+  - "src/parsers/TypeScriptParser.ts"
+  - "src/shared/types.ts"
+  - "src/shared/utils.ts"
+  - "src/tools/init.ts"
+  - "src/tools/naming.ts"
+  - "src/tools/orphans.ts"
+  - "src/tools/spec-orphans.ts"
+  - "src/tools/structure.ts"
+  - "src/tools/sync.ts"
+  - "src/tools/validate.ts"
+  - "src/types/config.ts"
+  - "src/utils/config.ts"
 ---
 
 # 06_ValidateAll - 전체 검증

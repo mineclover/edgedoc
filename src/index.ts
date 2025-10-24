@@ -165,6 +165,92 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: 'graph_build',
+        description: 'Build reference index (.edgedoc/references.json)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+            verbose: {
+              type: 'boolean',
+              description: 'Verbose output',
+            },
+          },
+        },
+      },
+      {
+        name: 'graph_query',
+        description: 'Query reference graph (feature/code/term lookup)',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+            featureId: {
+              type: 'string',
+              description: 'Feature ID to query',
+            },
+            codeFile: {
+              type: 'string',
+              description: 'Code file path for reverse lookup',
+            },
+            term: {
+              type: 'string',
+              description: 'Term name to query usage',
+            },
+          },
+        },
+      },
+      {
+        name: 'validate_terms',
+        description: 'Validate term definitions and references consistency',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+          },
+        },
+      },
+      {
+        name: 'list_terms',
+        description: 'List all defined terms with statistics',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+          },
+        },
+      },
+      {
+        name: 'find_term',
+        description: 'Search for terms by keyword',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: 'Search query',
+            },
+            projectPath: {
+              type: 'string',
+              description: 'Project directory path (defaults to current directory)',
+            },
+          },
+          required: ['query'],
+        },
+      },
     ],
   };
 });
@@ -230,6 +316,58 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'sync_code_refs': {
         cliArgs = ['sync'];
+        break;
+      }
+
+      case 'graph_build': {
+        cliArgs = ['graph', 'build'];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        if (args?.verbose) {
+          cliArgs.push('--verbose');
+        }
+        break;
+      }
+
+      case 'graph_query': {
+        cliArgs = ['graph', 'query'];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        if (args?.featureId) {
+          cliArgs.push(args.featureId as string);
+        }
+        if (args?.codeFile) {
+          cliArgs.push('--code', args.codeFile as string);
+        }
+        if (args?.term) {
+          cliArgs.push('--term', args.term as string);
+        }
+        break;
+      }
+
+      case 'validate_terms': {
+        cliArgs = ['validate', 'terms'];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        break;
+      }
+
+      case 'list_terms': {
+        cliArgs = ['terms', 'list'];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
+        break;
+      }
+
+      case 'find_term': {
+        cliArgs = ['terms', 'find', args?.query as string];
+        if (args?.projectPath) {
+          cliArgs.push('--project', args.projectPath as string);
+        }
         break;
       }
 
@@ -307,6 +445,18 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
         description: 'LLM-optimized quick reference for mdoc-tools',
         mimeType: 'text/plain',
       },
+      {
+        uri: 'mdoc://docs/syntax-guide',
+        name: 'Documentation Syntax Guide',
+        description: 'Complete syntax guide for writing edgedoc documentation',
+        mimeType: 'text/markdown',
+      },
+      {
+        uri: 'mdoc://docs/glossary',
+        name: 'Terminology Glossary',
+        description: 'Glossary of all defined terms with definitions',
+        mimeType: 'text/markdown',
+      },
     ],
   };
 });
@@ -332,6 +482,12 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
         break;
       case 'mdoc://llms.txt':
         filePath = join(__dirname, '../llms.txt');
+        break;
+      case 'mdoc://docs/syntax-guide':
+        filePath = join(__dirname, '../docs/SYNTAX_GUIDE.md');
+        break;
+      case 'mdoc://docs/glossary':
+        filePath = join(__dirname, '../docs/GLOSSARY.md');
         break;
       default:
         throw new Error(`Unknown resource: ${uri}`);

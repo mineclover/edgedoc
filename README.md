@@ -16,7 +16,9 @@ Edge-based Documentation Validation & Sync Tool (CLI + MCP)
 - ✅ **타입 검증**: TypeScript 타입 정의 누락 감지
 - ✅ **리포트 생성**: 마크다운 형식 검증 리포트
 - ✅ **다국어 지원**: TypeScript, JavaScript, Python 파일 자동 파싱
-- 🔄 **MCP 서버**: AI 에이전트 통합 (개발 중)
+- ✅ **참조 그래프**: 양방향 참조 인덱스 (feature↔code↔term)
+- ✅ **용어 관리**: 용어 정의 및 사용 추적
+- ✅ **MCP 서버**: AI 에이전트 통합 (Claude Desktop)
 
 ### 지원하는 언어
 
@@ -259,6 +261,7 @@ edgedoc/
 - [docs/TOOLS_README.md](./docs/TOOLS_README.md) - 도구 사용 가이드
 
 ### MCP 서버
+- [docs/MCP_SETUP.md](./docs/MCP_SETUP.md) - **MCP 서버 설정 가이드** ⭐ (Claude Desktop 연동)
 - [docs/MCP_SPEC.md](./docs/MCP_SPEC.md) - MCP 서버 사양 및 API 문서
 
 ## 로드맵
@@ -273,10 +276,12 @@ edgedoc/
 - [x] 전체 검증 명령어
 - [x] 바이너리 빌드
 
-### Phase 2: MCP 서버 (개발 중)
-- [ ] MCP 서버 구현
-- [ ] AI 에이전트 통합
-- [ ] 도구 노출 (validate, sync)
+### Phase 2: MCP 서버 ✅ (완료)
+- [x] MCP 서버 구현
+- [x] AI 에이전트 통합
+- [x] 도구 노출 (validate, graph, terms)
+- [x] 동적 리소스 제공 (reference index, features, terms)
+- [x] 개별 feature/term/code 조회
 
 ### Phase 3: 추가 기능 (예정)
 - [ ] 코드 참조 동기화

@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { spawn } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -419,46 +419,81 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
  * List available resources
  */
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  return {
-    resources: [
+  const projectPath = process.cwd();
+  const indexPath = join(projectPath, '.edgedoc', 'references.json');
+  const hasIndex = await readFile(indexPath, 'utf-8').then(() => true).catch(() => false);
+
+  const resources = [
+    // Static documentation
+    {
+      uri: 'mdoc://docs/workflows',
+      name: 'Workflows Guide',
+      description: 'Complete workflows for using mdoc-tools',
+      mimeType: 'text/markdown',
+    },
+    {
+      uri: 'mdoc://docs/shared-types',
+      name: 'Shared Types Convention',
+      description: 'Naming conventions for shared types and interfaces',
+      mimeType: 'text/markdown',
+    },
+    {
+      uri: 'mdoc://docs/agent-instructions',
+      name: 'Agent Instructions',
+      description: 'Complete instructions for AI agents using mdoc-tools',
+      mimeType: 'text/markdown',
+    },
+    {
+      uri: 'mdoc://llms.txt',
+      name: 'LLM Quick Reference',
+      description: 'LLM-optimized quick reference for mdoc-tools',
+      mimeType: 'text/plain',
+    },
+    {
+      uri: 'mdoc://docs/syntax-guide',
+      name: 'Documentation Syntax Guide',
+      description: 'Complete syntax guide for writing edgedoc documentation',
+      mimeType: 'text/markdown',
+    },
+    {
+      uri: 'mdoc://docs/glossary',
+      name: 'Terminology Glossary',
+      description: 'Glossary of all defined terms with definitions',
+      mimeType: 'text/markdown',
+    },
+  ];
+
+  // Dynamic project-specific resources (only if they exist)
+  if (hasIndex) {
+    resources.push(
       {
-        uri: 'mdoc://docs/workflows',
-        name: 'Workflows Guide',
-        description: 'Complete workflows for using mdoc-tools',
-        mimeType: 'text/markdown',
+        uri: 'mdoc://project/reference-index',
+        name: 'Project Reference Index',
+        description: 'Complete reference graph with features, code, interfaces, and terms',
+        mimeType: 'application/json',
       },
       {
-        uri: 'mdoc://docs/shared-types',
-        name: 'Shared Types Convention',
-        description: 'Naming conventions for shared types and interfaces',
-        mimeType: 'text/markdown',
+        uri: 'mdoc://project/features',
+        name: 'Project Features',
+        description: 'List of all features with their relationships',
+        mimeType: 'application/json',
       },
       {
-        uri: 'mdoc://docs/agent-instructions',
-        name: 'Agent Instructions',
-        description: 'Complete instructions for AI agents using mdoc-tools',
-        mimeType: 'text/markdown',
+        uri: 'mdoc://project/terms',
+        name: 'Project Terms',
+        description: 'All term definitions and usage statistics',
+        mimeType: 'application/json',
       },
       {
-        uri: 'mdoc://llms.txt',
-        name: 'LLM Quick Reference',
-        description: 'LLM-optimized quick reference for mdoc-tools',
-        mimeType: 'text/plain',
-      },
-      {
-        uri: 'mdoc://docs/syntax-guide',
-        name: 'Documentation Syntax Guide',
-        description: 'Complete syntax guide for writing edgedoc documentation',
-        mimeType: 'text/markdown',
-      },
-      {
-        uri: 'mdoc://docs/glossary',
-        name: 'Terminology Glossary',
-        description: 'Glossary of all defined terms with definitions',
-        mimeType: 'text/markdown',
-      },
-    ],
-  };
+        uri: 'mdoc://project/stats',
+        name: 'Project Statistics',
+        description: 'Overview statistics (features, code files, terms, interfaces)',
+        mimeType: 'application/json',
+      }
+    );
+  }
+
+  return { resources };
 });
 
 /**
@@ -468,42 +503,197 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const { uri } = request.params;
 
   try {
-    let filePath: string;
+    const projectPath = process.cwd();
 
-    switch (uri) {
-      case 'mdoc://docs/workflows':
-        filePath = join(__dirname, '../docs/WORKFLOWS.md');
-        break;
-      case 'mdoc://docs/shared-types':
-        filePath = join(__dirname, '../docs/SHARED_TYPES.md');
-        break;
-      case 'mdoc://docs/agent-instructions':
-        filePath = join(__dirname, '../instructions/AGENT_INSTRUCTIONS.md');
-        break;
-      case 'mdoc://llms.txt':
-        filePath = join(__dirname, '../llms.txt');
-        break;
-      case 'mdoc://docs/syntax-guide':
-        filePath = join(__dirname, '../docs/SYNTAX_GUIDE.md');
-        break;
-      case 'mdoc://docs/glossary':
-        filePath = join(__dirname, '../docs/GLOSSARY.md');
-        break;
-      default:
-        throw new Error(`Unknown resource: ${uri}`);
+    // Static documentation resources
+    if (uri.startsWith('mdoc://docs/') || uri === 'mdoc://llms.txt') {
+      let filePath: string;
+
+      switch (uri) {
+        case 'mdoc://docs/workflows':
+          filePath = join(__dirname, '../docs/WORKFLOWS.md');
+          break;
+        case 'mdoc://docs/shared-types':
+          filePath = join(__dirname, '../docs/SHARED_TYPES.md');
+          break;
+        case 'mdoc://docs/agent-instructions':
+          filePath = join(__dirname, '../instructions/AGENT_INSTRUCTIONS.md');
+          break;
+        case 'mdoc://llms.txt':
+          filePath = join(__dirname, '../llms.txt');
+          break;
+        case 'mdoc://docs/syntax-guide':
+          filePath = join(__dirname, '../docs/SYNTAX_GUIDE.md');
+          break;
+        case 'mdoc://docs/glossary':
+          filePath = join(__dirname, '../docs/GLOSSARY.md');
+          break;
+        default:
+          throw new Error(`Unknown static resource: ${uri}`);
+      }
+
+      const content = await readFile(filePath, 'utf-8');
+
+      return {
+        contents: [
+          {
+            uri,
+            mimeType: uri.endsWith('.txt') ? 'text/plain' : 'text/markdown',
+            text: content,
+          },
+        ],
+      };
     }
 
-    const content = await readFile(filePath, 'utf-8');
+    // Dynamic project-specific resources
+    if (uri.startsWith('mdoc://project/')) {
+      const indexPath = join(projectPath, '.edgedoc', 'references.json');
 
-    return {
-      contents: [
-        {
-          uri,
-          mimeType: uri.endsWith('.txt') ? 'text/plain' : 'text/markdown',
-          text: content,
-        },
-      ],
-    };
+      try {
+        await stat(indexPath);
+      } catch {
+        throw new Error('Reference index not found. Run "edgedoc graph build" first.');
+      }
+
+      const indexContent = await readFile(indexPath, 'utf-8');
+      const index = JSON.parse(indexContent);
+
+      let responseContent: any;
+
+      switch (uri) {
+        case 'mdoc://project/reference-index': {
+          // Return full index
+          responseContent = index;
+          break;
+        }
+
+        case 'mdoc://project/features': {
+          // Return features with summary
+          responseContent = {
+            total: Object.keys(index.features).length,
+            features: Object.entries(index.features).map(([id, feature]: [string, any]) => ({
+              id,
+              file: feature.file,
+              code_files: feature.code.uses.length,
+              related_features: feature.features.related.length,
+              interfaces: feature.interfaces.provides.length + feature.interfaces.uses.length,
+              terms: feature.terms.uses.length,
+            })),
+          };
+          break;
+        }
+
+        case 'mdoc://project/terms': {
+          // Return terms with usage stats
+          responseContent = {
+            total: Object.keys(index.terms).length,
+            terms: Object.entries(index.terms).map(([term, data]: [string, any]) => ({
+              term,
+              definition: data.definition,
+              usage_count: data.usage_count,
+              references_count: data.references.length,
+            })),
+          };
+          break;
+        }
+
+        case 'mdoc://project/stats': {
+          // Return overview statistics
+          responseContent = {
+            version: index.version,
+            generated: index.generated,
+            stats: {
+              features: Object.keys(index.features).length,
+              code_files: Object.keys(index.code).length,
+              interfaces: Object.keys(index.interfaces).length,
+              terms: Object.keys(index.terms).length,
+              total_references:
+                Object.values(index.features).reduce(
+                  (sum: number, f: any) => sum + f.code.uses.length,
+                  0
+                ) +
+                Object.values(index.code).reduce(
+                  (sum: number, c: any) => sum + c.imports.length,
+                  0
+                ),
+            },
+            top_terms: Object.entries(index.terms)
+              .map(([term, data]: [string, any]) => ({
+                term,
+                usage_count: data.usage_count,
+              }))
+              .sort((a: any, b: any) => b.usage_count - a.usage_count)
+              .slice(0, 10),
+          };
+          break;
+        }
+
+        default: {
+          // Try to match feature or term patterns
+          const featureMatch = uri.match(/^mdoc:\/\/project\/feature\/(.+)$/);
+          if (featureMatch) {
+            const featureId = featureMatch[1];
+            const feature = index.features[featureId];
+
+            if (!feature) {
+              throw new Error(`Feature "${featureId}" not found`);
+            }
+
+            responseContent = {
+              id: featureId,
+              ...feature,
+            };
+            break;
+          }
+
+          const termMatch = uri.match(/^mdoc:\/\/project\/term\/(.+)$/);
+          if (termMatch) {
+            const termName = decodeURIComponent(termMatch[1]);
+            const term = index.terms[termName];
+
+            if (!term) {
+              throw new Error(`Term "${termName}" not found`);
+            }
+
+            responseContent = {
+              term: termName,
+              ...term,
+            };
+            break;
+          }
+
+          const codeMatch = uri.match(/^mdoc:\/\/project\/code\/(.+)$/);
+          if (codeMatch) {
+            const codePath = decodeURIComponent(codeMatch[1]);
+            const code = index.code[codePath];
+
+            if (!code) {
+              throw new Error(`Code file "${codePath}" not found in index`);
+            }
+
+            responseContent = {
+              file: codePath,
+              ...code,
+            };
+            break;
+          }
+
+          throw new Error(`Unknown project resource: ${uri}`);
+        }
+      }
+
+      return {
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(responseContent, null, 2),
+          },
+        ],
+      };
+    }
+
+    throw new Error(`Unknown resource: ${uri}`);
   } catch (error) {
     throw new Error(
       `Failed to read resource ${uri}: ${error instanceof Error ? error.message : String(error)}`

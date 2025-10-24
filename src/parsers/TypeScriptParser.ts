@@ -54,19 +54,37 @@ export class TypeScriptParser {
   private extractImports(tree: Parser.Tree, sourceCode: string): ImportInfo[] {
     const imports: ImportInfo[] = [];
 
-    // Query for import statements
-    const query = this.language.query(`
+    // Query for import statements (using Parser.Query API)
+    const queryString = `
       (import_statement
         source: (string) @source) @import
-    `);
+    `;
 
-    const matches = query.matches(tree.rootNode);
+    const query = new Parser.Query(this.language, queryString);
+    const captures = query.captures(tree.rootNode);
 
-    for (const match of matches) {
-      const importNode = match.captures.find((c) => c.name === 'import')?.node;
-      const sourceNode = match.captures.find((c) => c.name === 'source')?.node;
+    // Group captures by import statement
+    const importNodes = new Map<number, Parser.SyntaxNode>();
+    const sourceNodes = new Map<number, Parser.SyntaxNode>();
 
-      if (!importNode || !sourceNode) continue;
+    for (const capture of captures) {
+      if (capture.name === 'import') {
+        importNodes.set(capture.node.id, capture.node);
+      } else if (capture.name === 'source') {
+        // Find parent import_statement
+        let parent = capture.node.parent;
+        while (parent && parent.type !== 'import_statement') {
+          parent = parent.parent;
+        }
+        if (parent) {
+          sourceNodes.set(parent.id, capture.node);
+        }
+      }
+    }
+
+    for (const [nodeId, importNode] of importNodes) {
+      const sourceNode = sourceNodes.get(nodeId);
+      if (!sourceNode) continue;
 
       const source = this.extractStringValue(sourceNode.text);
       const names = this.extractImportNames(importNode, sourceCode);
@@ -92,8 +110,8 @@ export class TypeScriptParser {
   private extractExports(tree: Parser.Tree, sourceCode: string): ExportInfo[] {
     const exports: ExportInfo[] = [];
 
-    // Query for export statements
-    const query = this.language.query(`
+    // Query for export statements (using Parser.Query API)
+    const queryString = `
       [
         ; Named exports
         (export_statement
@@ -120,29 +138,51 @@ export class TypeScriptParser {
             (identifier) @export_name
           ]) @default_export
       ]
-    `);
+    `;
 
-    const matches = query.matches(tree.rootNode);
+    const query = new Parser.Query(this.language, queryString);
+    const captures = query.captures(tree.rootNode);
 
-    for (const match of matches) {
-      const exportNode = match.captures.find(
-        (c) => c.name === 'export' || c.name === 'default_export'
-      )?.node;
-      const nameNode = match.captures.find((c) => c.name === 'export_name')?.node;
+    // Group captures by export node
+    const exportMap = new Map<number, { export?: Parser.SyntaxNode; name?: string; isDefault: boolean }>();
 
-      if (!exportNode) continue;
+    for (const capture of captures) {
+      if (capture.name === 'export' || capture.name === 'default_export') {
+        const nodeId = capture.node.id;
+        if (!exportMap.has(nodeId)) {
+          exportMap.set(nodeId, { isDefault: capture.name === 'default_export' });
+        }
+        exportMap.get(nodeId)!.export = capture.node;
+        exportMap.get(nodeId)!.isDefault = capture.name === 'default_export';
+      } else if (capture.name === 'export_name') {
+        // Find parent export_statement
+        let parent = capture.node.parent;
+        while (parent && parent.type !== 'export_statement') {
+          parent = parent.parent;
+        }
+        if (parent) {
+          const nodeId = parent.id;
+          if (!exportMap.has(nodeId)) {
+            exportMap.set(nodeId, { isDefault: false });
+          }
+          exportMap.get(nodeId)!.name = capture.node.text;
+        }
+      }
+    }
 
-      const name = nameNode?.text || 'default';
-      const type = this.inferExportType(exportNode.text);
-      const isDefault = match.captures.some((c) => c.name === 'default_export');
+    for (const entry of exportMap.values()) {
+      if (!entry.export) continue;
+
+      const name = entry.name || 'default';
+      const type = this.inferExportType(entry.export.text);
 
       exports.push({
         name,
         type,
-        isDefault,
+        isDefault: entry.isDefault,
         location: {
-          line: exportNode.startPosition.row + 1,
-          column: exportNode.startPosition.column,
+          line: entry.export.startPosition.row + 1,
+          column: entry.export.startPosition.column,
         },
       });
     }
@@ -157,37 +197,40 @@ export class TypeScriptParser {
     const names: string[] = [];
 
     // Named imports query
-    const namedQuery = this.language.query(`
+    const namedQueryString = `
       (named_imports
         (import_specifier name: (identifier) @name))
-    `);
-
-    const namedMatches = namedQuery.matches(importNode);
-    for (const match of namedMatches) {
-      const nameNodes = match.captures.filter((c) => c.name === 'name');
-      names.push(...nameNodes.map((n) => n.node.text));
+    `;
+    const namedQuery = new Parser.Query(this.language, namedQueryString);
+    const namedCaptures = namedQuery.captures(importNode);
+    for (const capture of namedCaptures) {
+      if (capture.name === 'name') {
+        names.push(capture.node.text);
+      }
     }
 
     // Default import query
-    const defaultQuery = this.language.query(`
+    const defaultQueryString = `
       (import_clause (identifier) @name)
-    `);
-
-    const defaultMatches = defaultQuery.matches(importNode);
-    for (const match of defaultMatches) {
-      const nameNodes = match.captures.filter((c) => c.name === 'name');
-      names.push(...nameNodes.map((n) => n.node.text));
+    `;
+    const defaultQuery = new Parser.Query(this.language, defaultQueryString);
+    const defaultCaptures = defaultQuery.captures(importNode);
+    for (const capture of defaultCaptures) {
+      if (capture.name === 'name') {
+        names.push(capture.node.text);
+      }
     }
 
     // Namespace import (import * as Foo)
-    const namespaceQuery = this.language.query(`
+    const namespaceQueryString = `
       (namespace_import (identifier) @name)
-    `);
-
-    const namespaceMatches = namespaceQuery.matches(importNode);
-    for (const match of namespaceMatches) {
-      const nameNodes = match.captures.filter((c) => c.name === 'name');
-      names.push(...nameNodes.map((n) => n.node.text));
+    `;
+    const namespaceQuery = new Parser.Query(this.language, namespaceQueryString);
+    const namespaceCaptures = namespaceQuery.captures(importNode);
+    for (const capture of namespaceCaptures) {
+      if (capture.name === 'name') {
+        names.push(capture.node.text);
+      }
     }
 
     return names;

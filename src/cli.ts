@@ -22,6 +22,8 @@ import {
   getTasksByInterface,
   getTasksByTerm,
   printTasksForReference,
+  calculateProgress,
+  printProgressDashboard,
 } from './tools/tasks-list.js';
 import {
   listDetailsBlocks,
@@ -466,43 +468,20 @@ tasks
 
 tasks
   .command('progress')
-  .description('전체 프로젝트 진행률')
+  .description('전체 프로젝트 진행률 대시보드')
   .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
   .action(async (options) => {
     try {
       const taskList = await listTasks({ projectPath: options.project });
-
-      const total = taskList.length;
-      const byStatus = taskList.reduce(
-        (acc, task) => {
-          acc[task.status] = (acc[task.status] || 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
-
-      const totalCheckboxes = taskList.reduce((sum, task) => sum + task.checkboxes.total, 0);
-      const checkedCheckboxes = taskList.reduce((sum, task) => sum + task.checkboxes.checked, 0);
-      const overallProgress =
-        totalCheckboxes > 0 ? Math.round((checkedCheckboxes / totalCheckboxes) * 100) : 0;
-
-      console.log('📊 Project Progress\n');
-      console.log(`Total Features: ${total}`);
-      console.log(`  Active: ${byStatus.active || 0}`);
-      console.log(`  In Progress: ${byStatus.in_progress || 0}`);
-      console.log(`  Planned: ${byStatus.planned || 0}\n`);
-
-      console.log('Checkboxes:');
-      const progressBar = '█'.repeat(Math.floor(overallProgress / 5));
-      const emptyBar = '░'.repeat(20 - Math.floor(overallProgress / 5));
-      console.log(`  ${progressBar}${emptyBar} ${checkedCheckboxes}/${totalCheckboxes} (${overallProgress}%)\n`);
-
+      const summary = calculateProgress(taskList);
+      printProgressDashboard(summary);
       process.exit(0);
     } catch (error) {
       console.error('❌ 오류:', error);
       process.exit(1);
     }
   });
+
 
 // Graph commands
 const graph = program.command('graph').description('참조 그래프 관리');

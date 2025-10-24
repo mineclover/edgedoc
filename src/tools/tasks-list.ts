@@ -176,6 +176,182 @@ export function getTaskDetails(tasks: TaskInfo[], taskId: string): TaskInfo | un
 }
 
 /**
+ * Calculate project progress summary
+ */
+export interface ProgressSummary {
+  total: number;
+  byStatus: {
+    planned: number;
+    in_progress: number;
+    active: number;
+    implemented: number;
+    deprecated: number;
+  };
+  byType: {
+    feature: number;
+    test: number;
+    interface: number;
+    shared: number;
+  };
+  byPriority: {
+    high: number;
+    medium: number;
+    low: number;
+    none: number;
+  };
+  overallProgress: {
+    totalCheckboxes: number;
+    checkedCheckboxes: number;
+    percentage: number;
+  };
+}
+
+export function calculateProgress(tasks: TaskInfo[]): ProgressSummary {
+  const summary: ProgressSummary = {
+    total: tasks.length,
+    byStatus: {
+      planned: 0,
+      in_progress: 0,
+      active: 0,
+      implemented: 0,
+      deprecated: 0,
+    },
+    byType: {
+      feature: 0,
+      test: 0,
+      interface: 0,
+      shared: 0,
+    },
+    byPriority: {
+      high: 0,
+      medium: 0,
+      low: 0,
+      none: 0,
+    },
+    overallProgress: {
+      totalCheckboxes: 0,
+      checkedCheckboxes: 0,
+      percentage: 0,
+    },
+  };
+
+  for (const task of tasks) {
+    // Count by status
+    const status = task.status as keyof typeof summary.byStatus;
+    if (status in summary.byStatus) {
+      summary.byStatus[status]++;
+    }
+
+    // Count by type
+    const type = task.type as keyof typeof summary.byType;
+    if (type in summary.byType) {
+      summary.byType[type]++;
+    }
+
+    // Count by priority
+    const priority = (task.priority || 'none') as keyof typeof summary.byPriority;
+    if (priority in summary.byPriority) {
+      summary.byPriority[priority]++;
+    }
+
+    // Accumulate checkboxes
+    summary.overallProgress.totalCheckboxes += task.checkboxes.total;
+    summary.overallProgress.checkedCheckboxes += task.checkboxes.checked;
+  }
+
+  // Calculate overall percentage
+  if (summary.overallProgress.totalCheckboxes > 0) {
+    summary.overallProgress.percentage = Math.round(
+      (summary.overallProgress.checkedCheckboxes / summary.overallProgress.totalCheckboxes) * 100
+    );
+  }
+
+  return summary;
+}
+
+/**
+ * Print progress dashboard
+ */
+export function printProgressDashboard(summary: ProgressSummary): void {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('📊 Project Progress Dashboard');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+  // Overall progress
+  const progressBarLength = 30;
+  const filledLength = Math.floor(
+    (summary.overallProgress.percentage / 100) * progressBarLength
+  );
+  const progressBar = '█'.repeat(filledLength) + '░'.repeat(progressBarLength - filledLength);
+
+  console.log('Overall Progress');
+  console.log(`${progressBar} ${summary.overallProgress.percentage}%\n`);
+
+  // Features count
+  console.log(`Features: ${summary.total}`);
+
+  // By status
+  console.log('\n━━━ By Status ━━━');
+  if (summary.byStatus.implemented > 0) {
+    console.log(`  ✅ Implemented: ${summary.byStatus.implemented}`);
+  }
+  if (summary.byStatus.active > 0) {
+    console.log(`  ✅ Active: ${summary.byStatus.active}`);
+  }
+  if (summary.byStatus.in_progress > 0) {
+    console.log(`  🔄 In Progress: ${summary.byStatus.in_progress}`);
+  }
+  if (summary.byStatus.planned > 0) {
+    console.log(`  ⬜ Planned: ${summary.byStatus.planned}`);
+  }
+  if (summary.byStatus.deprecated > 0) {
+    console.log(`  ⚠️  Deprecated: ${summary.byStatus.deprecated}`);
+  }
+
+  // By type
+  console.log('\n━━━ By Type ━━━');
+  if (summary.byType.feature > 0) {
+    console.log(`  Features: ${summary.byType.feature}`);
+  }
+  if (summary.byType.test > 0) {
+    console.log(`  Tests: ${summary.byType.test}`);
+  }
+  if (summary.byType.interface > 0) {
+    console.log(`  Interfaces: ${summary.byType.interface}`);
+  }
+  if (summary.byType.shared > 0) {
+    console.log(`  Shared: ${summary.byType.shared}`);
+  }
+
+  // By priority
+  console.log('\n━━━ By Priority ━━━');
+  if (summary.byPriority.high > 0) {
+    console.log(`  🔴 High: ${summary.byPriority.high}`);
+  }
+  if (summary.byPriority.medium > 0) {
+    console.log(`  🟡 Medium: ${summary.byPriority.medium}`);
+  }
+  if (summary.byPriority.low > 0) {
+    console.log(`  🟢 Low: ${summary.byPriority.low}`);
+  }
+  if (summary.byPriority.none > 0) {
+    console.log(`  ⚪ None: ${summary.byPriority.none}`);
+  }
+
+  // Checkboxes
+  console.log('\n━━━ Checkboxes ━━━');
+  console.log(`  Total: ${summary.overallProgress.totalCheckboxes}`);
+  console.log(
+    `  ✅ Completed: ${summary.overallProgress.checkedCheckboxes} (${summary.overallProgress.percentage}%)`
+  );
+  console.log(
+    `  ⬜ Remaining: ${summary.overallProgress.totalCheckboxes - summary.overallProgress.checkedCheckboxes}`
+  );
+
+  console.log();
+}
+
+/**
  * Get tasks by code file (reverse lookup via reference index)
  */
 export async function getTasksByCode(

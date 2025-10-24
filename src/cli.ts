@@ -13,6 +13,7 @@ import { validateTerms } from './tools/validate-terms.js';
 import { listTerms, findTerm } from './tools/term-commands.js';
 import { buildReferenceIndex } from './tools/build-reference-index.js';
 import { queryGraph } from './tools/graph-query.js';
+import { validateInterfaceLinks, printValidationResults } from './tools/validate-interface-links.js';
 import {
   listTasks,
   printTasksList,
@@ -154,6 +155,30 @@ validate
         projectPath: options.project,
       });
       process.exit(result.success ? 0 : 1);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+validate
+  .command('interfaces')
+  .description('인터페이스 검증 (양방향 링크 + 계층 구조)')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('--feature <id>', '특정 feature만 검증')
+  .option('--namespace <name>', '특정 namespace만 검증')
+  .option('-v, --verbose', '상세 출력')
+  .action(async (options) => {
+    try {
+      const result = validateInterfaceLinks(options.project, {
+        feature: options.feature,
+        namespace: options.namespace,
+      });
+
+      printValidationResults(result, options.verbose);
+
+      const hasErrors = result.summary.errorCount > 0;
+      process.exit(hasErrors ? 1 : 0);
     } catch (error) {
       console.error('❌ 오류:', error);
       process.exit(1);

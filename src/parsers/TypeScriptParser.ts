@@ -35,9 +35,11 @@ export class TypeScriptParser {
    */
   parse(sourceCode: string, isTsx = false): ParseResult {
     if (isTsx) {
-      this.parser.setLanguage(TypeScript.tsx);
+      this.language = TypeScript.tsx;
+      this.parser.setLanguage(this.language);
     } else {
-      this.parser.setLanguage(TypeScript.typescript);
+      this.language = TypeScript.typescript;
+      this.parser.setLanguage(this.language);
     }
 
     const tree = this.parser.parse(sourceCode);

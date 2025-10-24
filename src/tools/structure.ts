@@ -210,20 +210,64 @@ function checkFrontmatterFields(projectPath: string): FrontmatterError[] {
   const featuresPath = join(tasksPath, 'features');
   if (fileExists(featuresPath)) {
     const featureFiles = getMarkdownFiles(featuresPath);
-    const requiredFields = ['feature', 'status', 'entry_point'];
 
     for (const filePath of featureFiles) {
       const fileName = basename(filePath);
       const content = readFileSync(filePath, 'utf-8');
 
-      for (const field of requiredFields) {
-        const value = extractFrontmatterField(content, field);
-        if (!value) {
+      // Determine document type
+      const docType = extractFrontmatterField(content, 'type');
+
+      if (docType === 'test') {
+        // Test document required fields
+        const requiredFields = ['type', 'status', 'feature', 'test_type', 'entry_point'];
+
+        for (const field of requiredFields) {
+          const value = extractFrontmatterField(content, field);
+          if (!value) {
+            errors.push({
+              file: `features/${fileName}`,
+              field,
+              message: `missing '${field}' field`,
+            });
+          }
+        }
+
+        // Validate test_type value
+        const testType = extractFrontmatterField(content, 'test_type');
+        if (testType && !['manual', 'automated'].includes(testType)) {
           errors.push({
             file: `features/${fileName}`,
-            field,
-            message: `missing '${field}' field`,
+            field: 'test_type',
+            message: `invalid test_type: '${testType}' (must be 'manual' or 'automated')`,
           });
+        }
+
+        // Validate test_files paths exist (if provided)
+        const testFiles = extractFrontmatterArray(content, 'test_files');
+        for (const testFile of testFiles) {
+          const testFilePath = join(projectPath, testFile);
+          if (!fileExists(testFilePath)) {
+            errors.push({
+              file: `features/${fileName}`,
+              field: 'test_files',
+              message: `test file not found: '${testFile}'`,
+            });
+          }
+        }
+      } else {
+        // Regular feature document required fields
+        const requiredFields = ['feature', 'status', 'entry_point'];
+
+        for (const field of requiredFields) {
+          const value = extractFrontmatterField(content, field);
+          if (!value) {
+            errors.push({
+              file: `features/${fileName}`,
+              field,
+              message: `missing '${field}' field`,
+            });
+          }
         }
       }
     }

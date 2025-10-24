@@ -3,7 +3,11 @@ feature: "08_Config"
 entry_point: "src/utils/config.ts"
 type: "configuration"
 status: "implemented"
+related_features:
+  - 10_Internationalization
 code_references:
+  - "mdoc.config.example.json"
+  - "src/shared/i18n.ts"
   - "src/types/config.ts"
   - "src/utils/config.ts"
 ---
@@ -23,6 +27,7 @@ mdoc-tools의 설정 시스템을 관리합니다. `mdoc.config.json` 파일을 
 ```json
 {
   "$schema": "./schema/mdoc-config.schema.json",
+  "language": "en",
   "validation": {
     "sharedTypes": {
       "maxPairs": 12,
@@ -40,6 +45,7 @@ mdoc-tools의 설정 시스템을 관리합니다. `mdoc.config.json` 파일을 
 
 ```typescript
 export interface MdocConfig {
+  language?: 'en' | 'ko';  // Default: 'en'
   migration?: {
     sourceDir: string;
     targetDir: string;
@@ -67,6 +73,7 @@ export interface MdocConfig {
 
 ```typescript
 export const DEFAULT_CONFIG: MdocConfig = {
+  language: 'en',  // English by default
   migration: {
     sourceDir: 'tasks',
     targetDir: 'tasks-v2',
@@ -88,11 +95,12 @@ export const DEFAULT_CONFIG: MdocConfig = {
 
 ### 3. 설정 로딩
 
-**파일**: `src/utils/config.ts:7-36`
+**파일**: `src/utils/config.ts:7-52`
 
 - `mdoc.config.json` 존재 확인
 - JSON 파싱
 - 기본 설정과 Deep Merge
+- 언어 설정 적용 (`setLanguage`)
 - 에러 처리 (파싱 실패 시 기본 설정 사용)
 
 ### 4. 자동 감지
@@ -104,6 +112,16 @@ export const DEFAULT_CONFIG: MdocConfig = {
 별도의 설정 플래그가 필요 없습니다!
 
 ## 설정 적용
+
+### Language (언어)
+
+**규칙**:
+- `en`: English (default)
+- `ko`: Korean
+
+**적용**: `src/utils/config.ts` (loadConfig 함수)
+- 전역 i18n 시스템에 자동 적용
+- 모든 CLI 출력 메시지에 영향
 
 ### Shared Types 복잡도
 
@@ -118,6 +136,11 @@ export const DEFAULT_CONFIG: MdocConfig = {
 - ✅ 타입 정의
 - ✅ 기본 설정
 - ✅ 설정 로딩 (Deep Merge)
+- ✅ 언어 설정 (i18n 통합)
 - ✅ 에러 처리
 - ✅ Shared Types 복잡도 검증
 - ✅ 마이그레이션 자동 감지
+
+## 관련 기능
+
+- **10_Internationalization**: 언어 설정을 통한 다국어 지원

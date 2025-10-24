@@ -8,6 +8,7 @@ import { validateSpecOrphans } from './tools/spec-orphans.js';
 import { validateStructure } from './tools/structure.js';
 import { syncCodeRefs } from './tools/sync.js';
 import { validateMigration } from './tools/validate.js';
+import { EntryPointDetector } from './tools/entry-point-detector.js';
 
 const program = new Command();
 
@@ -226,6 +227,24 @@ docs
   .action(async (file, _options) => {
     console.log(`📕 ${file} 블록 닫기`);
     // TODO: 구현
+  });
+
+// Analyze commands
+const analyze = program.command('analyze').description('코드베이스 분석');
+
+analyze
+  .command('entry-points')
+  .description('진입점 모듈 탐지')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      const entryPoints = EntryPointDetector.detect(options.project);
+      EntryPointDetector.print(entryPoints);
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
   });
 
 program.parse();

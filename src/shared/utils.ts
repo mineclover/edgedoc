@@ -87,3 +87,27 @@ export function formatDateTime(): string {
     .replace(/\. /g, '-')
     .replace(/\./g, '');
 }
+
+/**
+ * 재귀적으로 마크다운 파일 찾기 (node_modules, .git, dist, build 제외)
+ */
+export function findMarkdownFiles(dir: string, files: string[] = []): string[] {
+  const excludeDirs = ['node_modules', '.git', 'dist', 'build'];
+
+  const entries = readdirSync(dir);
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry);
+    const stat = statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      if (!excludeDirs.includes(entry)) {
+        findMarkdownFiles(fullPath, files);
+      }
+    } else if (entry.endsWith('.md')) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
+}

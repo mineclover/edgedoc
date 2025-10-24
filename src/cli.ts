@@ -11,6 +11,7 @@ import { validateMigration } from './tools/validate.js';
 import { EntryPointDetector } from './tools/entry-point-detector.js';
 import { validateTerms } from './tools/validate-terms.js';
 import { listTerms, findTerm } from './tools/term-commands.js';
+import { buildReferenceIndex } from './tools/build-reference-index.js';
 
 const program = new Command();
 
@@ -289,6 +290,40 @@ terms
   .action(async (query, options) => {
     try {
       await findTerm(query, { projectPath: options.project });
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Graph commands
+const graph = program.command('graph').description('참조 그래프 관리');
+
+graph
+  .command('build')
+  .description('참조 인덱스 생성')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('-o, --output <path>', '출력 경로')
+  .option('--symbols', '심볼 정보 포함 (느림)')
+  .option('-v, --verbose', '상세 출력')
+  .action(async (options) => {
+    try {
+      const { index, stats } = await buildReferenceIndex({
+        projectPath: options.project,
+        outputPath: options.output,
+        includeSymbols: options.symbols,
+        verbose: options.verbose || true,
+      });
+
+      console.log('\n📊 Index Statistics:\n');
+      console.log(`Features: ${stats.features}`);
+      console.log(`Code files: ${stats.code_files}`);
+      console.log(`Interfaces: ${stats.interfaces}`);
+      console.log(`Terms: ${stats.terms}`);
+      console.log(`Total references: ${stats.total_references}`);
+      console.log(`Build time: ${stats.build_time_ms}ms\n`);
+
       process.exit(0);
     } catch (error) {
       console.error('❌ 오류:', error);

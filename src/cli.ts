@@ -13,7 +13,13 @@ import { validateTerms } from './tools/validate-terms.js';
 import { listTerms, findTerm } from './tools/term-commands.js';
 import { buildReferenceIndex } from './tools/build-reference-index.js';
 import { queryGraph } from './tools/graph-query.js';
-import { listTasks, printTasksList, getTaskDetails } from './tools/tasks-list.js';
+import {
+  listTasks,
+  printTasksList,
+  getTaskDetails,
+  getTasksByCode,
+  printTasksForCode,
+} from './tools/tasks-list.js';
 
 const program = new Command();
 
@@ -308,9 +314,18 @@ tasks
   .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
   .option('--status <status>', 'Status 필터 (planned, in_progress, active)')
   .option('--priority <priority>', 'Priority 필터 (high, medium, low)')
+  .option('--code <file>', '코드 파일 경로로 feature 찾기')
   .option('-v, --verbose', '상세 출력')
   .action(async (options) => {
     try {
+      // Code file lookup
+      if (options.code) {
+        const { featureIds, tasks } = await getTasksByCode(options.project, options.code);
+        printTasksForCode(options.code, featureIds, tasks);
+        process.exit(0);
+      }
+
+      // Normal list
       const taskList = await listTasks({
         projectPath: options.project,
         status: options.status,

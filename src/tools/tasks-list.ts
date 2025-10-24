@@ -1,6 +1,7 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { findMarkdownFiles } from '../shared/utils.js';
+import type { ReferenceIndex } from '../types/reference-index.js';
 
 export interface TasksListOptions {
   projectPath: string;
@@ -172,4 +173,68 @@ export function printTasksList(tasks: TaskInfo[], options?: { verbose?: boolean 
  */
 export function getTaskDetails(tasks: TaskInfo[], taskId: string): TaskInfo | undefined {
   return tasks.find((t) => t.id === taskId || t.feature === taskId);
+}
+
+/**
+ * Get tasks by code file (reverse lookup via reference index)
+ */
+export async function getTasksByCode(
+  projectPath: string,
+  codeFile: string
+): Promise<{ featureIds: string[]; tasks: TaskInfo[] }> {
+  const indexPath = join(projectPath, '.edgedoc', 'references.json');
+
+  if (!existsSync(indexPath)) {
+    throw new Error('Reference index not found. Run "edgedoc graph build" first.');
+  }
+
+  const indexContent = readFileSync(indexPath, 'utf-8');
+  const index: ReferenceIndex = JSON.parse(indexContent);
+
+  const codeRef = index.code[codeFile];
+
+  if (!codeRef) {
+    throw new Error(`Code file "${codeFile}" not found in index. Not documented in any feature.`);
+  }
+
+  const featureIds = codeRef.documented_in;
+
+  if (featureIds.length === 0) {
+    throw new Error(`Code file "${codeFile}" is not documented in any feature.`);
+  }
+
+  // Get tasks for all features documenting this code
+  const allTasks = await listTasks({ projectPath });
+  const tasks = allTasks.filter((t) => featureIds.includes(t.feature) || featureIds.includes(t.id));
+
+  return { featureIds, tasks };
+}
+
+/**
+ * Print tasks for a code file
+ */
+export function printTasksForCode(
+  codeFile: string,
+  featureIds: string[],
+  tasks: TaskInfo[]
+): void {
+  console.log(`💾 Code File: ${codeFile}\n`);
+  console.log(`📄 Documented in ${featureIds.length} feature(s):\n`);
+
+  for (const task of tasks) {
+    const statusIcon = task.status === 'active' ? '✅' : task.status === 'in_progress' ? '🔄' : '⬜';
+
+    console.log(`${statusIcon} ${task.id}`);
+    console.log(`   ${task.title}`);
+
+    if (task.checkboxes.total > 0) {
+      const progressBar = '█'.repeat(Math.floor(task.checkboxes.progress / 10));
+      const emptyBar = '░'.repeat(10 - Math.floor(task.checkboxes.progress / 10));
+      console.log(
+        `   Progress: ${progressBar}${emptyBar} ${task.checkboxes.checked}/${task.checkboxes.total} (${task.checkboxes.progress}%)`
+      );
+    }
+
+    console.log();
+  }
 }

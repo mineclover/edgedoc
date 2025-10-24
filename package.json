@@ -1,6 +1,6 @@
 {
   "name": "edgedoc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Edge-based documentation validation and sync tool (CLI + MCP)",
   "type": "module",
   "bin": {

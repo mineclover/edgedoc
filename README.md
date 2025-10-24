@@ -162,7 +162,41 @@ edgedoc validate naming -p ~/my-project
 edgedoc validate all -p ~/my-project
 \`\`\`
 
-#### 4. 옵션
+#### 4. 참조 그래프 (Reference Index)
+
+**인덱스 생성**:
+\`\`\`bash
+# 참조 인덱스 생성 (.edgedoc/references.json)
+edgedoc graph build
+
+# 상세 출력
+edgedoc graph build --verbose
+\`\`\`
+
+**그래프 조회**:
+\`\`\`bash
+# 전체 개요
+edgedoc graph query
+
+# 특정 feature 조회
+edgedoc graph query validate-terms
+
+# 코드 파일의 역방향 조회 (어떤 feature가 이 코드를 사용하는가?)
+edgedoc graph query --code src/tools/validate-terms.ts
+
+# 용어 사용처 조회
+edgedoc graph query --term "Entry Point Module"
+\`\`\`
+
+**주요 기능**:
+- Feature → Code 매핑
+- Code → Feature 역방향 매핑 (documented_in)
+- Feature → Feature 관계 (depends_on, used_by)
+- Interface 연결
+- Term 정의 및 사용처 추적
+- 빌드 시간: ~20ms (17 features, 31 code files, 24 terms)
+
+#### 5. 옵션
 
 - \`-p, --project <path>\`: 프로젝트 디렉토리 경로 (기본값: 현재 디렉토리)
 - \`-m, --markdown\`: 마크다운 리포트 생성 (tasks-v2/MIGRATION_REPORT.md, migration 전용)

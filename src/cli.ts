@@ -12,6 +12,7 @@ import { EntryPointDetector } from './tools/entry-point-detector.js';
 import { validateTerms } from './tools/validate-terms.js';
 import { listTerms, findTerm } from './tools/term-commands.js';
 import { buildReferenceIndex } from './tools/build-reference-index.js';
+import { queryGraph } from './tools/graph-query.js';
 
 const program = new Command();
 
@@ -324,6 +325,28 @@ graph
       console.log(`Total references: ${stats.total_references}`);
       console.log(`Build time: ${stats.build_time_ms}ms\n`);
 
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+graph
+  .command('query [id]')
+  .description('참조 그래프 조회')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('--feature <id>', 'Feature ID 조회')
+  .option('--code <file>', '코드 파일 조회 (역방향)')
+  .option('--term <name>', '용어 사용처 조회')
+  .action(async (id, options) => {
+    try {
+      await queryGraph({
+        projectPath: options.project,
+        featureId: options.feature || id,
+        codeFile: options.code,
+        term: options.term,
+      });
       process.exit(0);
     } catch (error) {
       console.error('❌ 오류:', error);

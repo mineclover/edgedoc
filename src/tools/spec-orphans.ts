@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
-import { basename, join, relative } from 'node:path';
+import { basename, join, relative, resolve, dirname } from 'node:path';
 import type { ValidationOptions } from '../shared/types.js';
 import { fileExists, getMarkdownFiles } from '../shared/utils.js';
+import { TypeScriptParser } from '../parsers/TypeScriptParser.js';
 
 /**
  * Spec orphan detection result
@@ -78,72 +79,45 @@ function extractCodeReferences(projectPath: string): Map<string, CodeReference> 
 }
 
 /**
- * Extract exports from a TypeScript file
+ * Extract exports from a TypeScript file (Tree-sitter 기반)
  */
 function extractExports(filePath: string): Array<{
   name: string;
   type: 'interface' | 'type' | 'class' | 'function' | 'const';
 }> {
-  const exports: Array<{ name: string; type: any }> = [];
-
   try {
     const content = readFileSync(filePath, 'utf-8');
+    const parser = new TypeScriptParser();
+    const isTsx = filePath.endsWith('.tsx');
 
-    // Match export interface
-    const interfaceMatches = content.matchAll(/export\s+interface\s+(\w+)/g);
-    for (const match of interfaceMatches) {
-      exports.push({ name: match[1], type: 'interface' });
-    }
+    const { exports } = parser.parse(content, isTsx);
 
-    // Match export type
-    const typeMatches = content.matchAll(/export\s+type\s+(\w+)/g);
-    for (const match of typeMatches) {
-      exports.push({ name: match[1], type: 'type' });
-    }
-
-    // Match export class
-    const classMatches = content.matchAll(/export\s+class\s+(\w+)/g);
-    for (const match of classMatches) {
-      exports.push({ name: match[1], type: 'class' });
-    }
-
-    // Match export function
-    const functionMatches = content.matchAll(/export\s+function\s+(\w+)/g);
-    for (const match of functionMatches) {
-      exports.push({ name: match[1], type: 'function' });
-    }
-
-    // Match export const
-    const constMatches = content.matchAll(/export\s+const\s+(\w+)/g);
-    for (const match of constMatches) {
-      exports.push({ name: match[1], type: 'const' });
-    }
+    return exports.map(exp => ({
+      name: exp.name,
+      type: exp.type,
+    }));
   } catch (error) {
     // File might not exist or be readable
+    return [];
   }
-
-  return exports;
 }
 
 /**
- * Extract imports from a TypeScript file
+ * Extract imports from a TypeScript file (Tree-sitter 기반)
  */
 function extractImports(filePath: string): string[] {
-  const imports: string[] = [];
-
   try {
     const content = readFileSync(filePath, 'utf-8');
+    const parser = new TypeScriptParser();
+    const isTsx = filePath.endsWith('.tsx');
 
-    // Match import statements
-    const importMatches = content.matchAll(/import\s+.*?\s+from\s+['"](.+?)['"]/g);
-    for (const match of importMatches) {
-      imports.push(match[1]);
-    }
+    const { imports } = parser.parse(content, isTsx);
+
+    return imports.map(imp => imp.source);
   } catch (error) {
     // File might not exist
+    return [];
   }
-
-  return imports;
 }
 
 /**

@@ -1,7 +1,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, resolve, dirname } from 'node:path';
 import type { OrphanFile, OrphanFilesResult, OrphanOptions } from '../shared/types.js';
 import { fileExists, getMarkdownFiles } from '../shared/utils.js';
+import { TypeScriptParser } from '../parsers/TypeScriptParser.js';
 
 /**
  * 파일 경로 추출 정규식
@@ -118,33 +119,81 @@ function collectSourceFiles(dir: string, baseDir: string, options: OrphanOptions
 }
 
 /**
- * 코드에서 import되는지 확인
+ * Import 그래프 구축 (Tree-sitter 기반)
  */
-function isImportedByCode(filePath: string, projectDir: string, allSourceFiles: string[]): boolean {
-  const fileBasename = filePath.split('/').pop() || '';
-  const fileWithoutExt = fileBasename.replace(/\.(ts|tsx|js|jsx)$/, '');
-
-  // 간단한 import 검색 (정규식 기반)
-  const importPatterns = [
-    new RegExp(`from ['"].*${fileWithoutExt}['"]`, 'g'),
-    new RegExp(`import.*['"].*${fileWithoutExt}['"]`, 'g'),
-    new RegExp(`require\\(['"].*${fileWithoutExt}['"]\\)`, 'g'),
-  ];
+function buildImportGraph(
+  allSourceFiles: string[],
+  projectDir: string
+): Map<string, Set<string>> {
+  const graph = new Map<string, Set<string>>();
+  const parser = new TypeScriptParser();
 
   for (const sourceFile of allSourceFiles) {
-    if (sourceFile === filePath) continue;
+    const ext = sourceFile.split('.').pop() || '';
+    if (!['ts', 'tsx', 'js', 'jsx'].includes(ext)) {
+      continue;
+    }
 
     try {
       const fullPath = join(projectDir, sourceFile);
       const content = readFileSync(fullPath, 'utf-8');
+      const isTsx = sourceFile.endsWith('.tsx') || sourceFile.endsWith('.jsx');
 
-      for (const pattern of importPatterns) {
-        if (pattern.test(content)) {
-          return true;
+      const { imports } = parser.parse(content, isTsx);
+
+      const importedFiles = new Set<string>();
+
+      for (const imp of imports) {
+        // 상대 경로 해석
+        if (imp.source.startsWith('.')) {
+          const fromDir = dirname(fullPath);
+          const resolved = resolveImportPath(imp.source, fromDir, projectDir);
+          if (resolved) {
+            importedFiles.add(resolved);
+          }
         }
       }
+
+      graph.set(sourceFile, importedFiles);
     } catch (_error) {
-      // 파일 읽기 실패 무시
+      // 파일 읽기 또는 파싱 실패 무시
+    }
+  }
+
+  return graph;
+}
+
+/**
+ * Import 경로 해석
+ */
+function resolveImportPath(
+  importPath: string,
+  fromDir: string,
+  projectDir: string
+): string | null {
+  const extensions = ['.ts', '.tsx', '.js', '.jsx', '/index.ts', '/index.tsx', '/index.js', '/index.jsx'];
+
+  for (const ext of extensions) {
+    const fullPath = resolve(fromDir, importPath + ext);
+    if (fileExists(fullPath)) {
+      return relative(projectDir, fullPath);
+    }
+  }
+
+  return null;
+}
+
+/**
+ * 코드에서 import되는지 확인 (Tree-sitter 기반)
+ */
+function isImportedByCode(
+  filePath: string,
+  importGraph: Map<string, Set<string>>
+): boolean {
+  // Import 그래프에서 이 파일을 import하는 파일이 있는지 확인
+  for (const [_sourceFile, imports] of importGraph) {
+    if (imports.has(filePath)) {
+      return true;
     }
   }
 
@@ -242,7 +291,12 @@ export async function validateOrphans(options: OrphanOptions = {}): Promise<Orph
   const allSourceFiles = collectSourceFiles(projectDir, projectDir, options);
   console.log(`   → ${allSourceFiles.length}개 파일 발견\n`);
 
-  // 3. 고아 파일 찾기
+  // 3. Import 그래프 구축 (Tree-sitter 기반)
+  console.log('🔗 Import 그래프 구축 중...');
+  const importGraph = buildImportGraph(allSourceFiles, projectDir);
+  console.log(`   → ${importGraph.size}개 파일 분석됨\n`);
+
+  // 4. 고아 파일 찾기
   console.log('🔎 고아 파일 탐색 중...\n');
 
   const orphans: OrphanFile[] = [];
@@ -262,10 +316,10 @@ export async function validateOrphans(options: OrphanOptions = {}): Promise<Orph
       continue;
     }
 
-    // 코드에서 import됨 확인 (소스 파일만)
+    // 코드에서 import됨 확인 (소스 파일만, Tree-sitter 기반)
     let isImported = false;
     if (fileType === 'source') {
-      isImported = isImportedByCode(sourceFile, projectDir, allSourceFiles);
+      isImported = isImportedByCode(sourceFile, importGraph);
     }
 
     // tasks에도 없고, import도 안 됨 → 고아 파일

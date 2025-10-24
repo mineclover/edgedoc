@@ -72,6 +72,13 @@ export interface Messages {
     importedOk: string;
   };
 
+  // Terms
+  terms: {
+    validation_start: string;
+    list_start: string;
+    find_start: string;
+  };
+
   // Common
   common: {
     success: string;
@@ -147,6 +154,12 @@ const EN_MESSAGES: Messages = {
     importedOk: 'OK if imported by other code',
   },
 
+  terms: {
+    validation_start: 'Term validation starting',
+    list_start: 'Listing terms',
+    find_start: 'Finding term',
+  },
+
   common: {
     success: 'Success',
     failed: 'Failed',
@@ -219,6 +232,12 @@ const KO_MESSAGES: Messages = {
     addToTasks: 'tasks 문서에 참조 추가: code_references 또는 entry_point',
     deleteUnused: '사용하지 않는 파일이면 삭제 고려',
     importedOk: '다른 코드에서 import하여 사용 중이면 문제 없음',
+  },
+
+  terms: {
+    validation_start: '용어 검증 시작',
+    list_start: '용어 목록',
+    find_start: '용어 검색',
   },
 
   common: {

@@ -9,6 +9,8 @@ import { validateStructure } from './tools/structure.js';
 import { syncCodeRefs } from './tools/sync.js';
 import { validateMigration } from './tools/validate.js';
 import { EntryPointDetector } from './tools/entry-point-detector.js';
+import { validateTerms } from './tools/validate-terms.js';
+import { listTerms, findTerm } from './tools/term-commands.js';
 
 const program = new Command();
 
@@ -116,6 +118,22 @@ validate
   .action(async (options) => {
     try {
       const result = await validateSpecOrphans({
+        projectPath: options.project,
+      });
+      process.exit(result.success ? 0 : 1);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+validate
+  .command('terms')
+  .description('용어 검증 (정의/참조 일관성)')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로 (기본값: 현재 디렉토리)', process.cwd())
+  .action(async (options) => {
+    try {
+      const result = await validateTerms({
         projectPath: options.project,
       });
       process.exit(result.success ? 0 : 1);
@@ -240,6 +258,37 @@ analyze
     try {
       const entryPoints = EntryPointDetector.detect(options.project);
       EntryPointDetector.print(entryPoints);
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Terms commands
+const terms = program.command('terms').description('용어 관리');
+
+terms
+  .command('list')
+  .description('정의된 용어 목록')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      await listTerms({ projectPath: options.project });
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+terms
+  .command('find <query>')
+  .description('용어 검색')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (query, options) => {
+    try {
+      await findTerm(query, { projectPath: options.project });
       process.exit(0);
     } catch (error) {
       console.error('❌ 오류:', error);

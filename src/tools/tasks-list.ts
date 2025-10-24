@@ -211,15 +211,112 @@ export async function getTasksByCode(
 }
 
 /**
- * Print tasks for a code file
+ * Get tasks by interface (reverse lookup via reference index)
  */
-export function printTasksForCode(
-  codeFile: string,
+export async function getTasksByInterface(
+  projectPath: string,
+  interfaceId: string
+): Promise<{ featureIds: string[]; tasks: TaskInfo[] }> {
+  const indexPath = join(projectPath, '.edgedoc', 'references.json');
+
+  if (!existsSync(indexPath)) {
+    throw new Error('Reference index not found. Run "edgedoc graph build" first.');
+  }
+
+  const indexContent = readFileSync(indexPath, 'utf-8');
+  const index: ReferenceIndex = JSON.parse(indexContent);
+
+  const interfaceData = index.interfaces[interfaceId];
+
+  if (!interfaceData) {
+    throw new Error(`Interface "${interfaceId}" not found in index.`);
+  }
+
+  // Get features that provide or use this interface
+  const featureIds: string[] = [];
+
+  for (const [featureId, feature] of Object.entries(index.features)) {
+    if (
+      feature.interfaces.provides.includes(interfaceId) ||
+      feature.interfaces.uses.includes(interfaceId)
+    ) {
+      featureIds.push(featureId);
+    }
+  }
+
+  if (featureIds.length === 0) {
+    throw new Error(`No features found for interface "${interfaceId}".`);
+  }
+
+  const allTasks = await listTasks({ projectPath });
+  const tasks = allTasks.filter((t) => featureIds.includes(t.feature) || featureIds.includes(t.id));
+
+  return { featureIds, tasks };
+}
+
+/**
+ * Get tasks by term (reverse lookup via reference index)
+ */
+export async function getTasksByTerm(
+  projectPath: string,
+  termName: string
+): Promise<{ featureIds: string[]; tasks: TaskInfo[] }> {
+  const indexPath = join(projectPath, '.edgedoc', 'references.json');
+
+  if (!existsSync(indexPath)) {
+    throw new Error('Reference index not found. Run "edgedoc graph build" first.');
+  }
+
+  const indexContent = readFileSync(indexPath, 'utf-8');
+  const index: ReferenceIndex = JSON.parse(indexContent);
+
+  const termData = index.terms[termName];
+
+  if (!termData) {
+    throw new Error(`Term "[[${termName}]]" not found in index.`);
+  }
+
+  // Get features that use or define this term
+  const featureIds: string[] = [];
+
+  for (const [featureId, feature] of Object.entries(index.features)) {
+    if (
+      feature.terms.defines.includes(termName) ||
+      feature.terms.uses.includes(termName)
+    ) {
+      featureIds.push(featureId);
+    }
+  }
+
+  if (featureIds.length === 0) {
+    throw new Error(`No features found using term "[[${termName}]]".`);
+  }
+
+  const allTasks = await listTasks({ projectPath });
+  const tasks = allTasks.filter((t) => featureIds.includes(t.feature) || featureIds.includes(t.id));
+
+  return { featureIds, tasks };
+}
+
+/**
+ * Print tasks for a reference (code/interface/term)
+ */
+export function printTasksForReference(
+  referenceType: string,
+  referenceName: string,
   featureIds: string[],
   tasks: TaskInfo[]
 ): void {
-  console.log(`💾 Code File: ${codeFile}\n`);
-  console.log(`📄 Documented in ${featureIds.length} feature(s):\n`);
+  const icons = {
+    code: '💾',
+    interface: '🔌',
+    term: '📚',
+  };
+
+  const icon = icons[referenceType as keyof typeof icons] || '📦';
+
+  console.log(`${icon} ${referenceType.charAt(0).toUpperCase() + referenceType.slice(1)}: ${referenceName}\n`);
+  console.log(`📄 Used in ${featureIds.length} feature(s):\n`);
 
   for (const task of tasks) {
     const statusIcon = task.status === 'active' ? '✅' : task.status === 'in_progress' ? '🔄' : '⬜';

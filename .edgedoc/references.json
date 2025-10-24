@@ -1,0 +1,1686 @@
+{
+  "version": "1.0",
+  "generated": "2025-10-24T14:40:57.986Z",
+  "features": {
+    "00_Init": {
+      "file": "tasks/features/00_Init.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [
+          "00--01",
+          "00--02",
+          "00--03",
+          "00--04",
+          "00--05",
+          "00--06",
+          "00--07",
+          "00--05",
+          "00--01",
+          "00--04",
+          "00--03",
+          "00--07",
+          "00--06",
+          "00--02"
+        ],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "reverse-reference-index": {
+      "file": "tasks/features/14_ReverseReferenceIndex.md",
+      "code": {
+        "uses": [
+          "src/tools/build-reference-index.ts",
+          "src/types/reference-index.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "13_ValidateTerms",
+          "03_ValidateOrphans"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": [
+          "Validation",
+          "Code References"
+        ]
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "03_ValidateOrphans": {
+      "file": "tasks/features/03_ValidateOrphans.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": [
+          "reverse-reference-index",
+          "mcp-server",
+          "tree-sitter-parser-test",
+          "multi-language-parser"
+        ]
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": [
+          "00--03"
+        ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "04_ValidateStructure": {
+      "file": "tasks/features/04_ValidateStructure.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": [
+          "00--04"
+        ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "validate-terms": {
+      "file": "tasks/features/13_ValidateTerms.md",
+      "code": {
+        "uses": [
+          "src/tools/validate-terms.ts",
+          "src/tools/term-registry.ts",
+          "src/tools/term-commands.ts",
+          "src/parsers/TermParser.ts",
+          "src/types/terminology.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "06_ValidateAll",
+          "10_Internationalization"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": [
+          "Term Definition",
+          "Documentation Symbol",
+          "Term",
+          "Validation"
+        ]
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "01_ValidateMigration": {
+      "file": "tasks/features/01_ValidateMigration.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": [
+          "mcp-server"
+        ]
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": [
+          "00--01"
+        ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "analyze-entry-points": {
+      "file": "tasks/features/12_AnalyzeEntryPoints.md",
+      "code": {
+        "uses": [
+          "src/tools/entry-point-detector.ts",
+          "src/parsers/ParserFactory.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "09_MultiLanguageParser"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "08_Config": {
+      "file": "tasks/features/08_Config.md",
+      "code": {
+        "uses": [
+          "mdoc.config.example.json",
+          "src/shared/i18n.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "10_Internationalization"
+        ],
+        "depends_on": [],
+        "used_by": [
+          "internationalization"
+        ]
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "07_Sync": {
+      "file": "tasks/features/07_Sync.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": [
+          "mcp-server",
+          "tree-sitter-parser-test",
+          "multi-language-parser",
+          "internationalization"
+        ]
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": [
+          "00--07"
+        ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "mcp-server": {
+      "file": "tasks/features/11_MCPServer.md",
+      "code": {
+        "uses": [
+          "src/index.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "01_ValidateMigration",
+          "02_ValidateNaming",
+          "03_ValidateOrphans",
+          "07_Sync"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "tree-sitter-parser-test": {
+      "file": "tasks/features/TEST_TreeSitterParser.md",
+      "code": {
+        "uses": [
+          "src/parsers/ILanguageParser.ts",
+          "src/parsers/PythonParser.ts",
+          "src/parsers/TypeScriptParser.ts",
+          "tests/manual/tree-sitter-parser.test.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "03_ValidateOrphans",
+          "05_ValidateSpecOrphans",
+          "07_Sync",
+          "09_MultiLanguageParser"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": [
+          "tests/manual/tree-sitter-parser.test.ts"
+        ]
+      }
+    },
+    "06_ValidateAll": {
+      "file": "tasks/features/06_ValidateAll.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": [
+          "validate-terms"
+        ]
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": [
+          "00--06"
+        ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "tasks-management": {
+      "file": "tasks/features/15_TasksManagement.md",
+      "code": {
+        "uses": [
+          "src/tools/tasks-manager.ts",
+          "src/parsers/TaskParser.ts",
+          "src/types/tasks.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "14_ReverseReferenceIndex",
+          "13_ValidateTerms"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": [
+          "Validation",
+          "Code References"
+        ]
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "02_ValidateNaming": {
+      "file": "tasks/features/02_ValidateNaming.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": [
+          "mcp-server"
+        ]
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": [
+          "00--02"
+        ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "multi-language-parser": {
+      "file": "tasks/features/09_MultiLanguageParser.md",
+      "code": {
+        "uses": [
+          "src/parsers/ILanguageParser.ts",
+          "src/parsers/ParserFactory.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "03_ValidateOrphans",
+          "05_ValidateSpecOrphans",
+          "07_Sync"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "05_ValidateSpecOrphans": {
+      "file": "tasks/features/05_ValidateSpecOrphans.md",
+      "code": {
+        "uses": [
+          "src/cli.ts",
+          "src/parsers/ParserFactory.ts",
+          "src/shared/i18n.ts",
+          "src/shared/types.ts",
+          "src/shared/utils.ts",
+          "src/tools/init.ts",
+          "src/tools/naming.ts",
+          "src/tools/orphans.ts",
+          "src/tools/spec-orphans.ts",
+          "src/tools/structure.ts",
+          "src/tools/sync.ts",
+          "src/tools/validate.ts",
+          "src/types/config.ts",
+          "src/utils/config.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [],
+        "depends_on": [],
+        "used_by": [
+          "tree-sitter-parser-test",
+          "multi-language-parser"
+        ]
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": [
+          "00--05"
+        ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "internationalization": {
+      "file": "tasks/features/10_Internationalization.md",
+      "code": {
+        "uses": [
+          "src/shared/i18n.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "07_Sync",
+          "08_Config"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    }
+  },
+  "code": {
+    "src/cli.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/parsers/ParserFactory.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "analyze-entry-points",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "multi-language-parser",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/shared/i18n.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "08_Config",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans",
+        "internationalization"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/shared/types.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/shared/utils.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/init.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/naming.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/orphans.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/spec-orphans.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/structure.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/sync.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/validate.ts": {
+      "type": "source",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/types/config.ts": {
+      "type": "config",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "08_Config",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/utils/config.ts": {
+      "type": "config",
+      "documented_in": [
+        "00_Init",
+        "03_ValidateOrphans",
+        "04_ValidateStructure",
+        "01_ValidateMigration",
+        "08_Config",
+        "07_Sync",
+        "06_ValidateAll",
+        "02_ValidateNaming",
+        "05_ValidateSpecOrphans"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/build-reference-index.ts": {
+      "type": "source",
+      "documented_in": [
+        "reverse-reference-index"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/types/reference-index.ts": {
+      "type": "source",
+      "documented_in": [
+        "reverse-reference-index"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/validate-terms.ts": {
+      "type": "source",
+      "documented_in": [
+        "validate-terms"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/term-registry.ts": {
+      "type": "source",
+      "documented_in": [
+        "validate-terms"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/term-commands.ts": {
+      "type": "source",
+      "documented_in": [
+        "validate-terms"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/parsers/TermParser.ts": {
+      "type": "source",
+      "documented_in": [
+        "validate-terms"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/types/terminology.ts": {
+      "type": "source",
+      "documented_in": [
+        "validate-terms"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/entry-point-detector.ts": {
+      "type": "source",
+      "documented_in": [
+        "analyze-entry-points"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "mdoc.config.example.json": {
+      "type": "config",
+      "documented_in": [
+        "08_Config"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/index.ts": {
+      "type": "source",
+      "documented_in": [
+        "mcp-server"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/parsers/ILanguageParser.ts": {
+      "type": "source",
+      "documented_in": [
+        "tree-sitter-parser-test",
+        "multi-language-parser"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/parsers/PythonParser.ts": {
+      "type": "source",
+      "documented_in": [
+        "tree-sitter-parser-test"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/parsers/TypeScriptParser.ts": {
+      "type": "source",
+      "documented_in": [
+        "tree-sitter-parser-test"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "tests/manual/tree-sitter-parser.test.ts": {
+      "type": "test",
+      "documented_in": [
+        "tree-sitter-parser-test"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/tasks-manager.ts": {
+      "type": "source",
+      "documented_in": [
+        "tasks-management"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/parsers/TaskParser.ts": {
+      "type": "source",
+      "documented_in": [
+        "tasks-management"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/types/tasks.ts": {
+      "type": "source",
+      "documented_in": [
+        "tasks-management"
+      ],
+      "imports": [],
+      "imported_by": []
+    }
+  },
+  "interfaces": {
+    "00--05": {
+      "file": "tasks/interfaces/00--05.md",
+      "from": "00_Init",
+      "to": "05_ValidateSpecOrphans",
+      "type": "command",
+      "shared_types": [
+        "00--01_00--02_00--03_00--04_00--05"
+      ]
+    },
+    "00--01": {
+      "file": "tasks/interfaces/00--01.md",
+      "from": "00_Init",
+      "to": "01_ValidateMigration",
+      "type": "command",
+      "shared_types": [
+        "00--01_00--02_00--03_00--04_00--05"
+      ]
+    },
+    "00--04": {
+      "file": "tasks/interfaces/00--04.md",
+      "from": "00_Init",
+      "to": "04_ValidateStructure",
+      "type": "command",
+      "shared_types": [
+        "00--01_00--02_00--03_00--04_00--05"
+      ]
+    },
+    "00--03": {
+      "file": "tasks/interfaces/00--03.md",
+      "from": "00_Init",
+      "to": "03_ValidateOrphans",
+      "type": "command",
+      "shared_types": [
+        "00--01_00--02_00--03_00--04_00--05"
+      ]
+    },
+    "00--07": {
+      "file": "tasks/interfaces/00--07.md",
+      "from": "00_Init",
+      "to": "07_Sync",
+      "type": "command",
+      "shared_types": []
+    },
+    "00--06": {
+      "file": "tasks/interfaces/00--06.md",
+      "from": "00_Init",
+      "to": "06_ValidateAll",
+      "type": "orchestration",
+      "shared_types": []
+    },
+    "00--02": {
+      "file": "tasks/interfaces/00--02.md",
+      "from": "00_Init",
+      "to": "02_ValidateNaming",
+      "type": "command",
+      "shared_types": [
+        "00--01_00--02_00--03_00--04_00--05"
+      ]
+    }
+  },
+  "terms": {
+    "Entry Point Module": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 11,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 67,
+          "context": "**Related**: [[Entry Point Module]], [[Public API]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 69,
+          "context": "[[Entry Point Module]]에서 직접 export되어 외부 사용자가 접근 가능한 [[Code Interface]]를 의미한다."
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 97,
+          "context": "**Related**: [[Entry Point Module]], [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 102,
+          "context": "- [[Entry Point Module]]에서 export된 [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 124,
+          "context": "- [[Entry Point Module]]의 모든 [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 129,
+          "context": "1. [[Entry Point Module]]에서 모든 exported interface 추출"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 403,
+          "context": "**Related**: [[Entry Point Module]], [[Synchronization]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 433,
+          "context": "**Related**: [[Code References]], [[Entry Point Module]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 451,
+          "context": "- `entry_point`: [[Entry Point Module]] 경로"
+        },
+        {
+          "file": "docs/TERM_DEFINITION_SYNTAX.md",
+          "line": 235,
+          "context": "[[Entry Point Module]]"
+        }
+      ],
+      "usage_count": 10
+    },
+    "Code Interface": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 37,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 66,
+          "context": "**Parent**: [[Code Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 69,
+          "context": "[[Entry Point Module]]에서 직접 export되어 외부 사용자가 접근 가능한 [[Code Interface]]를 의미한다."
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 121,
+          "context": "개별 [[Code Interface]] 단위로 문서화 여부를 검증하는 프로세스를 의미한다."
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 226,
+          "context": "**Related**: [[Code Interface]], [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 228,
+          "context": "코드 파일에서 export된 [[Code Interface]]를 추출하고 분석하는 컴포넌트를 의미한다."
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 248,
+          "context": "**Related**: [[Code Interface]], [[Top-Level Interface]], [[Export Analyzer]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 250,
+          "context": "[[Code Interface]] 간의 사용 관계를 추적하는 그래프 자료구조를 의미한다. [[Export Analyzer]]로 추출한 인터페이스 정보를 기반으로 구성된다."
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 253,
+          "context": "- **Nodes**: 각 [[Code Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 553,
+          "context": "**Related**: [[Term Definition]], [[Code Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 621,
+          "context": "**Not to Confuse**: [[Code Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 630,
+          "context": "**vs [[Code Interface]]**:"
+        }
+      ],
+      "usage_count": 11
+    },
+    "Top-Level Interface": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 61,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 16,
+          "context": "**Related**: [[Top-Level Interface]], [[Public API]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 97,
+          "context": "**Related**: [[Entry Point Module]], [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 102,
+          "context": "- [[Entry Point Module]]에서 export된 [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 119,
+          "context": "**Related**: [[Top-Level Interface]], [[Orphan Detection]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 124,
+          "context": "- [[Entry Point Module]]의 모든 [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 226,
+          "context": "**Related**: [[Code Interface]], [[Top-Level Interface]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 248,
+          "context": "**Related**: [[Code Interface]], [[Top-Level Interface]], [[Export Analyzer]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 454,
+          "context": "- `public_interfaces`: [[Top-Level Interface]] 목록 (향후)"
+        },
+        {
+          "file": "docs/TERM_DEFINITION_SYNTAX.md",
+          "line": 236,
+          "context": "→ [[Top-Level Interface]] 추출"
+        }
+      ],
+      "usage_count": 9
+    },
+    "Public API": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 92,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 16,
+          "context": "**Related**: [[Top-Level Interface]], [[Public API]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 67,
+          "context": "**Related**: [[Entry Point Module]], [[Public API]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 193,
+          "context": "**Related**: [[Public API]]"
+        }
+      ],
+      "usage_count": 3
+    },
+    "Interface-level Validation": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 113,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 146,
+          "context": "**Contrast**: [[Interface-level Validation]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 166,
+          "context": "**Related**: [[Spec Orphan]], [[Interface-level Validation]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 348,
+          "context": "**Related**: [[Interface-level Validation]], [[File-level Validation]]"
+        }
+      ],
+      "usage_count": 3
+    },
+    "File-level Validation": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 141,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 118,
+          "context": "**Contrast**: [[File-level Validation]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 348,
+          "context": "**Related**: [[Interface-level Validation]], [[File-level Validation]]"
+        }
+      ],
+      "usage_count": 2
+    },
+    "Orphan Detection": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 161,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 119,
+          "context": "**Related**: [[Top-Level Interface]], [[Orphan Detection]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 192,
+          "context": "**Parent**: [[Orphan Detection]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 418,
+          "context": "- [[Orphan Detection]]에서 문서화된 파일 식별"
+        }
+      ],
+      "usage_count": 3
+    },
+    "Spec Orphan": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 187,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 166,
+          "context": "**Related**: [[Spec Orphan]], [[Interface-level Validation]]"
+        }
+      ],
+      "usage_count": 1
+    },
+    "Export Analyzer": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 221,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 248,
+          "context": "**Related**: [[Code Interface]], [[Top-Level Interface]], [[Export Analyzer]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 250,
+          "context": "[[Code Interface]] 간의 사용 관계를 추적하는 그래프 자료구조를 의미한다. [[Export Analyzer]]로 추출한 인터페이스 정보를 기반으로 구성된다."
+        }
+      ],
+      "usage_count": 2
+    },
+    "Interface Graph": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 243,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 130,
+          "context": "2. [[Interface Graph]]를 사용하여 interface 사용 관계 구축"
+        }
+      ],
+      "usage_count": 1
+    },
+    "Parser Factory": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 267,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 295,
+          "context": "**Related**: [[Parser Factory]], [[Parse Result]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 468,
+          "context": "**Related**: [[Language Parser]], [[Parser Factory]]"
+        }
+      ],
+      "usage_count": 2
+    },
+    "Language Parser": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 290,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 272,
+          "context": "**Related**: [[Language Parser]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 320,
+          "context": "**Related**: [[Language Parser]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 468,
+          "context": "**Related**: [[Language Parser]], [[Parser Factory]]"
+        }
+      ],
+      "usage_count": 3
+    },
+    "Parse Result": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 315,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 295,
+          "context": "**Related**: [[Parser Factory]], [[Parse Result]]"
+        }
+      ],
+      "usage_count": 1
+    },
+    "Validation": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 343,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "tasks/features/14_ReverseReferenceIndex.md",
+          "line": 376,
+          "context": "- [[Validation]]: 구조 검증과 통합"
+        },
+        {
+          "file": "tasks/features/13_ValidateTerms.md",
+          "line": 218,
+          "context": "- [[Validation]]: 전체 검증 시스템"
+        },
+        {
+          "file": "tasks/features/15_TasksManagement.md",
+          "line": 530,
+          "context": "- [[Validation]]: 전체 검증 시스템"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 7,
+          "context": "edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다."
+        }
+      ],
+      "usage_count": 4
+    },
+    "Synchronization": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 370,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 403,
+          "context": "**Related**: [[Entry Point Module]], [[Synchronization]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 419,
+          "context": "- [[Synchronization]]의 동기화 대상"
+        }
+      ],
+      "usage_count": 2
+    },
+    "Code References": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 398,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "tasks/features/14_ReverseReferenceIndex.md",
+          "line": 377,
+          "context": "- [[Code References]]: Frontmatter 필드"
+        },
+        {
+          "file": "tasks/features/15_TasksManagement.md",
+          "line": 531,
+          "context": "- [[Code References]]: Frontmatter 필드"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 375,
+          "context": "**Related**: [[Code References]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 433,
+          "context": "**Related**: [[Code References]], [[Entry Point Module]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 452,
+          "context": "- `code_references`: [[Code References]] 목록"
+        }
+      ],
+      "usage_count": 5
+    },
+    "Frontmatter": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 428,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/SYNTAX_GUIDE.md",
+          "line": 188,
+          "context": "| [[Frontmatter]] | 문서 메타데이터 | `validate structure` |"
+        }
+      ],
+      "usage_count": 1
+    },
+    "Tree-sitter": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 463,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 7,
+          "context": "edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다."
+        }
+      ],
+      "usage_count": 1
+    },
+    "Type Definition": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 490,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 523,
+          "context": "**Not to Confuse**: [[Type Definition]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 542,
+          "context": "**vs [[Type Definition]]**:"
+        }
+      ],
+      "usage_count": 2
+    },
+    "Term Definition": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 518,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "tasks/features/13_ValidateTerms.md",
+          "line": 24,
+          "context": "[[Term Definition]]과 참조의 일관성을 검증하고 용어를 관리하는 기능을 제공한다."
+        },
+        {
+          "file": "tasks/features/13_ValidateTerms.md",
+          "line": 220,
+          "context": "- [[Term Definition]]: 용어 정의 메타정보"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 495,
+          "context": "**Not to Confuse**: [[Term Definition]]"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 512,
+          "context": "**vs [[Term Definition]]**:"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 553,
+          "context": "**Related**: [[Term Definition]], [[Code Interface]]"
+        }
+      ],
+      "usage_count": 5
+    },
+    "Documentation Symbol": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 548,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "tasks/features/13_ValidateTerms.md",
+          "line": 35,
+          "context": "[[Documentation Symbol]] 개념을 도입하여 용어를 코드의 심볼처럼 취급한다:"
+        },
+        {
+          "file": "tasks/features/13_ValidateTerms.md",
+          "line": 219,
+          "context": "- [[Documentation Symbol]]: 문서 용어 개념"
+        },
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 7,
+          "context": "edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다."
+        }
+      ],
+      "usage_count": 3
+    },
+    "MCP": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 575,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 7,
+          "context": "edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다."
+        }
+      ],
+      "usage_count": 1
+    },
+    "CLI": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 595,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 7,
+          "context": "edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다."
+        }
+      ],
+      "usage_count": 1
+    },
+    "User Interface": {
+      "definition": {
+        "file": "docs/GLOSSARY.md",
+        "line": 616,
+        "scope": "global"
+      },
+      "references": [
+        {
+          "file": "docs/GLOSSARY.md",
+          "line": 42,
+          "context": "**Not to Confuse**: [[User Interface]]"
+        }
+      ],
+      "usage_count": 1
+    }
+  }
+}

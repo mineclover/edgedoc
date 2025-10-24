@@ -18,7 +18,9 @@ import {
   printTasksList,
   getTaskDetails,
   getTasksByCode,
-  printTasksForCode,
+  getTasksByInterface,
+  getTasksByTerm,
+  printTasksForReference,
 } from './tools/tasks-list.js';
 import {
   listDetailsBlocks,
@@ -359,13 +361,29 @@ tasks
   .option('--status <status>', 'Status 필터 (planned, in_progress, active)')
   .option('--priority <priority>', 'Priority 필터 (high, medium, low)')
   .option('--code <file>', '코드 파일 경로로 feature 찾기')
+  .option('--interface <id>', '인터페이스 ID로 feature 찾기')
+  .option('--term <name>', '용어 이름으로 feature 찾기')
   .option('-v, --verbose', '상세 출력')
   .action(async (options) => {
     try {
       // Code file lookup
       if (options.code) {
         const { featureIds, tasks } = await getTasksByCode(options.project, options.code);
-        printTasksForCode(options.code, featureIds, tasks);
+        printTasksForReference('code', options.code, featureIds, tasks);
+        process.exit(0);
+      }
+
+      // Interface lookup
+      if (options.interface) {
+        const { featureIds, tasks } = await getTasksByInterface(options.project, options.interface);
+        printTasksForReference('interface', options.interface, featureIds, tasks);
+        process.exit(0);
+      }
+
+      // Term lookup
+      if (options.term) {
+        const { featureIds, tasks } = await getTasksByTerm(options.project, options.term);
+        printTasksForReference('term', options.term, featureIds, tasks);
         process.exit(0);
       }
 

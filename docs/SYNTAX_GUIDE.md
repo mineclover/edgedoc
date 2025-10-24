@@ -43,8 +43,26 @@ code_references:                 # 참조하는 코드 파일
 - 정의는 프로젝트 내 **고유**해야 함
 - 참조는 **반드시 정의**되어 있어야 함
 - Global 정의는 `docs/GLOSSARY.md`에 작성
+- 코드 블록(` ``` `)과 인라인 코드(`` ` ``) 내부의 `[[Term]]`은 무시됨
 
-**검증**: `edgedoc validate terms`, `edgedoc terms list/find`
+### 예시 작성 시 주의사항
+
+예시로 `[[Term]]`을 보여줄 때는 백틱으로 감싸세요:
+
+```markdown
+✅ 올바름: 용어는 `[[Term]]` 형식으로 작성합니다.
+❌ 잘못됨: 용어는 [[Term]] 형식으로 작성합니다.  (실제 참조로 인식됨)
+```
+
+### 용어 관리 명령어
+
+```bash
+edgedoc validate terms         # 용어 일관성 검증
+edgedoc terms list             # 전체 용어 목록 (타입별 그룹화)
+edgedoc terms find <query>     # 용어 검색 (fuzzy matching)
+```
+
+**검증**: `edgedoc validate terms`
 
 ---
 
@@ -83,12 +101,25 @@ export class ParserFactory { }
 
 ## 6. 검증 명령어
 
+### 전체 검증
 ```bash
-edgedoc validate all           # 전체 검증
-edgedoc validate terms         # 용어 일관성
-edgedoc validate structure     # 문서 구조
-edgedoc validate orphans       # 고아 파일
+edgedoc validate all           # 모든 검증 실행
+```
+
+### 개별 검증
+```bash
+edgedoc validate terms         # 용어 일관성 (정의/참조/스코프/순환참조)
+edgedoc validate structure     # 문서 구조 (순환 의존성, frontmatter)
+edgedoc validate orphans       # 고아 파일 (문서화되지 않은 파일)
+edgedoc validate naming        # 네이밍 컨벤션
+edgedoc validate spec-orphans  # 스펙 고아 코드 (문서화되지 않은 export)
+```
+
+### 동기화 및 관리
+```bash
 edgedoc sync                   # code_references 자동 업데이트
+edgedoc terms list             # 용어 목록
+edgedoc terms find <query>     # 용어 검색
 ```
 
 ---
@@ -115,6 +146,11 @@ edgedoc sync                   # code_references 자동 업데이트
 1. `GLOSSARY.md`에 `## [[Term]]` 정의
 2. `edgedoc validate terms` 검증
 3. 다른 문서에서 `[[Term]]` 참조
+
+**용어 찾기**:
+1. `edgedoc terms list` - 모든 용어 확인
+2. `edgedoc terms find <query>` - 특정 용어 검색
+3. 용어 정의 위치 확인 후 문서에서 참조
 
 ---
 

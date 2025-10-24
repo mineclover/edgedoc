@@ -189,11 +189,14 @@ export class TermParser {
         continue;
       }
 
+      // Remove inline code spans before extracting references
+      const lineWithoutCode = this.removeInlineCode(line);
+
       // Extract [[Term]] references
       const pattern = /\[\[([^\]]+)\]\]/g;
       let match;
 
-      while ((match = pattern.exec(line)) !== null) {
+      while ((match = pattern.exec(lineWithoutCode)) !== null) {
         references.push({
           term: match[1],
           file,
@@ -251,6 +254,15 @@ export class TermParser {
       }
     }
     return false;
+  }
+
+  /**
+   * Remove inline code spans (backticks) from a line
+   * This prevents [[Term]] inside `code` from being detected
+   */
+  private static removeInlineCode(line: string): string {
+    // Replace `...` with empty string
+    return line.replace(/`[^`]+`/g, '');
   }
 
   /**

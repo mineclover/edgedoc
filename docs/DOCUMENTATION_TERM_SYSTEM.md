@@ -730,7 +730,7 @@ export class TermExtractor {
   extractPotentialTerms(markdown: string): PotentialTerm[] {
     // Extract **bold** phrases
     // Extract capitalized phrases
-    // Extract [[wiki-links]]
+    // Extract `[[wiki-links]]`
     // Return with context
   }
 }
@@ -843,7 +843,7 @@ $ edgedoc validate terms
 **Tasks**:
 - ⬜ Update all docs to reference GLOSSARY terms
 - ⬜ Replace inconsistent terms
-- ⬜ Add [[wiki-links]] for term references
+- ⬜ Add wiki-style links (`[[Term]]`) for term references
 - ⬜ Run validation and fix errors
 
 **Migration Strategy**:

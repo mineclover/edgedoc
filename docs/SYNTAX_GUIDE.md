@@ -66,7 +66,60 @@ edgedoc terms find <query>     # 용어 검색 (fuzzy matching)
 
 ---
 
-## 3. 코드 참조
+## 3. 참조 시스템
+
+문서 간 연결을 위한 3가지 참조 방식이 있습니다.
+
+### 3.1 코드 파일 참조 (Frontmatter)
+
+Feature 문서에서 사용하는 코드 파일을 명시:
+
+```yaml
+---
+code_references:
+  - "src/tools/validate-terms.ts"
+  - "src/parsers/TermParser.ts"
+---
+```
+
+### 3.2 Feature 간 참조 (Frontmatter)
+
+Feature 간 의존 관계 명시:
+
+```yaml
+---
+related_features:
+  - 06_ValidateAll         # 연관 feature
+  - 10_Internationalization
+---
+```
+
+**참고**: 현재는 방향성이 불명확합니다. 향후 `depends_on`/`used_by`로 개선 예정.
+
+### 3.3 Interface 참조 (Frontmatter)
+
+Interface 문서에서 연결되는 Feature 명시:
+
+```yaml
+---
+from: "00_Init"              # 호출하는 feature
+to: "01_ValidateMigration"   # 호출되는 feature
+shared_types:                # 사용하는 공용 타입
+  - "00--01_00--02"
+---
+```
+
+### 3.4 용어 참조 (본문)
+
+문서 본문에서 정의된 용어 참조:
+
+```markdown
+[[Entry Point Module]]은 [[Code Interface]]를 노출한다.
+```
+
+### 3.5 코드 위치 표기 (본문)
+
+본문에서 코드 위치를 명시할 때:
 
 ```markdown
 `ParserFactory` 클래스는 파서를 관리한다.
@@ -77,6 +130,8 @@ edgedoc terms find <query>     # 용어 검색 (fuzzy matching)
 export class ParserFactory { }
 \`\`\`
 ```
+
+**형식**: `파일경로:라인번호` 또는 `파일경로:시작-끝`
 
 ---
 

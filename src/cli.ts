@@ -47,6 +47,11 @@ import {
   generateImplementationCoverage,
   printImplementationCoverage,
 } from './tools/implementation-coverage.js';
+import {
+  collectSyntaxTerms,
+  findSyntaxTerm,
+  getSyntaxTermsByCategory,
+} from './tools/syntax-manager.js';
 
 const program = new Command();
 
@@ -930,6 +935,145 @@ validate
 
       const hasErrors = result.errors.length > 0;
       process.exit(hasErrors ? 1 : 0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Syntax management commands
+const syntax = program
+  .command('syntax')
+  .description('문법 용어 관리');
+
+syntax
+  .command('list')
+  .description('모든 문법 용어 목록')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action((options) => {
+    try {
+      const categories = getSyntaxTermsByCategory(options.project);
+
+      console.log('📝 Syntax Terms\n');
+
+      for (const [category, terms] of Object.entries(categories)) {
+        console.log(`${category}:`);
+        for (const term of terms) {
+          const status = term.status === 'documented' ? '✅' : term.status === 'planned' ? '📝' : '⚠️';
+          console.log(`  ${status} [[${term.name}]] (${term.status})`);
+        }
+        console.log();
+      }
+
+      const total = Object.values(categories).reduce((sum, terms) => sum + terms.length, 0);
+      console.log(`Total: ${total} syntax terms`);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+syntax
+  .command('show <term>')
+  .description('문법 용어 상세 정보')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action((termName, options) => {
+    try {
+      const term = findSyntaxTerm(termName, options.project);
+
+      if (!term) {
+        console.error(`❌ Syntax term not found: ${termName}`);
+        process.exit(1);
+      }
+
+      console.log(`📝 [[${term.name}]]\n`);
+      console.log(`Type: ${term.type}`);
+      console.log(`Status: ${term.status}`);
+      console.log(`Parser: ${term.parser}`);
+      if (term.validator) {
+        console.log(`Validator: ${term.validator}`);
+      }
+      console.log();
+
+      if (term.description) {
+        console.log(`Description:`);
+        console.log(`  ${term.description}\n`);
+      }
+
+      if (term.patterns.length > 0) {
+        console.log(`Patterns (${term.patterns.length}):`);
+        for (const pattern of term.patterns) {
+          console.log(`  - ${pattern.name}`);
+          if (pattern.description) {
+            console.log(`    ${pattern.description}`);
+          }
+        }
+        console.log();
+      }
+
+      if (term.rules.length > 0) {
+        console.log(`Validation Rules (${term.rules.length}):`);
+        for (const rule of term.rules) {
+          const severity = rule.severity === 'error' ? '❌' : '⚠️';
+          console.log(`  ${severity} ${rule.description}`);
+        }
+        console.log();
+      }
+
+      if (term.relatedFeatures.length > 0) {
+        console.log(`Related Features:`);
+        for (const feature of term.relatedFeatures) {
+          console.log(`  - ${feature}`);
+        }
+        console.log();
+      }
+
+      if (term.examples.valid.length > 0) {
+        console.log(`Valid Examples:`);
+        for (const example of term.examples.valid) {
+          console.log(`  ✅ ${example}`);
+        }
+        console.log();
+      }
+
+      if (term.examples.invalid.length > 0) {
+        console.log(`Invalid Examples:`);
+        for (const example of term.examples.invalid) {
+          console.log(`  ❌ ${example}`);
+        }
+        console.log();
+      }
+
+      console.log(`Location: ${term.docPath}`);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+syntax
+  .command('usage <term>')
+  .description('문법 용어 사용처 찾기')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action((termName, options) => {
+    try {
+      const term = findSyntaxTerm(termName, options.project);
+
+      if (!term) {
+        console.error(`❌ Syntax term not found: ${termName}`);
+        process.exit(1);
+      }
+
+      console.log(`🔍 Usage of [[${term.name}]]\n`);
+
+      if (term.examples.valid.length > 0) {
+        console.log(`Found in ${term.examples.valid.length} features:\n`);
+        for (const example of term.examples.valid) {
+          console.log(`✅ ${example}`);
+        }
+      } else {
+        console.log('⚠️  No usage examples found');
+      }
     } catch (error) {
       console.error('❌ 오류:', error);
       process.exit(1);

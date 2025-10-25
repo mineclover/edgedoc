@@ -1,6 +1,6 @@
 ---
 type: feature
-status: active
+status: implemented
 feature: multi-language-parser
 priority: high
 entry_point: "src/parsers/ParserFactory.ts"

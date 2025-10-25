@@ -1,6 +1,6 @@
 ---
 type: feature
-status: active
+status: implemented
 feature: validate-terms
 priority: high
 entry_point: "src/cli.ts"

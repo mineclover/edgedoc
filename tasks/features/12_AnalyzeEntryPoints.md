@@ -1,6 +1,6 @@
 ---
 type: feature
-status: active
+status: implemented
 feature: analyze-entry-points
 priority: high
 entry_point: "src/tools/entry-point-detector.ts"

@@ -13,6 +13,8 @@ code_references:
   - "src/tools/term-commands.ts"
   - "src/parsers/TermParser.ts"
   - "src/types/terminology.ts"
+test_files:
+  - "tests/unit/term-validation.test.ts"
 ---
 
 # Term Validation & Management
@@ -211,6 +213,54 @@ file2.md: [[Helper]] 참조 → 에러 (스코프 위반)
 
 문서에서:
 [[진입점 모듈]] 참조 → 정상 (alias로 해석)
+```
+
+## Tests
+
+**Test File**: `tests/unit/term-validation.test.ts`
+**Test Count**: 19 tests
+**Coverage**: 90.48% functions, 99.51% lines
+
+### Test Suites
+
+1. **Definition Management** (4 tests)
+   - Add and find definitions
+   - Alias resolution
+   - Conflict detection
+   - Scope organization
+
+2. **Reference Tracking** (2 tests)
+   - Track term references
+   - Get references by file
+
+3. **Validation: Undefined Terms** (1 test)
+   - Detect undefined term usage
+
+4. **Validation: Scope Violations** (2 tests)
+   - Detect document-scoped violations
+   - Allow global-scoped anywhere
+
+5. **Validation: Isolated Terms** (3 tests)
+   - Detect terms with no relationships
+   - Track usage count
+   - Exclude terms with parent
+
+6. **Validation: Duplicate Detection** (3 tests)
+   - Detect similar definitions
+   - Skip related terms
+   - Jaccard similarity algorithm
+
+7. **Validation: Stats** (1 test)
+   - Calculate accurate statistics
+
+8. **Search** (3 tests)
+   - Search by term name
+   - Search by alias
+   - Search by definition content
+
+**Run Tests**:
+```bash
+bun test tests/unit/term-validation.test.ts
 ```
 
 ## Related

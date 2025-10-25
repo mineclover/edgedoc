@@ -101,6 +101,67 @@ status: "implemented"
 
 ---
 
+## Component Definition
+
+Feature 문서의 Architecture 섹션에서 컴포넌트를 정의하는 문법입니다. 자세한 내용은 [[Component Definition]] 참조.
+
+### 기본 형식 (권장)
+
+```markdown
+## Architecture
+
+### Components
+
+1. **ComponentName** (`path/to/file.ts`)
+   - publicMethod1()
+   - publicMethod2()
+
+2. **AnotherComponent** (`path/to/another.ts`)
+   - anotherMethod()
+```
+
+### 대체 형식 1: Heading with File
+
+```markdown
+## Architecture
+
+### ComponentName
+
+**File**: `path/to/file.ts`
+
+- publicMethod1()
+- publicMethod2()
+```
+
+### 대체 형식 2: Heading with Location
+
+```markdown
+## Implementation
+
+### ComponentName
+
+**Location**: `path/to/file.ts`
+
+- publicMethod1()
+- publicMethod2()
+```
+
+### 검증 및 사용
+
+```bash
+# 컴포넌트 정의 확인
+edgedoc test coverage --code
+
+# 특정 Feature 상세 확인
+edgedoc test coverage --code --feature 13_ValidateTerms --verbose
+```
+
+**관련 문서**:
+- [Component Definition 상세 문법](syntax/terms/Component-Definition.md)
+- [Feature 18: Implementation Coverage](../tasks/features/18_ImplementationCoverage.md)
+
+---
+
 ## Test References
 
 테스트 파일과 문서 간의 양방향 참조 시스템입니다.

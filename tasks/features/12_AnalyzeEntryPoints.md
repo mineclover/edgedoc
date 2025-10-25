@@ -9,6 +9,8 @@ related_features:
 code_references:
   - "src/tools/entry-point-detector.ts"
   - "src/parsers/ParserFactory.ts"
+test_files:
+  - "tests/unit/entry-point-detection.test.ts"
 ---
 
 # Entry Point Detection
@@ -242,6 +244,90 @@ edgedoc analyze entry-points
 ```
 
 ## Testing
+
+### Unit Tests
+
+**File**: `tests/unit/entry-point-detection.test.ts`
+
+**Test Count**: 48 tests, 85 assertions
+**Coverage**: 87.50% functions, 95.45% lines
+
+**Test Suites**:
+1. **CLI Pattern Detection** (6 tests)
+   - Detects src/cli.ts, src/index.ts, src/main.ts
+   - Detects root-level cli.ts, index.ts
+   - Handles multiple CLI patterns
+
+2. **package.json Main Field** (5 tests)
+   - Parses main field
+   - Normalizes dist/ to src/
+   - Strips leading ./
+   - Handles missing files gracefully
+
+3. **package.json Bin Field** (5 tests)
+   - Parses string bin field
+   - Parses object bin field (single and multiple)
+   - Normalizes dist/ to src/
+
+4. **package.json Exports Field** (6 tests)
+   - Parses string exports
+   - Parses object exports with multiple subpaths
+   - Normalizes paths correctly
+   - Handles complex export structures
+
+5. **Documentation-Based Detection** (5 tests)
+   - Extracts entry_point from frontmatter
+   - Strips line numbers
+   - Handles multiple docs
+   - Gracefully handles missing directories
+
+6. **Export Extraction** (4 tests)
+   - Extracts exports from TypeScript
+   - Extracts exports from JavaScript
+   - Handles files without parsers
+   - Handles parse errors gracefully
+
+7. **Deduplication** (3 tests)
+   - Merges duplicate entries with combined reasons
+   - Merges public interfaces
+   - Deduplicates interface names
+
+8. **Path Normalization** (4 tests)
+   - Normalizes dist/ to src/
+   - Removes leading ./
+   - Handles nested paths
+
+9. **Sorting and Output** (3 tests)
+   - Sorts by file path
+   - print() doesn't crash
+
+10. **Error Handling** (4 tests)
+    - Handles invalid package.json
+    - Handles missing package.json
+    - Handles empty directories
+    - Handles nonexistent paths
+
+11. **Type Classification** (5 tests)
+    - Classifies CLI patterns as 'cli'
+    - Classifies bin entries as 'cli'
+    - Classifies main as 'library'
+    - Classifies exports as 'library'
+    - Classifies doc-based as 'api'
+
+**Run Tests**:
+```bash
+bun test tests/unit/entry-point-detection.test.ts
+```
+
+**Coverage Report**:
+```
+File                               | % Funcs | % Lines
+-----------------------------------|---------|----------
+src/tools/entry-point-detector.ts  |   87.50 |   95.45
+src/parsers/ParserFactory.ts       |   33.33 |   59.38
+```
+
+### Manual Testing
 
 **Manual Test**: `tests/manual/tree-sitter-parser.test.ts` includes entry point detection tests
 

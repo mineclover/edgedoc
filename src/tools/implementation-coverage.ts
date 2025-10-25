@@ -89,7 +89,9 @@ export interface InterfaceCoverage {
   name: string;
   defined: boolean;      // Defined in docs
   implemented: boolean;  // Exists in code
+  tested: boolean;       // Has tests
   source: 'docs' | 'code' | 'both';
+  status: 'complete' | 'over-implemented' | 'under-documented' | 'untested' | 'defined-only';
 }
 
 /**
@@ -111,7 +113,12 @@ export interface ProjectCoverage {
     implementedInterfaces: number;
     missingInterfaces: number;
 
+    // Advanced metrics
     undocumentedImplementations: number; // Implemented but not documented
+    overImplemented: number;             // More code than documented
+    underDocumented: number;             // Documented but missing implementation
+    untestedImplementations: number;     // Implemented but no tests
+    completeInterfaces: number;          // Documented + Implemented + Tested
   };
 }
 
@@ -411,21 +418,65 @@ export function calculateFeatureCoverage(
   const allDocumentedInterfaces = new Set(documentedComponents.map(c => c.name));
   const allImplementedInterfaces = new Set(implementedInterfaces.map(i => i.name));
 
+  // Check test files
+  const testFiles: string[] = frontmatter.test_files || [];
+  const testedInterfaces = new Set<string>();
+
+  // Extract tested interfaces from test files (simple heuristic: import/require statements)
+  for (const testFile of testFiles) {
+    const testPath = join(projectPath, testFile);
+    if (existsSync(testPath)) {
+      try {
+        const testContent = readFileSync(testPath, 'utf-8');
+        // Match: import { Name } or const Name = require
+        const importMatches = testContent.matchAll(/import\s+{[^}]*\b([A-Z][A-Za-z0-9_]*)\b[^}]*}|const\s+([A-Z][A-Za-z0-9_]*)\s*=/g);
+        for (const match of importMatches) {
+          const name = match[1] || match[2];
+          if (name) testedInterfaces.add(name);
+        }
+      } catch (e) {
+        // Ignore read errors
+      }
+    }
+  }
+
   const interfaceCoverageDetails: InterfaceCoverage[] = [
-    ...Array.from(allDocumentedInterfaces).map(name => ({
-      name,
-      defined: true,
-      implemented: allImplementedInterfaces.has(name),
-      source: (allImplementedInterfaces.has(name) ? 'both' : 'docs') as 'docs' | 'code' | 'both',
-    })),
+    ...Array.from(allDocumentedInterfaces).map(name => {
+      const implemented = allImplementedInterfaces.has(name);
+      const tested = testedInterfaces.has(name);
+
+      let status: InterfaceCoverage['status'];
+      if (implemented && tested) {
+        status = 'complete';
+      } else if (implemented && !tested) {
+        status = 'untested';
+      } else {
+        status = 'defined-only';
+      }
+
+      return {
+        name,
+        defined: true,
+        implemented,
+        tested,
+        source: (implemented ? 'both' : 'docs') as 'docs' | 'code' | 'both',
+        status,
+      };
+    }),
     ...Array.from(allImplementedInterfaces)
       .filter(name => !allDocumentedInterfaces.has(name))
-      .map(name => ({
-        name,
-        defined: false,
-        implemented: true,
-        source: 'code' as 'docs' | 'code' | 'both',
-      })),
+      .map(name => {
+        const tested = testedInterfaces.has(name);
+
+        return {
+          name,
+          defined: false,
+          implemented: true,
+          tested,
+          source: 'code' as 'docs' | 'code' | 'both',
+          status: (tested ? 'over-implemented' : 'under-documented') as InterfaceCoverage['status'],
+        };
+      }),
   ];
 
   return {
@@ -506,6 +557,23 @@ export function generateImplementationCoverage(
     sum + f.interfaces.details.filter(i => i.source === 'code').length, 0
   );
 
+  // Advanced metrics
+  const overImplemented = featureCoverages.reduce((sum, f) =>
+    sum + f.interfaces.details.filter(i => i.status === 'over-implemented').length, 0
+  );
+
+  const underDocumented = featureCoverages.reduce((sum, f) =>
+    sum + f.interfaces.details.filter(i => i.status === 'under-documented').length, 0
+  );
+
+  const untestedImplementations = featureCoverages.reduce((sum, f) =>
+    sum + f.interfaces.details.filter(i => i.status === 'untested').length, 0
+  );
+
+  const completeInterfaces = featureCoverages.reduce((sum, f) =>
+    sum + f.interfaces.details.filter(i => i.status === 'complete').length, 0
+  );
+
   return {
     features: featureCoverages,
     summary: {
@@ -522,7 +590,12 @@ export function generateImplementationCoverage(
       implementedInterfaces,
       missingInterfaces: totalInterfaces - implementedInterfaces,
 
+      // Advanced metrics
       undocumentedImplementations,
+      overImplemented,
+      underDocumented,
+      untestedImplementations,
+      completeInterfaces,
     },
   };
 }
@@ -562,9 +635,11 @@ export function printImplementationCoverage(
     console.log(`└─ Documented but Missing: ${coverage.summary.missingComponents} (${((coverage.summary.missingComponents / coverage.summary.totalComponents) * 100).toFixed(1)}%)\n`);
 
     console.log(`Public Interfaces: ${coverage.summary.totalInterfaces}`);
-    console.log(`├─ Defined & Implemented: ${coverage.summary.implementedInterfaces} (${((coverage.summary.implementedInterfaces / coverage.summary.totalInterfaces) * 100).toFixed(1)}%)`);
-    console.log(`├─ Defined but Missing: ${coverage.summary.missingInterfaces} (${((coverage.summary.missingInterfaces / coverage.summary.totalInterfaces) * 100).toFixed(1)}%)`);
-    console.log(`└─ Implemented but Undocumented: ${coverage.summary.undocumentedImplementations}\n`);
+    console.log(`├─ ✅ Complete (Doc + Code + Test): ${coverage.summary.completeInterfaces} (${((coverage.summary.completeInterfaces / coverage.summary.totalInterfaces) * 100).toFixed(1)}%)`);
+    console.log(`├─ 🟡 Implemented but Untested: ${coverage.summary.untestedImplementations} (${((coverage.summary.untestedImplementations / coverage.summary.totalInterfaces) * 100).toFixed(1)}%)`);
+    console.log(`├─ ⚠️  Over-Implemented (Code > Doc): ${coverage.summary.overImplemented} (${((coverage.summary.overImplemented / coverage.summary.totalInterfaces) * 100).toFixed(1)}%)`);
+    console.log(`├─ 📝 Under-Documented (Doc < Code): ${coverage.summary.underDocumented} (${((coverage.summary.underDocumented / coverage.summary.totalInterfaces) * 100).toFixed(1)}%)`);
+    console.log(`└─ ❌ Defined but Missing: ${coverage.summary.missingInterfaces} (${((coverage.summary.missingInterfaces / coverage.summary.totalInterfaces) * 100).toFixed(1)}%)\n`);
   }
 
   // Print per-feature details
@@ -608,6 +683,54 @@ export function printImplementationCoverage(
       console.log(`\n   ⚠️  Missing Code Files:`);
       for (const missing of feature.codeReferences.missing) {
         console.log(`      - ${missing}`);
+      }
+    }
+
+    // Show interface status breakdown in verbose mode
+    if (verbose && feature.interfaces.total > 0) {
+      const statusGroups = {
+        complete: feature.interfaces.details.filter(i => i.status === 'complete'),
+        untested: feature.interfaces.details.filter(i => i.status === 'untested'),
+        'over-implemented': feature.interfaces.details.filter(i => i.status === 'over-implemented'),
+        'under-documented': feature.interfaces.details.filter(i => i.status === 'under-documented'),
+        'defined-only': feature.interfaces.details.filter(i => i.status === 'defined-only'),
+      };
+
+      console.log(`\n   🔍 Interface Status:`);
+
+      if (statusGroups.complete.length > 0) {
+        console.log(`      ✅ Complete: ${statusGroups.complete.length}`);
+        for (const iface of statusGroups.complete) {
+          console.log(`         - ${iface.name} (documented + implemented + tested)`);
+        }
+      }
+
+      if (statusGroups.untested.length > 0) {
+        console.log(`      🟡 Untested: ${statusGroups.untested.length}`);
+        for (const iface of statusGroups.untested) {
+          console.log(`         - ${iface.name} (missing tests)`);
+        }
+      }
+
+      if (statusGroups['over-implemented'].length > 0) {
+        console.log(`      ⚠️  Over-Implemented: ${statusGroups['over-implemented'].length}`);
+        for (const iface of statusGroups['over-implemented']) {
+          console.log(`         - ${iface.name} (code exists but not documented)`);
+        }
+      }
+
+      if (statusGroups['under-documented'].length > 0) {
+        console.log(`      📝 Under-Documented: ${statusGroups['under-documented'].length}`);
+        for (const iface of statusGroups['under-documented']) {
+          console.log(`         - ${iface.name} (implemented but needs documentation)`);
+        }
+      }
+
+      if (statusGroups['defined-only'].length > 0) {
+        console.log(`      ❌ Defined Only: ${statusGroups['defined-only'].length}`);
+        for (const iface of statusGroups['defined-only']) {
+          console.log(`         - ${iface.name} (documented but not implemented)`);
+        }
       }
     }
 

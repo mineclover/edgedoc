@@ -149,8 +149,8 @@ edgedoc terms find "Parser" -p /path/to/project
 ### Key Features
 
 1. **Code Block Filtering**
-   - ` ``` ` 코드 블록 내부의 `[[Term]]` 무시
-   - `` ` `` 인라인 코드 내부의 `[[Term]]` 무시
+   - Triple backtick 코드 블록 내부의 용어 참조 무시
+   - 인라인 코드 (single backtick) 내부의 용어 참조 무시
    - 예시 문서 작성 시 오탐 방지
 
 2. **Metadata Parsing**

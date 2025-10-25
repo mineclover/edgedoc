@@ -43,7 +43,7 @@ code_references:                 # 참조하는 코드 파일
 - 정의는 프로젝트 내 **고유**해야 함
 - 참조는 **반드시 정의**되어 있어야 함
 - Global 정의는 `docs/GLOSSARY.md`에 작성
-- 코드 블록(` ``` `)과 인라인 코드(`` ` ``) 내부의 `[[Term]]`은 무시됨
+- 코드 블록(triple backtick)과 인라인 코드(single backtick) 내부의 용어 참조는 무시됨
 
 ### 예시 작성 시 주의사항
 

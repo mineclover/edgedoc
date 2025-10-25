@@ -344,7 +344,7 @@ terms:
 3. **자동 추론**:
    - Import graph → code dependencies
    - Interface from/to → feature connections
-   - [[Term]] → term references
+   - `[[Term]]` → term references
 
 **예시**:
 

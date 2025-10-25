@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2025-10-25T00:55:09.383Z",
+  "generated": "2025-10-25T01:03:01.648Z",
   "features": {
     "00_Init": {
       "file": "tasks/features/00_Init.md",
@@ -202,7 +202,6 @@
         "uses": [
           "Term Definition",
           "Documentation Symbol",
-          "Term",
           "Validation"
         ]
       },
@@ -468,7 +467,9 @@
       "file": "tasks/features/15_TasksManagement.md",
       "code": {
         "uses": [
-          "src/tools/tasks-list.ts"
+          "src/tools/tasks-list.ts",
+          "src/tools/docs-toggle.ts",
+          "src/tools/validate-interface-links.ts"
         ],
         "used_by": []
       },
@@ -984,6 +985,22 @@
       ],
       "imports": [],
       "imported_by": []
+    },
+    "src/tools/docs-toggle.ts": {
+      "type": "source",
+      "documented_in": [
+        "tasks-management"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/validate-interface-links.ts": {
+      "type": "source",
+      "documented_in": [
+        "tasks-management"
+      ],
+      "imports": [],
+      "imported_by": []
     }
   },
   "interfaces": {
@@ -1452,7 +1469,7 @@
         },
         {
           "file": "tasks/features/15_TasksManagement.md",
-          "line": 525,
+          "line": 527,
           "context": "- [[Validation]]: 전체 검증 시스템"
         },
         {
@@ -1497,7 +1514,7 @@
         },
         {
           "file": "tasks/features/15_TasksManagement.md",
-          "line": 526,
+          "line": 528,
           "context": "- [[Code References]]: Frontmatter 필드"
         },
         {

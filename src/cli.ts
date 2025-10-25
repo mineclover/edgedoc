@@ -506,6 +506,43 @@ tasks
   });
 
 
+// Feature commands
+const feature = program.command('feature').description('Feature 정보 및 커버리지 조회');
+
+feature
+  .command('info <feature-id>')
+  .description('Feature 전체 정보 조회')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('--full', '전체 코드 파일 목록 표시')
+  .option('--json', 'JSON 형식 출력')
+  .action(async (featureId, options) => {
+    try {
+      const { getFeatureInfo } = await import('./tools/feature-info.js');
+      const info = await getFeatureInfo(options.project, featureId);
+
+      if (options.json) {
+        console.log(JSON.stringify(info, null, 2));
+      } else {
+        // Simple output for now
+        console.log(`📦 Feature: ${info.id}`);
+        console.log(`   Title: ${info.title}`);
+        console.log(`   Status: ${info.status}`);
+        if (info.hasCheckboxes) {
+          console.log(`   Progress: ${info.progress}%`);
+        }
+        console.log(`\n🔗 Interfaces Provided: ${info.interfaces.provides.length}`);
+        console.log(`🔗 Interfaces Used: ${info.interfaces.uses.length}`);
+        console.log(`🧪 Tests: ${info.tests.hasCoverage ? '✅ ' + info.tests.files.length : '❌ None'}`);
+        console.log(`📝 Code Files: ${info.code.files.length}`);
+      }
+
+      process.exit(0);
+    } catch (error: any) {
+      console.error('❌ 오류:', error.message);
+      process.exit(1);
+    }
+  });
+
 // Graph commands
 const graph = program.command('graph').description('참조 그래프 관리');
 

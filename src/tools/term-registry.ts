@@ -160,10 +160,6 @@ export class TermRegistry implements ITermRegistry {
       }
     }
 
-    // 4. Check circular references
-    const circularWarnings = this.detectCircularReferences();
-    warnings.push(...circularWarnings);
-
     // Calculate stats
     const uniqueReferences = new Set(this.references.map((r) => r.term));
 
@@ -186,62 +182,6 @@ export class TermRegistry implements ITermRegistry {
     };
   }
 
-  /**
-   * Detect circular references in related terms
-   */
-  private detectCircularReferences(): ValidationError[] {
-    const warnings: ValidationError[] = [];
-    const visited = new Set<string>();
-    const stack = new Set<string>();
-
-    const dfs = (term: string, path: string[]): void => {
-      if (stack.has(term)) {
-        // Circular reference detected
-        const cycle = [...path, term];
-        const cycleStart = cycle.indexOf(term);
-        const circularPath = cycle.slice(cycleStart);
-
-        const def = this.definitions.get(term);
-        warnings.push({
-          type: 'circular_reference',
-          severity: 'warning',
-          term,
-          message: `Circular reference detected: ${circularPath.join(' → ')}`,
-          location: def ? { file: def.file, line: def.line } : undefined,
-          suggestion: 'Break the cycle by rephrasing one definition',
-        });
-        return;
-      }
-
-      if (visited.has(term)) {
-        return;
-      }
-
-      visited.add(term);
-      stack.add(term);
-
-      const def = this.definitions.get(term);
-      if (def && def.related) {
-        for (const related of def.related) {
-          dfs(related, [...path, term]);
-        }
-      }
-
-      if (def && def.parent) {
-        dfs(def.parent, [...path, term]);
-      }
-
-      stack.delete(term);
-    };
-
-    for (const term of this.definitions.keys()) {
-      if (!visited.has(term)) {
-        dfs(term, []);
-      }
-    }
-
-    return warnings;
-  }
 
   /**
    * List all definitions

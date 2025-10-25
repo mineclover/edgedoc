@@ -13,6 +13,7 @@ edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수
 **Type**: concept
 **Scope**: global
 **Aliases**: 진입점 모듈, entry point
+**Related**: [[Top-Level Interface]], [[Public API]]
 
 외부 사용자가 접근할 수 있는 최상위 public API 모듈을 의미한다.
 
@@ -63,8 +64,9 @@ export type ParseResult = { }         // Code Interface
 **Scope**: global
 **Aliases**: 최상위 인터페이스
 **Parent**: [[Code Interface]]
+**Related**: [[Entry Point Module]], [[Public API]]
 
-Entry Point Module에서 직접 export되어 외부 사용자가 접근 가능한 코드 인터페이스를 의미한다.
+[[Entry Point Module]]에서 직접 export되어 외부 사용자가 접근 가능한 [[Code Interface]]를 의미한다.
 
 **정의 조건**:
 - Entry point module에서 `export` 키워드로 노출
@@ -92,11 +94,12 @@ class InternalHelper { }              // ❌ Not exported
 **Type**: concept
 **Scope**: global
 **Aliases**: 공개 API
+**Related**: [[Entry Point Module]], [[Top-Level Interface]]
 
 외부 사용자가 사용할 수 있도록 의도적으로 노출된 모든 인터페이스, 함수, 클래스의 집합을 의미한다.
 
 **구성 요소**:
-- Entry Point Module에서 export된 최상위 인터페이스
+- [[Entry Point Module]]에서 export된 [[Top-Level Interface]]
 - 문서화되고 안정적인 API
 - Breaking change 시 버전 관리 대상
 
@@ -159,6 +162,7 @@ class InternalHelper { }              // ❌ Not exported
 **Type**: process
 **Scope**: global
 **Aliases**: 고아 탐지
+**Related**: [[Spec Orphan]]
 
 문서화되지 않았고 사용되지도 않는 코드나 파일을 탐지하는 프로세스를 의미한다.
 
@@ -184,6 +188,7 @@ edgedoc validate orphans
 **Type**: concept
 **Scope**: global
 **Aliases**: 스펙 고아, 명세 고아
+**Parent**: [[Orphan Detection]]
 
 문서화되지 않은 public export (interface, class, function)를 의미한다.
 
@@ -285,6 +290,7 @@ edgedoc validate spec-orphans
 **Type**: entity
 **Scope**: global
 **Aliases**: 언어 파서, ILanguageParser
+**Related**: [[Parser Factory]], [[Parse Result]]
 
 특정 프로그래밍 언어의 소스 코드를 파싱하는 인터페이스를 의미한다.
 
@@ -391,6 +397,7 @@ edgedoc sync --dry-run         # 시뮬레이션만
 **Type**: attribute
 **Scope**: global
 **Aliases**: 코드 참조
+**Related**: [[Synchronization]]
 
 문서 frontmatter에서 해당 문서가 참조하는 소스 코드 파일 목록을 의미한다.
 

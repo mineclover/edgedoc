@@ -180,28 +180,10 @@ function printValidationResults(result: ValidationResult): void {
     console.log(`   → 모든 용어가 올바른 스코프에서 사용되었습니다\n`);
   }
 
-  // 3. Circular references
-  const circularWarnings = warnings.filter((w) => w.type === 'circular_reference');
-  if (circularWarnings.length > 0) {
-    console.log('⚠️  3. 순환 참조');
-    console.log(`   → ${circularWarnings.length}개 발견\n`);
-
-    for (const warning of circularWarnings) {
-      console.log(`   🔄 ${warning.message}`);
-      if (warning.location) {
-        console.log(`      ${warning.location.file}:${warning.location.line}`);
-      }
-      console.log();
-    }
-  } else {
-    console.log('✅ 3. 순환 참조');
-    console.log(`   → 순환 참조 없음\n`);
-  }
-
-  // 4. Unused definitions
+  // 3. Unused definitions
   const unusedWarnings = warnings.filter((w) => w.type === 'unused_definition');
   if (unusedWarnings.length > 0) {
-    console.log('⚠️  4. 사용되지 않는 정의');
+    console.log('⚠️  3. 사용되지 않는 정의');
     console.log(`   → ${unusedWarnings.length}개 발견\n`);
 
     for (const warning of unusedWarnings) {
@@ -210,7 +192,7 @@ function printValidationResults(result: ValidationResult): void {
     }
     console.log();
   } else {
-    console.log('✅ 4. 사용되지 않는 정의');
+    console.log('✅ 3. 사용되지 않는 정의');
     console.log(`   → 모든 정의가 사용되었습니다\n`);
   }
 

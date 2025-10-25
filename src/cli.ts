@@ -33,6 +33,16 @@ import {
   closeDetailsBlocks,
 } from './tools/docs-toggle.js';
 import { collectIssues, printIssuesReport } from './tools/issues.js';
+import {
+  findTestsForFeature,
+  findDocForTest,
+  generateCoverageReport,
+  validateTestDocSync,
+  printTestReference,
+  printDocReference,
+  printCoverageReport,
+  printSyncValidation,
+} from './tools/test-doc-lookup.js';
 
 const program = new Command();
 
@@ -818,6 +828,90 @@ program
       // Exit with code 1 if there are warnings
       const hasWarnings = report.summary.bySeverity.warning > 0;
       process.exit(hasWarnings ? 1 : 0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Test commands
+const test = program.command('test').description('테스트 관리');
+
+test
+  .command('find')
+  .description('Feature에서 테스트 파일 찾기')
+  .option('-f, --feature <id>', 'Feature ID')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      if (!options.feature) {
+        console.error('❌ --feature 옵션이 필요합니다');
+        process.exit(1);
+      }
+
+      const ref = findTestsForFeature(options.feature, options.project);
+      printTestReference(ref, options.feature);
+      process.exit(ref ? 0 : 1);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+test
+  .command('coverage')
+  .description('테스트 커버리지 확인')
+  .option('-f, --feature <id>', 'Feature ID')
+  .option('-m, --missing', '테스트되지 않은 feature만 표시')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      const report = generateCoverageReport(options.project, {
+        featureId: options.feature,
+        missingOnly: options.missing,
+      });
+      printCoverageReport(report);
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Doc commands (extends existing docs command group)
+docs
+  .command('find')
+  .description('테스트 파일에서 Feature 찾기')
+  .option('-t, --test <path>', '테스트 파일 경로')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      if (!options.test) {
+        console.error('❌ --test 옵션이 필요합니다');
+        process.exit(1);
+      }
+
+      const ref = findDocForTest(options.test, options.project);
+      printDocReference(ref, options.test);
+      process.exit(ref ? 0 : 1);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Validation - add test-sync command
+validate
+  .command('test-sync')
+  .description('테스트-문서 참조 동기화 검증')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      const result = validateTestDocSync(options.project);
+      printSyncValidation(result);
+
+      const hasErrors = result.errors.length > 0;
+      process.exit(hasErrors ? 1 : 0);
     } catch (error) {
       console.error('❌ 오류:', error);
       process.exit(1);

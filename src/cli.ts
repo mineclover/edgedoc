@@ -1080,4 +1080,128 @@ syntax
     }
   });
 
+syntax
+  .command('guide [term]')
+  .description('문법 가이드 - 코드에서 추출한 규칙')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action((termName, options) => {
+    try {
+      if (termName) {
+        // Show specific term guide
+        const term = findSyntaxTerm(termName, options.project);
+        if (!term) {
+          console.error(`❌ Syntax term not found: ${termName}`);
+          process.exit(1);
+        }
+
+        console.log(`📖 [[${term.name}]] 가이드\n`);
+        console.log(`Parser: ${term.parser}`);
+        console.log();
+
+        if (term.patterns.length > 0) {
+          console.log(`✅ 지원되는 패턴:\n`);
+          for (const pattern of term.patterns) {
+            console.log(`${pattern.name}`);
+            console.log(`  ${pattern.description}`);
+            console.log();
+          }
+        }
+
+        if (term.rules.length > 0) {
+          console.log(`📋 검증 규칙:\n`);
+          for (const rule of term.rules) {
+            console.log(`${rule.description}`);
+          }
+          console.log();
+        }
+
+        console.log(`📚 예시:`);
+        if (term.examples.valid.length > 0) {
+          console.log(`  ✅ Valid: ${term.examples.valid[0]}`);
+        }
+        if (term.examples.invalid.length > 0) {
+          console.log(`  ❌ Invalid: ${term.examples.invalid[0]}`);
+        }
+        console.log();
+        console.log(`상세 문서: ${term.docPath}`);
+      } else {
+        // Show all syntax guides summary
+        const categories = getSyntaxTermsByCategory(options.project);
+
+        console.log(`📖 Syntax Guide - SSOT 문서 작성 규칙\n`);
+        console.log(`명확하고 직관적이고 간단 명료하게 코드를 정의하는 SSOT 문서 유지\n`);
+
+        for (const [category, terms] of Object.entries(categories)) {
+          console.log(`${category}:`);
+          for (const term of terms) {
+            console.log(`  [[${term.name}]]`);
+            console.log(`    Parser: ${term.parser}`);
+            console.log(`    Patterns: ${term.patterns.length}, Rules: ${term.rules.length}`);
+          }
+          console.log();
+        }
+
+        console.log(`사용법:`);
+        console.log(`  edgedoc syntax guide <term>     # 특정 문법 상세 가이드`);
+        console.log(`  edgedoc syntax validate <term>  # 문법 검증`);
+        console.log(`  edgedoc syntax list             # 전체 문법 목록`);
+      }
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Syntax validation - route to existing validators
+syntax
+  .command('validate [term]')
+  .description('문법 검증 - 기존 검증 도구 라우팅')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action((termName, options) => {
+    try {
+      if (!termName) {
+        // Show available syntax validators
+        console.log(`📋 Syntax Validation\n`);
+        console.log(`사용 가능한 문법 검증:\n`);
+        console.log(`  [[Component Definition]]`);
+        console.log(`    edgedoc syntax validate component`);
+        console.log(`    → edgedoc test coverage --code\n`);
+        console.log(`  [[Frontmatter Field]]`);
+        console.log(`    edgedoc syntax validate frontmatter`);
+        console.log(`    → edgedoc validate structure\n`);
+        console.log(`  [[Term Definition]]`);
+        console.log(`    edgedoc syntax validate term`);
+        console.log(`    → edgedoc validate terms\n`);
+        console.log(`전체 검증:`);
+        console.log(`  edgedoc validate all`);
+        return;
+      }
+
+      const lowerTerm = termName.toLowerCase();
+
+      // Route to appropriate validator
+      if (lowerTerm.includes('component')) {
+        console.log(`🔍 [[Component Definition]] 검증\n`);
+        console.log(`Implementation Coverage 실행...\n`);
+        const coverage = generateImplementationCoverage(options.project);
+        printImplementationCoverage(coverage, { verbose: false });
+      } else if (lowerTerm.includes('frontmatter') || lowerTerm.includes('field')) {
+        console.log(`🔍 [[Frontmatter Field]] 검증\n`);
+        console.log(`Structure Validation 실행...\n`);
+        validateStructure({ project: options.project });
+      } else if (lowerTerm.includes('term')) {
+        console.log(`🔍 [[Term Definition]] 검증\n`);
+        console.log(`Term Validation 실행...\n`);
+        validateTerms({ projectPath: options.project });
+      } else {
+        console.error(`❌ Unknown syntax term: ${termName}`);
+        console.log(`\nAvailable: component, frontmatter, term`);
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
 program.parse();

@@ -798,6 +798,7 @@ program
   .option('--orphans', '고아 파일만 표시')
   .option('--terms', '용어 문제만 표시')
   .option('--quality', '품질 이슈만 표시')
+  .option('--interfaces', '인터페이스 문제만 표시')
   .option('--all', '모든 이상치 표시 (기본값)')
   .option('-v, --verbose', '상세 정보 표시')
   .action(async (options) => {
@@ -808,6 +809,7 @@ program
         orphans: options.orphans,
         terms: options.terms,
         quality: options.quality,
+        interfaces: options.interfaces,
         all: options.all,
       });
 

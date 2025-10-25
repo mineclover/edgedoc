@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { listTasks, type TaskInfo } from './tasks-list.js';
 import { validateTerms } from './validate-terms.js';
 import { validateOrphans } from './orphans.js';
+import { validateInterfaceLinks } from './validate-interface-links.js';
 import type { ReferenceIndex } from '../types/reference-index.js';
 
 export interface IssuesOptions {
@@ -11,11 +12,12 @@ export interface IssuesOptions {
   orphans?: boolean;
   terms?: boolean;
   quality?: boolean;
+  interfaces?: boolean;
   all?: boolean;
 }
 
 export interface Issue {
-  type: 'task' | 'orphan' | 'term' | 'quality';
+  type: 'task' | 'orphan' | 'term' | 'quality' | 'interface';
   severity: 'warning' | 'info';
   title: string;
   description: string;
@@ -28,6 +30,7 @@ export interface IssuesReport {
   orphans: Issue[];
   terms: Issue[];
   quality: Issue[];
+  interfaces: Issue[];
   summary: {
     total: number;
     byType: Record<string, number>;
@@ -207,6 +210,78 @@ async function collectTermIssues(projectPath: string): Promise<Issue[]> {
 }
 
 /**
+ * Collect interface-related issues
+ */
+async function collectInterfaceIssues(projectPath: string): Promise<Issue[]> {
+  const issues: Issue[] = [];
+  const indexPath = join(projectPath, '.edgedoc', 'references.json');
+
+  if (!existsSync(indexPath)) {
+    return issues;
+  }
+
+  try {
+    const indexContent = readFileSync(indexPath, 'utf-8');
+    const index: ReferenceIndex = JSON.parse(indexContent);
+
+    const result = validateInterfaceLinks(projectPath);
+
+    // Missing providers (used but not provided)
+    if (result.bidirectional.missingProviders.length > 0) {
+      for (const { interfaceId, usedBy } of result.bidirectional.missingProviders) {
+        issues.push({
+          type: 'interface',
+          severity: 'warning',
+          title: `Missing provider for interface: ${interfaceId}`,
+          description: `Interface is used but no feature provides it`,
+          details: [
+            `Used by: ${usedBy.join(', ')}`,
+            'Add this interface to a feature\'s interfaces.provides',
+          ],
+        });
+      }
+    }
+
+    // Unused interfaces (provided but never used)
+    if (result.bidirectional.unusedInterfaces.length > 0) {
+      for (const { interfaceId, providedBy } of result.bidirectional.unusedInterfaces) {
+        issues.push({
+          type: 'interface',
+          severity: 'info',
+          title: `Unused interface: ${interfaceId}`,
+          description: `Interface is provided but no feature uses it`,
+          details: [
+            `Provided by: ${providedBy.join(', ')}`,
+            'Either remove from provides or add to a feature\'s interfaces.uses',
+          ],
+        });
+      }
+    }
+
+    // Incomplete sibling coverage
+    if (result.incompleteCoverage.length > 0) {
+      for (const { namespace, feature, allSiblings, provided, missing } of result.incompleteCoverage) {
+        issues.push({
+          type: 'interface',
+          severity: 'info',
+          title: `Incomplete sibling coverage in ${feature}`,
+          description: `Feature provides only ${provided.length}/${allSiblings.length} interfaces in namespace ${namespace}`,
+          details: [
+            `Provided: ${provided.join(', ')}`,
+            `Missing: ${missing.join(', ')}`,
+            'Consider providing all sibling interfaces or split into separate features',
+          ],
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Warning: Could not collect interface issues:', error);
+  }
+
+  return issues;
+}
+
+/**
  * Collect quality-related issues
  */
 async function collectQualityIssues(projectPath: string): Promise<Issue[]> {
@@ -263,13 +338,14 @@ async function collectQualityIssues(projectPath: string): Promise<Issue[]> {
  * Collect all issues
  */
 export async function collectIssues(options: IssuesOptions): Promise<IssuesReport> {
-  const { projectPath, tasks, orphans, terms, quality, all } = options;
+  const { projectPath, tasks, orphans, terms, quality, interfaces, all } = options;
 
   const report: IssuesReport = {
     tasks: [],
     orphans: [],
     terms: [],
     quality: [],
+    interfaces: [],
     summary: {
       total: 0,
       byType: {},
@@ -294,12 +370,17 @@ export async function collectIssues(options: IssuesOptions): Promise<IssuesRepor
     report.quality = await collectQualityIssues(projectPath);
   }
 
+  if (all || interfaces) {
+    report.interfaces = await collectInterfaceIssues(projectPath);
+  }
+
   // If no filters specified, collect all
-  if (!tasks && !orphans && !terms && !quality && !all) {
+  if (!tasks && !orphans && !terms && !quality && !interfaces && !all) {
     report.tasks = await collectTaskIssues(projectPath);
     report.orphans = await collectOrphanIssues(projectPath);
     report.terms = await collectTermIssues(projectPath);
     report.quality = await collectQualityIssues(projectPath);
+    report.interfaces = await collectInterfaceIssues(projectPath);
   }
 
   // Calculate summary
@@ -308,6 +389,7 @@ export async function collectIssues(options: IssuesOptions): Promise<IssuesRepor
     ...report.orphans,
     ...report.terms,
     ...report.quality,
+    ...report.interfaces,
   ];
 
   report.summary.total = allIssues.length;
@@ -324,7 +406,7 @@ export async function collectIssues(options: IssuesOptions): Promise<IssuesRepor
  * Print issues report
  */
 export function printIssuesReport(report: IssuesReport, options?: { verbose?: boolean }): void {
-  const { tasks, orphans, terms, quality, summary } = report;
+  const { tasks, orphans, terms, quality, interfaces, summary } = report;
 
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('🔍 Issues Report');
@@ -346,6 +428,7 @@ export function printIssuesReport(report: IssuesReport, options?: { verbose?: bo
   if (summary.byType.orphan) console.log(`   👻 Orphans: ${summary.byType.orphan}`);
   if (summary.byType.term) console.log(`   📚 Terms: ${summary.byType.term}`);
   if (summary.byType.quality) console.log(`   ⭐ Quality: ${summary.byType.quality}`);
+  if (summary.byType.interface) console.log(`   🔌 Interfaces: ${summary.byType.interface}`);
   console.log();
 
   // Print each category
@@ -375,6 +458,13 @@ export function printIssuesReport(report: IssuesReport, options?: { verbose?: bo
     console.log('⭐ Quality Issues');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     printIssueList(quality, options);
+  }
+
+  if (interfaces.length > 0) {
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('🔌 Interface Issues');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+    printIssueList(interfaces, options);
   }
 }
 

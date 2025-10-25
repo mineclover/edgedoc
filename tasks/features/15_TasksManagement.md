@@ -9,6 +9,8 @@ related_features:
   - 13_ValidateTerms
 code_references:
   - "src/tools/tasks-list.ts"
+  - "src/tools/docs-toggle.ts"
+  - "src/tools/validate-interface-links.ts"
 ---
 
 # Tasks Management

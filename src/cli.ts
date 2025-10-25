@@ -32,6 +32,7 @@ import {
   openDetailsBlocks,
   closeDetailsBlocks,
 } from './tools/docs-toggle.js';
+import { collectIssues, printIssuesReport } from './tools/issues.js';
 
 const program = new Command();
 
@@ -782,6 +783,39 @@ graph
         term: options.term,
       });
       process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
+// Issues command
+program
+  .command('issues')
+  .description('프로젝트 이상치 검토 (미완료 작업, 고아 파일, 용어 문제 등)')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('--tasks', 'Task 관련 이상치만 표시')
+  .option('--orphans', '고아 파일만 표시')
+  .option('--terms', '용어 문제만 표시')
+  .option('--quality', '품질 이슈만 표시')
+  .option('--all', '모든 이상치 표시 (기본값)')
+  .option('-v, --verbose', '상세 정보 표시')
+  .action(async (options) => {
+    try {
+      const report = await collectIssues({
+        projectPath: options.project,
+        tasks: options.tasks,
+        orphans: options.orphans,
+        terms: options.terms,
+        quality: options.quality,
+        all: options.all,
+      });
+
+      printIssuesReport(report, { verbose: options.verbose });
+
+      // Exit with code 1 if there are warnings
+      const hasWarnings = report.summary.bySeverity.warning > 0;
+      process.exit(hasWarnings ? 1 : 0);
     } catch (error) {
       console.error('❌ 오류:', error);
       process.exit(1);

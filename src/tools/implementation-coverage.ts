@@ -586,15 +586,26 @@ export function generateImplementationCoverage(
   projectPath: string = process.cwd()
 ): ProjectCoverage {
   const featuresDir = join(projectPath, 'tasks', 'features');
+  const syntaxDir = join(projectPath, 'tasks', 'syntax');
+
   if (!existsSync(featuresDir)) {
     throw new Error(`Features directory not found: ${featuresDir}`);
   }
 
+  // Collect feature files from both features/ and syntax/
   const featureFiles = readdirSync(featuresDir)
     .filter(f => f.endsWith('.md'))
     .map(f => join(featuresDir, f));
 
-  const featureCoverages = featureFiles.map(file => {
+  const syntaxFiles = existsSync(syntaxDir)
+    ? readdirSync(syntaxDir)
+        .filter(f => f.endsWith('.md'))
+        .map(f => join(syntaxDir, f))
+    : [];
+
+  const allFiles = [...featureFiles, ...syntaxFiles];
+
+  const featureCoverages = allFiles.map(file => {
     const featureId = file.split('/').pop()?.replace('.md', '') || 'unknown';
     return calculateFeatureCoverage(file, featureId, projectPath);
   });

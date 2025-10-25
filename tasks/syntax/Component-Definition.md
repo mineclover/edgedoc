@@ -1,12 +1,12 @@
 ---
-term: "Component Definition"
-syntax_type: "documentation_structure"
+feature: "syntax:Component-Definition"
+type: "syntax"
+status: "documented"
 parser: "src/tools/implementation-coverage.ts:extractDocumentedComponents"
-validator: "docs/syntax/validators/component-validator.ts"
-related_terms:
-  - "[[Architecture Section]]"
-  - "[[Public Interface]]"
-  - "[[Implementation Coverage]]"
+validator: "src/validators/component-validator.ts"
+related_features:
+  - "18_ImplementationCoverage"
+  - "13_ValidateTerms"
 examples:
   valid:
     - "tasks/features/13_ValidateTerms.md:56-75"
@@ -19,7 +19,7 @@ examples:
 
 # [[Component Definition]]
 
-**Type**: Documentation Structure
+**Type**: Documentation Structure Syntax
 **Scope**: Feature Documents
 **Used By**: Implementation Coverage Analysis (`edgedoc test coverage --code`)
 **Validated By**: `extractDocumentedComponents()` (src/tools/implementation-coverage.ts:165-280)
@@ -173,117 +173,29 @@ const methodMatch = line.match(/^\s*-\s+([A-Za-z_][A-Za-z0-9_]*):/);
 
 **Function**: `extractDocumentedComponents()`
 
-**Full Implementation**:
+**Interface**:
 ```typescript
+export interface DocumentedComponent {
+  name: string;           // Component name
+  filePath: string;       // Relative path to source file
+  description: string;    // Optional description
+  featureId: string;      // Parent feature ID
+  docLine: number;        // Line number in doc
+  publicMethods: string[]; // List of public methods
+}
+
 export function extractDocumentedComponents(
   docContent: string,
   featureId: string
-): DocumentedComponent[] {
-  const components: DocumentedComponent[] = [];
-  const lines = docContent.split('\n');
-
-  let inArchitectureSection = false;
-  let currentComponent: Partial<DocumentedComponent> | null = null;
-  let currentMethods: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    // Detect Architecture/Components/Implementation section
-    if (line.match(/^##\s+(Components|Architecture|Implementation)/i)) {
-      inArchitectureSection = true;
-      continue;
-    }
-
-    // Exit section on next ## heading
-    if (inArchitectureSection && line.match(/^##\s+[^#]/)) {
-      // Save last component
-      if (currentComponent && currentComponent.name && currentComponent.filePath) {
-        components.push({
-          ...currentComponent,
-          publicMethods: currentMethods,
-        } as DocumentedComponent);
-      }
-      break;
-    }
-
-    if (!inArchitectureSection) continue;
-
-    // Pattern 1: Numbered list
-    const numberedMatch = line.match(/^\s*\d+\.\s+\*\*([^*]+)\*\*\s+\(`([^`]+)`\)/);
-    if (numberedMatch) {
-      // Save previous component
-      if (currentComponent && currentComponent.name && currentComponent.filePath) {
-        components.push({
-          ...currentComponent,
-          publicMethods: currentMethods,
-        } as DocumentedComponent);
-      }
-
-      currentComponent = {
-        name: numberedMatch[1].trim(),
-        filePath: numberedMatch[2].trim(),
-        description: '',
-        featureId,
-        docLine: i + 1,
-      };
-      currentMethods = [];
-      continue;
-    }
-
-    // Pattern 2 & 3: Heading
-    const headingMatch = line.match(/^###\s+([A-Z][A-Za-z0-9_\s]+)/);
-    if (headingMatch) {
-      // Save previous component
-      if (currentComponent && currentComponent.name && currentComponent.filePath) {
-        components.push({
-          ...currentComponent,
-          publicMethods: currentMethods,
-        } as DocumentedComponent);
-      }
-
-      currentComponent = {
-        name: headingMatch[1].trim(),
-        filePath: '', // Will be filled by **File**: or **Location**:
-        description: '',
-        featureId,
-        docLine: i + 1,
-      };
-      currentMethods = [];
-      continue;
-    }
-
-    // Extract file path
-    const fileMatch = line.match(/^\*\*(File|Location)\*\*:\s*`([^`]+)`/);
-    if (fileMatch && currentComponent) {
-      currentComponent.filePath = fileMatch[2].trim();
-      continue;
-    }
-
-    // Extract methods
-    if (currentComponent) {
-      const methodMatch1 = line.match(/^\s*-\s+([A-Za-z_][A-Za-z0-9_]*)\(/);
-      const methodMatch2 = line.match(/^\s*-\s+([A-Za-z_][A-Za-z0-9_]*):/);
-
-      if (methodMatch1) {
-        currentMethods.push(methodMatch1[1]);
-      } else if (methodMatch2) {
-        currentMethods.push(methodMatch2[1]);
-      }
-    }
-  }
-
-  // Save last component
-  if (currentComponent && currentComponent.name && currentComponent.filePath) {
-    components.push({
-      ...currentComponent,
-      publicMethods: currentMethods,
-    } as DocumentedComponent);
-  }
-
-  return components;
-}
+): DocumentedComponent[];
 ```
+
+**Algorithm**:
+1. Find Architecture/Components/Implementation section
+2. Parse numbered list pattern OR heading pattern
+3. Extract file path from inline OR **File**/**Location** field
+4. Collect public methods from bullet points
+5. Save component when next component starts or section ends
 
 ## Validation Rules
 
@@ -347,9 +259,10 @@ export function extractDocumentedComponents(
 
 ## Examples
 
-### ✅ Valid Example 1: Numbered List (13_ValidateTerms.md)
+### ✅ Valid Example 1: Numbered List
 
-See: tasks/features/13_ValidateTerms.md:56-75
+**Feature**: 13_ValidateTerms
+**Location**: tasks/features/13_ValidateTerms.md:56-75
 
 ```markdown
 ## Architecture
@@ -374,9 +287,10 @@ See: tasks/features/13_ValidateTerms.md:56-75
    - findTerm()
 ```
 
-### ✅ Valid Example 2: Heading with File (10_Internationalization.md)
+### ✅ Valid Example 2: Heading with File
 
-See: tasks/features/10_Internationalization.md:40-55
+**Feature**: 10_Internationalization
+**Location**: tasks/features/10_Internationalization.md:40-55
 
 ```markdown
 ## Architecture
@@ -390,9 +304,10 @@ See: tasks/features/10_Internationalization.md:40-55
 - setLocale()
 ```
 
-### ✅ Valid Example 3: Heading with Location (09_MultiLanguageParser.md)
+### ✅ Valid Example 3: Heading with Location
 
-See: tasks/features/09_MultiLanguageParser.md:45-65
+**Feature**: 09_MultiLanguageParser
+**Location**: tasks/features/09_MultiLanguageParser.md:45-65
 
 ```markdown
 ## Implementation
@@ -407,6 +322,8 @@ See: tasks/features/09_MultiLanguageParser.md:45-65
 
 ### ❌ Invalid Example 1: Missing Path
 
+See: docs/syntax/examples/component-missing-path.md
+
 ```markdown
 ## Architecture
 
@@ -420,6 +337,8 @@ See: tasks/features/09_MultiLanguageParser.md:45-65
 
 ### ❌ Invalid Example 2: Wrong Section
 
+See: docs/syntax/examples/component-wrong-section.md
+
 ```markdown
 ## Solution
 
@@ -428,16 +347,6 @@ See: tasks/features/09_MultiLanguageParser.md:45-65
 
 **Error**: Component defined outside Architecture/Components/Implementation section
 
-### ❌ Invalid Example 3: File Not Found
-
-```markdown
-## Architecture
-
-1. **MissingComponent** (`src/does-not-exist.ts`)
-```
-
-**Error**: Referenced file does not exist
-
 ## Related Terms
 
 - [[Architecture Section]] - 상위 섹션 정의
@@ -445,7 +354,7 @@ See: tasks/features/09_MultiLanguageParser.md:45-65
 - [[Implementation Coverage]] - 이 문법을 사용하는 기능
 - [[Frontmatter Field]] - code_references와 연계
 
-## Usage in Project
+## Usage Commands
 
 Check component definitions:
 
@@ -455,30 +364,26 @@ edgedoc test coverage --code
 
 # Check specific feature
 edgedoc test coverage --code --feature 13_ValidateTerms --verbose
-```
 
-Validate syntax:
-
-```bash
-# Validate all component definitions
+# Validate syntax usage
 edgedoc validate syntax --term "Component Definition"
-
-# Find usage in project
-edgedoc syntax usage "Component Definition"
 ```
 
-## Parser Location
+## Implementation Status
 
-**Main Parser**: src/tools/implementation-coverage.ts:165-280
-
-**Called By**:
-- `calculateFeatureCoverage()` (src/tools/implementation-coverage.ts:387)
-- `generateImplementationCoverage()` (src/tools/implementation-coverage.ts:561)
-
-**CLI Command**: `edgedoc test coverage --code`
+- [x] Parser implementation (src/tools/implementation-coverage.ts)
+- [x] Pattern 1: Numbered list support
+- [x] Pattern 2: Heading with File support
+- [x] Pattern 3: Heading with Location support
+- [x] Method extraction
+- [x] Section validation
+- [ ] Validator implementation (src/validators/component-validator.ts)
+- [ ] Syntax usage checker (`edgedoc syntax usage`)
+- [ ] Auto-fix suggestions
 
 ## See Also
 
-- [Implementation Specification](../../../tasks/features/18_ImplementationCoverage.md) - Feature 구현 스펙
-- [SYNTAX_GUIDE.md](../../SYNTAX_GUIDE.md) - 전체 문법 가이드
-- [VALIDATION_GUIDE.md](../../VALIDATION_GUIDE.md) - 검증 시스템
+- [Implementation Specification](../features/18_ImplementationCoverage.md) - Feature 구현 스펙
+- [Syntax Index](../../docs/syntax/INDEX.md) - 전체 문법 용어 색인
+- [SYNTAX_GUIDE.md](../../docs/SYNTAX_GUIDE.md) - 사용자 문법 가이드
+- [VALIDATION_GUIDE.md](../../docs/VALIDATION_GUIDE.md) - 검증 시스템

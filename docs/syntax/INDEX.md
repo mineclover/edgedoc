@@ -1,8 +1,11 @@
 # Syntax Terms Index
 
 **Last Updated**: 2025-10-25
+**Auto-Generated**: Run `edgedoc syntax index` to update
 
 edgedoc 문서 작성 문법 용어 색인입니다. 각 문법 용어는 [[Term]] 형식으로 참조할 수 있습니다.
+
+**Note**: Syntax terms are managed in `tasks/syntax/` as features. This index is auto-generated from those files.
 
 ---
 
@@ -10,11 +13,11 @@ edgedoc 문서 작성 문법 용어 색인입니다. 각 문법 용어는 [[Term
 
 Feature 문서의 구조와 섹션 정의 관련 문법입니다.
 
-| Term | Description | Parser | Status |
-|------|-------------|--------|--------|
-| [[Component Definition]] | Architecture 섹션의 컴포넌트 정의 | implementation-coverage.ts:165 | ✅ Implemented |
-| [[Architecture Section]] | 구조 설계 섹션 | TBD | 📝 Planned |
-| [[Frontmatter Field]] | YAML 메타데이터 필드 | structure-validator.ts | 📝 Planned |
+| Term | Description | Parser | Status | Location |
+|------|-------------|--------|--------|----------|
+| [[Component Definition]] | Architecture 섹션의 컴포넌트 정의 | implementation-coverage.ts:165 | ✅ Documented | [tasks/syntax/Component-Definition.md](../../tasks/syntax/Component-Definition.md) |
+| [[Architecture Section]] | 구조 설계 섹션 | TBD | 📝 Planned | - |
+| [[Frontmatter Field]] | YAML 메타데이터 필드 | structure-validator.ts | 📝 Planned | - |
 
 ---
 
@@ -107,23 +110,28 @@ edgedoc syntax usage "Component Definition"
 ## Directory Structure
 
 ```
+tasks/
+  syntax/                             # Syntax term definitions (managed as features)
+    Component-Definition.md           # [[Component Definition]]
+    Frontmatter-Field.md              # (planned)
+    Term-Definition.md                # (planned)
+    Test-Reference.md                 # (planned)
+    Public-Interface.md               # (planned)
+
+  features/
+    19_SyntaxTermSystem.md            # Syntax management system
+
 docs/syntax/
-├── INDEX.md                          # This file
-├── terms/                            # Syntax term definitions
-│   ├── Component-Definition.md
-│   ├── Architecture-Section.md
-│   ├── Frontmatter-Field.md
-│   ├── Term-Definition.md
-│   ├── Test-Reference.md
-│   └── Public-Interface.md
-├── examples/                         # Valid and invalid examples
-│   ├── component-missing-path.md
-│   ├── component-wrong-section.md
-│   └── ...
-└── validators/                       # Validation logic (TBD)
-    ├── component-validator.ts
-    ├── term-validator.ts
-    └── test-validator.ts
+  INDEX.md                            # This file (auto-generated)
+  examples/                           # Valid and invalid examples
+    component-missing-path.md
+    component-wrong-section.md
+    ...
+
+src/validators/                       # Validation logic (planned)
+  component-validator.ts
+  syntax-validator.ts
+  ...
 ```
 
 ---
@@ -134,14 +142,16 @@ docs/syntax/
 
 ```
 [[Component Definition]]
+  ├─ Definition: tasks/syntax/Component-Definition.md
   ├─ Parser: src/tools/implementation-coverage.ts:extractDocumentedComponents()
-  ├─ Validator: docs/syntax/validators/component-validator.ts (planned)
+  ├─ Validator: src/validators/component-validator.ts (planned)
   ├─ Examples: docs/syntax/examples/component-*.md
   └─ Usage: tasks/features/13_ValidateTerms.md:56
 
-[[Test Reference]]
+[[Test Reference]] (planned)
+  ├─ Definition: tasks/syntax/Test-Reference.md (planned)
   ├─ Parser: src/tools/test-doc-lookup.ts:findTestsForFeature()
-  ├─ Validator: docs/syntax/validators/test-validator.ts (planned)
+  ├─ Validator: src/validators/test-validator.ts (planned)
   ├─ Examples: docs/syntax/examples/test-*.md
   └─ Usage: tasks/features/17_TestDocLookup.md
 ```
@@ -152,33 +162,46 @@ docs/syntax/
 
 새로운 문법 용어를 추가하려면:
 
-1. **용어 정의 문서 작성**: `docs/syntax/terms/Your-Term.md`
+1. **용어 정의 문서 작성**: `tasks/syntax/Your-Term.md`
    ```yaml
    ---
-   term: "Your Term"
-   syntax_type: "category"
+   feature: "syntax:Your-Term"
+   type: "syntax"
+   status: "documented"
    parser: "path/to/parser.ts:functionName"
-   validator: "docs/syntax/validators/your-validator.ts"
-   related_terms:
-     - "[[Related Term 1]]"
-     - "[[Related Term 2]]"
+   validator: "src/validators/your-validator.ts"
+   related_features:
+     - "19_SyntaxTermSystem"
    examples:
      valid:
        - "path/to/example1.md"
      invalid:
-       - "path/to/invalid-example.md"
+       - "docs/syntax/examples/your-term-invalid.md"
    ---
 
    # [[Your Term]]
 
+   **Type**: Syntax Category
+   **Used By**: Feature name
+   **Validated By**: functionName()
+
+   ## 정의
+   ...
+
+   ## 문법 (Syntax)
+   ...
+
+   ## Parser Implementation
+   ...
+
+   ## Validation Rules
    ...
    ```
 
 2. **예시 파일 작성**: `docs/syntax/examples/your-term-*.md`
-   - Valid examples
-   - Invalid examples
+   - Invalid examples (valid examples reference actual feature files)
 
-3. **인덱스에 추가**: 이 파일(INDEX.md)에 항목 추가
+3. **인덱스 재생성**: `edgedoc syntax index` (auto-updates this file)
 
 4. **SYNTAX_GUIDE.md 업데이트**: 사용자 가이드에 섹션 추가
 

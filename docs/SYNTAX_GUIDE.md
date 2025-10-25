@@ -157,8 +157,9 @@ edgedoc test coverage --code --feature 13_ValidateTerms --verbose
 ```
 
 **관련 문서**:
-- [Component Definition 상세 문법](syntax/terms/Component-Definition.md)
+- [Component Definition 상세 문법](../tasks/syntax/Component-Definition.md)
 - [Feature 18: Implementation Coverage](../tasks/features/18_ImplementationCoverage.md)
+- [Feature 19: Syntax Term System](../tasks/features/19_SyntaxTermSystem.md)
 
 ---
 

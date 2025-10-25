@@ -115,17 +115,17 @@ export interface InterfaceStatus {
 
 ## Implementation Tasks
 
-### Task 1: Data Collection Functions
-- [ ] `getFeatureInfo(featureId)` - 메인 함수
-- [ ] `getInterfaceStatuses(interfaceIds, direction)` - 인터페이스 상태 조회
-- [ ] `getTestCoverage(featureId)` - 테스트 커버리지 조회
-- [ ] `getCodeFiles(featureId)` - 코드 파일 목록 및 크기
-- [ ] `checkDependencies(featureId)` - 의존성 준비 상태
+### Task 1: Data Collection Functions ✅
+- [x] `getFeatureInfo(featureId)` - 메인 함수
+- [x] `getInterfaceStatuses(interfaceIds, direction)` - 인터페이스 상태 조회
+- [x] `getTestCoverage(featureId)` - 테스트 커버리지 조회
+- [x] `getCodeFiles(featureId)` - 코드 파일 목록 및 크기
+- [ ] `checkDependencies(featureId)` - 의존성 준비 상태 (incomplete)
 
-### Task 2: CLI Integration
-- [ ] `feature info <feature-id>` 명령어 추가
+### Task 2: CLI Integration ✅
+- [x] `feature info <feature-id>` 명령어 추가
 - [ ] `--full` 옵션: 상세 정보 (코드 파일 목록 전체)
-- [ ] `--json` 옵션: JSON 형식 출력
+- [x] `--json` 옵션: JSON 형식 출력
 
 ### Task 3: Pretty Printing
 - [ ] `printFeatureInfo()` - 통합 출력

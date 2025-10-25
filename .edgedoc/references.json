@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2025-10-25T01:03:01.648Z",
+  "generated": "2025-10-25T01:27:11.268Z",
   "features": {
     "00_Init": {
       "file": "tasks/features/00_Init.md",
@@ -454,6 +454,34 @@
         "uses": [
           "00--06"
         ]
+      },
+      "terms": {
+        "defines": [],
+        "uses": []
+      },
+      "tests": {
+        "tested_by": []
+      }
+    },
+    "feature-info": {
+      "file": "tasks/features/16_FeatureInfo.md",
+      "code": {
+        "uses": [
+          "src/tools/feature-info.ts"
+        ],
+        "used_by": []
+      },
+      "features": {
+        "related": [
+          "14_ReverseReferenceIndex",
+          "15_TasksManagement"
+        ],
+        "depends_on": [],
+        "used_by": []
+      },
+      "interfaces": {
+        "provides": [],
+        "uses": []
       },
       "terms": {
         "defines": [],
@@ -974,6 +1002,14 @@
       "type": "test",
       "documented_in": [
         "tree-sitter-parser-test"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/feature-info.ts": {
+      "type": "source",
+      "documented_in": [
+        "feature-info"
       ],
       "imports": [],
       "imported_by": []

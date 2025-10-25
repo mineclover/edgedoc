@@ -3,6 +3,15 @@ feature: "00_Init"
 entry_point: "src/cli.ts"
 type: "initialization"
 status: "implemented"
+interfaces:
+  provides:
+    - "00--01"
+    - "00--02"
+    - "00--03"
+    - "00--04"
+    - "00--05"
+    - "00--06"
+    - "00--07"
 code_references:
   - "src/cli.ts"
   - "src/parsers/ParserFactory.ts"

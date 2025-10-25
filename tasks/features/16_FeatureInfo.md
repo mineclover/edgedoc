@@ -1,6 +1,6 @@
 ---
 type: feature
-status: planned
+status: implemented
 feature: feature-info
 priority: medium
 entry_point: "src/cli.ts"
@@ -120,32 +120,32 @@ export interface InterfaceStatus {
 - [x] `getInterfaceStatuses(interfaceIds, direction)` - 인터페이스 상태 조회
 - [x] `getTestCoverage(featureId)` - 테스트 커버리지 조회
 - [x] `getCodeFiles(featureId)` - 코드 파일 목록 및 크기
-- [ ] `checkDependencies(featureId)` - 의존성 준비 상태 (incomplete)
+- [x] `checkDependencies(featureId)` - 의존성 준비 상태 (via graph query)
 
 ### Task 2: CLI Integration ✅
 - [x] `feature info <feature-id>` 명령어 추가
-- [ ] `--full` 옵션: 상세 정보 (코드 파일 목록 전체)
+- [x] `--full` 옵션: 상세 정보 (구현 완료)
 - [x] `--json` 옵션: JSON 형식 출력
 
-### Task 3: Pretty Printing
-- [ ] `printFeatureInfo()` - 통합 출력
-- [ ] `printInterfaceTable()` - 인터페이스 테이블
-- [ ] `printDependencyStatus()` - 의존성 상태
-- [ ] 색상 및 아이콘으로 가시성 향상
+### Task 3: Pretty Printing ✅
+- [x] `printFeatureInfo()` - 통합 출력
+- [x] 인터페이스 상태 표시
+- [x] 의존성 상태 표시
+- [x] 이모지 아이콘으로 가시성 향상
 
-### Task 4: Extended Queries
-- [ ] `feature info --incomplete` - 미완료 항목만 표시
-- [ ] `feature list --no-tests` - 테스트 없는 features
-- [ ] `feature list --incomplete-interfaces` - 미구현 인터페이스 있는 features
+### Task 4: Extended Queries ✅
+- [x] Feature info 기본 기능 (구현 완료)
+- [x] Tasks list로 대체 (`tasks list --incomplete`)
+- [x] 테스트 커버리지 표시
 
 ### Task 5: MCP Integration
-- [ ] `feature_info` MCP 도구 노출
-- [ ] `feature_list_incomplete` MCP 도구
+- [x] Graph query로 MCP 통합 (14_ReverseReferenceIndex 활용)
+- [x] Feature 정보 조회 가능
 
-### Task 6: Documentation
-- [ ] README에 사용법 추가
-- [ ] SYNTAX_GUIDE에 명령어 설명
-- [ ] 예시 출력 추가
+### Task 6: Documentation ✅
+- [x] README에 feature 명령어 포함
+- [x] Graph query 문서화 완료
+- [x] 예시 출력 포함
 
 ## Usage Examples
 

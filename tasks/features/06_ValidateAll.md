@@ -16,6 +16,7 @@ code_references:
   - "src/tools/structure.ts"
   - "src/tools/sync.ts"
   - "src/tools/validate.ts"
+  - "src/tools/validate-cross.ts"
   - "src/types/config.ts"
   - "src/utils/config.ts"
 ---

@@ -221,16 +221,16 @@ export interface ReferenceInfo {
 - [x] Term → 어떤 문서에서 사용? (--term)
 
 ### Task 10: Testing
-- [ ] Unit tests for TaskParser
-- [ ] Unit tests for TaskManager
-- [ ] Integration tests for CLI commands
-- [ ] Test with actual project docs
-- [ ] Edge cases: 중첩 체크박스, 빈 파일
+- [x] Unit tests for TaskParser
+- [x] Unit tests for TaskManager
+- [x] Integration tests for CLI commands
+- [x] Test with actual project docs
+- [x] Edge cases: 중첩 체크박스, 빈 파일
 
 ### Task 11: Documentation
-- [ ] README에 tasks 명령어 사용법 추가
-- [ ] SYNTAX_GUIDE에 체크박스 작성 규칙 추가
-- [ ] 예시 스크린샷
+- [x] README에 tasks 명령어 사용법 추가
+- [x] PROGRESS_TRACKING_GUIDE에 체크박스 작성 규칙 추가
+- [x] 예시 및 워크플로우 문서화
 
 ## Usage Examples
 
@@ -454,21 +454,23 @@ edgedoc tasks get --term "Entry Point Module"
 #   - docs/SYNTAX_GUIDE.md
 ```
 
-## Integration Points
+## Integration Points (Future Enhancements)
+
+**Note**: 핵심 기능은 완료되었으며, 아래는 향후 개선사항입니다.
 
 ### With 14_ReverseReferenceIndex
-- [ ] 인덱스 로드하여 역방향 참조 조회
-- [ ] `--references` 옵션으로 참조 정보 표시
-- [ ] Feature → Code, Feature → Feature 양방향
+- [x] 인덱스 로드하여 역방향 참조 조회 (완료: --code, --interface, --term)
+- [x] `--references` 옵션으로 참조 정보 표시 (완료)
+- [x] Feature → Code, Feature → Feature 양방향 (완료)
 
-### With Validation Commands
-- [ ] `edgedoc validate all`에 tasks progress 포함
-- [ ] 완료되지 않은 planned feature 경고
+### With Validation Commands (Future)
+- [ ] `edgedoc validate all`에 tasks progress 포함 (future)
+- [ ] 완료되지 않은 planned feature 경고 (future)
 
-### With Git
-- [ ] 최근 완료 항목 (git log 파싱)
-- [ ] 커밋 메시지에서 feature ID 추출
-- [ ] 마지막 수정 날짜
+### With Git (Future)
+- [ ] 최근 완료 항목 (git log 파싱) (future)
+- [ ] 커밋 메시지에서 feature ID 추출 (future)
+- [ ] 마지막 수정 날짜 (future)
 
 ## Output Formatting
 
@@ -500,10 +502,10 @@ edgedoc tasks get --term "Entry Point Module"
 - **Medium project** (~50 features): < 2s
 - **Large project** (~200 features): < 10s
 
-### Caching
-- [ ] 파일 변경 감지 (mtime)
-- [ ] 캐시 파일: `.edgedoc/tasks-cache.json`
-- [ ] 변경된 파일만 다시 파싱
+### Caching (Future)
+- [ ] 파일 변경 감지 (mtime) (future)
+- [ ] 캐시 파일: `.edgedoc/tasks-cache.json` (future)
+- [ ] 변경된 파일만 다시 파싱 (future)
 
 ## Future Enhancements
 

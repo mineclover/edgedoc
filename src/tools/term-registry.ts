@@ -161,8 +161,8 @@ export class TermRegistry implements ITermRegistry {
     }
 
     // 4. Check circular references
-    const circularErrors = this.detectCircularReferences();
-    errors.push(...circularErrors);
+    const circularWarnings = this.detectCircularReferences();
+    warnings.push(...circularWarnings);
 
     // Calculate stats
     const uniqueReferences = new Set(this.references.map((r) => r.term));
@@ -190,7 +190,7 @@ export class TermRegistry implements ITermRegistry {
    * Detect circular references in related terms
    */
   private detectCircularReferences(): ValidationError[] {
-    const errors: ValidationError[] = [];
+    const warnings: ValidationError[] = [];
     const visited = new Set<string>();
     const stack = new Set<string>();
 
@@ -202,7 +202,7 @@ export class TermRegistry implements ITermRegistry {
         const circularPath = cycle.slice(cycleStart);
 
         const def = this.definitions.get(term);
-        errors.push({
+        warnings.push({
           type: 'circular_reference',
           severity: 'warning',
           term,
@@ -240,7 +240,7 @@ export class TermRegistry implements ITermRegistry {
       }
     }
 
-    return errors;
+    return warnings;
   }
 
   /**

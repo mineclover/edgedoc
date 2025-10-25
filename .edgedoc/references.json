@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2025-10-25T01:35:34.629Z",
+  "generated": "2025-10-25T02:22:51.018Z",
   "features": {
     "00_Init": {
       "file": "tasks/features/00_Init.md",
@@ -54,7 +54,8 @@
         "uses": [
           "src/tools/build-reference-index.ts",
           "src/tools/graph-query.ts",
-          "src/types/reference-index.ts"
+          "src/types/reference-index.ts",
+          ".edgedoc/references.json"
         ],
         "used_by": []
       },
@@ -430,6 +431,7 @@
           "src/tools/structure.ts",
           "src/tools/sync.ts",
           "src/tools/validate.ts",
+          "src/tools/validate-cross.ts",
           "src/types/config.ts",
           "src/utils/config.ts"
         ],
@@ -902,6 +904,14 @@
       "imports": [],
       "imported_by": []
     },
+    ".edgedoc/references.json": {
+      "type": "config",
+      "documented_in": [
+        "reverse-reference-index"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
     "src/tools/validate-terms.ts": {
       "type": "source",
       "documented_in": [
@@ -995,6 +1005,14 @@
       "type": "test",
       "documented_in": [
         "tree-sitter-parser-test"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
+    "src/tools/validate-cross.ts": {
+      "type": "source",
+      "documented_in": [
+        "06_ValidateAll"
       ],
       "imports": [],
       "imported_by": []
@@ -1145,14 +1163,9 @@
           "file": "docs/GLOSSARY.md",
           "line": 451,
           "context": "- `entry_point`: [[Entry Point Module]] 경로"
-        },
-        {
-          "file": "docs/TERM_DEFINITION_SYNTAX.md",
-          "line": 235,
-          "context": "[[Entry Point Module]]"
         }
       ],
-      "usage_count": 10
+      "usage_count": 9
     },
     "Code Interface": {
       "definition": {
@@ -1265,14 +1278,9 @@
           "file": "docs/GLOSSARY.md",
           "line": 454,
           "context": "- `public_interfaces`: [[Top-Level Interface]] 목록 (향후)"
-        },
-        {
-          "file": "docs/TERM_DEFINITION_SYNTAX.md",
-          "line": 236,
-          "context": "→ [[Top-Level Interface]] 추출"
         }
       ],
-      "usage_count": 9
+      "usage_count": 8
     },
     "Public API": {
       "definition": {
@@ -1488,7 +1496,7 @@
       "references": [
         {
           "file": "tasks/features/14_ReverseReferenceIndex.md",
-          "line": 377,
+          "line": 378,
           "context": "- [[Validation]]: 구조 검증과 통합"
         },
         {
@@ -1538,7 +1546,7 @@
       "references": [
         {
           "file": "tasks/features/14_ReverseReferenceIndex.md",
-          "line": 378,
+          "line": 379,
           "context": "- [[Code References]]: Frontmatter 필드"
         },
         {
@@ -1572,9 +1580,9 @@
       },
       "references": [
         {
-          "file": "docs/SYNTAX_GUIDE.md",
-          "line": 419,
-          "context": "| [[Frontmatter]] | 문서 메타데이터 | `validate structure` |"
+          "file": "docs/TASKS_README.md",
+          "line": 50,
+          "context": "각 tasks 문서는 파일 상단에 [[Frontmatter]]를 포함하여 메타데이터를 정의합니다."
         }
       ],
       "usage_count": 1
@@ -1685,9 +1693,14 @@
           "file": "docs/GLOSSARY.md",
           "line": 7,
           "context": "edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다."
+        },
+        {
+          "file": "docs/README.md",
+          "line": 59,
+          "context": "- [[CLI]], [[MCP]] 등의 형식으로 참조"
         }
       ],
-      "usage_count": 1
+      "usage_count": 2
     },
     "CLI": {
       "definition": {
@@ -1700,9 +1713,14 @@
           "file": "docs/GLOSSARY.md",
           "line": 7,
           "context": "edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수행하고, [[Validation]] 기능을 제공합니다. 각 용어는 [[Documentation Symbol]]로 정의되어 프로젝트 전체에서 일관되게 사용됩니다."
+        },
+        {
+          "file": "docs/README.md",
+          "line": 59,
+          "context": "- [[CLI]], [[MCP]] 등의 형식으로 참조"
         }
       ],
-      "usage_count": 1
+      "usage_count": 2
     },
     "User Interface": {
       "definition": {

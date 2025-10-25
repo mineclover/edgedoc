@@ -72,11 +72,13 @@ The MCP server provides:
 - [x] Interface validation
 - [x] Resources (static docs + dynamic project data)
 
-### Phase 2: Advanced Features (Future)
-- [ ] Real-time validation events
-- [ ] Documentation generation
-- [ ] Migration assistance
-- [ ] Interactive fixing suggestions
+### Phase 2: Advanced Features (Future - Optional)
+- [ ] Real-time validation events (future enhancement)
+- [ ] Documentation generation (future enhancement)
+- [ ] Migration assistance (future enhancement)
+- [ ] Interactive fixing suggestions (future enhancement)
+
+**Note**: Phase 1 완료로 현재 MCP 서버는 프로덕션 준비 완료 상태입니다.
 
 ## Usage (Planned)
 

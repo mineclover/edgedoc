@@ -2,7 +2,7 @@
 feature: "07_Sync"
 entry_point: "src/cli.ts:158-170"
 type: "synchronization"
-status: "planned"
+status: "implemented"
 code_references:
   - "src/cli.ts"
   - "src/parsers/ParserFactory.ts"
@@ -72,8 +72,9 @@ mdoc sync
 
 ## 구현 상태
 
-- 🔄 기능 명세 작성 중
-- ⏳ 구현 예정
-- 📋 TODO: 코드 스캔 로직
-- 📋 TODO: 참조 매칭 알고리즘
-- 📋 TODO: 자동 업데이트 로직
+- ✅ **구현 완료**
+- ✅ 코드 스캔 로직 (Tree-sitter 기반)
+- ✅ 참조 매칭 알고리즘
+- ✅ 자동 업데이트 로직
+- ✅ Dry-run 모드
+- ✅ Multi-language 지원 (TypeScript, JavaScript, Python)

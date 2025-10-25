@@ -21,6 +21,8 @@ export interface TaskInfo {
     total: number;
     checked: number;
     progress: number;
+    futureCount: number;  // Future/Optional 체크박스 수
+    coreCount: number;    // 핵심 체크박스 수
   };
 }
 
@@ -53,14 +55,57 @@ function parseFrontmatter(content: string): Record<string, any> {
 /**
  * Count checkboxes in markdown content
  */
-function countCheckboxes(content: string): { total: number; checked: number } {
-  const checkboxPattern = /^[\s-]*\[([ xX])\]/gm;
-  const matches = content.match(checkboxPattern) || [];
+function countCheckboxes(content: string): {
+  total: number;
+  checked: number;
+  futureCount: number;
+  coreCount: number;
+} {
+  const lines = content.split('\n');
+  let total = 0;
+  let checked = 0;
+  let futureCount = 0;
+  let coreCount = 0;
+  let inFutureSection = false;
 
-  const total = matches.length;
-  const checked = matches.filter((m) => m.includes('[x]') || m.includes('[X]')).length;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
 
-  return { total, checked };
+    // Detect Future/Optional sections
+    if (
+      line.match(/##.*\(Future.*\)/i) ||
+      line.match(/###.*\(Future.*\)/i) ||
+      line.match(/Phase \d+:.*Future/i) ||
+      line.includes('Future Enhancements') ||
+      line.includes('Future - Optional')
+    ) {
+      inFutureSection = true;
+    }
+    // Exit future section on new major heading
+    else if (line.match(/^##[^#]/)) {
+      inFutureSection = false;
+    }
+
+    // Count checkboxes
+    const checkboxMatch = line.match(/^[\s-]*\[([ xX])\]/);
+    if (checkboxMatch) {
+      total++;
+      if (checkboxMatch[1].toLowerCase() === 'x') {
+        checked++;
+      }
+
+      // Check if line contains (future) marker
+      const isFuture = line.includes('(future)') || inFutureSection;
+
+      if (isFuture) {
+        futureCount++;
+      } else {
+        coreCount++;
+      }
+    }
+  }
+
+  return { total, checked, futureCount, coreCount };
 }
 
 /**
@@ -115,6 +160,8 @@ export async function listTasks(options: TasksListOptions): Promise<TaskInfo[]> 
         total: checkboxes.total,
         checked: checkboxes.checked,
         progress: checkboxes.total > 0 ? Math.round((checkboxes.checked / checkboxes.total) * 100) : 0,
+        futureCount: checkboxes.futureCount,
+        coreCount: checkboxes.coreCount,
       },
     });
   }
@@ -156,6 +203,11 @@ export function printTasksList(tasks: TaskInfo[], options?: { verbose?: boolean 
       console.log(
         `   Progress: ${progressBar}${emptyBar} ${task.checkboxes.checked}/${task.checkboxes.total} (${task.checkboxes.progress}%)`
       );
+
+      // Show core vs future breakdown if there are future items
+      if (task.checkboxes.futureCount > 0) {
+        console.log(`   └─ Core: ${task.checkboxes.coreCount} items, Future: ${task.checkboxes.futureCount} items`);
+      }
     } else {
       // No checkboxes - show clear status message
       if (task.status === 'active' || task.status === 'implemented') {
@@ -210,6 +262,8 @@ export interface ProgressSummary {
     totalCheckboxes: number;
     checkedCheckboxes: number;
     percentage: number;
+    coreCheckboxes: number;
+    futureCheckboxes: number;
   };
   withoutCheckboxes: {
     total: number;
@@ -244,6 +298,8 @@ export function calculateProgress(tasks: TaskInfo[]): ProgressSummary {
       totalCheckboxes: 0,
       checkedCheckboxes: 0,
       percentage: 0,
+      coreCheckboxes: 0,
+      futureCheckboxes: 0,
     },
     withoutCheckboxes: {
       total: 0,
@@ -284,6 +340,8 @@ export function calculateProgress(tasks: TaskInfo[]): ProgressSummary {
     // Accumulate checkboxes
     summary.overallProgress.totalCheckboxes += task.checkboxes.total;
     summary.overallProgress.checkedCheckboxes += task.checkboxes.checked;
+    summary.overallProgress.coreCheckboxes += task.checkboxes.coreCount;
+    summary.overallProgress.futureCheckboxes += task.checkboxes.futureCount;
   }
 
   // Calculate overall percentage
@@ -374,6 +432,18 @@ export function printProgressDashboard(summary: ProgressSummary): void {
   console.log(
     `  ⬜ Remaining: ${summary.overallProgress.totalCheckboxes - summary.overallProgress.checkedCheckboxes}`
   );
+
+  // Core vs Future breakdown
+  if (summary.overallProgress.futureCheckboxes > 0) {
+    console.log('\n━━━ Core vs Future ━━━');
+    console.log(`  🎯 Core Tasks: ${summary.overallProgress.coreCheckboxes}`);
+    console.log(`  🔮 Future/Optional: ${summary.overallProgress.futureCheckboxes}`);
+
+    const corePercentage = summary.overallProgress.totalCheckboxes > 0
+      ? Math.round((summary.overallProgress.coreCheckboxes / summary.overallProgress.totalCheckboxes) * 100)
+      : 0;
+    console.log(`  📊 Core tasks represent ${corePercentage}% of total`);
+  }
 
   // Features without checkboxes
   if (summary.withoutCheckboxes.total > 0) {
@@ -554,6 +624,11 @@ export function printTasksForReference(
       console.log(
         `   Progress: ${progressBar}${emptyBar} ${task.checkboxes.checked}/${task.checkboxes.total} (${task.checkboxes.progress}%)`
       );
+
+      // Show core vs future breakdown if there are future items
+      if (task.checkboxes.futureCount > 0) {
+        console.log(`   └─ Core: ${task.checkboxes.coreCount} items, Future: ${task.checkboxes.futureCount} items`);
+      }
     }
 
     console.log();

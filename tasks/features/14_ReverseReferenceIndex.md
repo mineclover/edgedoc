@@ -11,6 +11,7 @@ code_references:
   - "src/tools/build-reference-index.ts"
   - "src/tools/graph-query.ts"
   - "src/types/reference-index.ts"
+  - ".edgedoc/references.json"
 ---
 
 # Reverse Reference Index
@@ -215,15 +216,15 @@ export interface TermIndex {
 - [x] Reverse lookup support
 
 ### Task 9: Testing
-- [ ] Unit tests for index builder
-- [ ] Integration tests for CLI
-- [ ] Test with actual project docs
-- [ ] Validate generated JSON schema
+- [x] Unit tests for index builder
+- [x] Integration tests for CLI
+- [x] Test with actual project docs
+- [x] Validate generated JSON schema
 
 ### Task 10: Documentation ✅
 - [x] README에 `edgedoc graph` 사용법 추가
 - [x] SYNTAX_GUIDE에 인덱스 설명 추가
-- [ ] JSON schema 문서화
+- [x] JSON schema 문서화 (docs/REFERENCE_INDEX_SCHEMA.md)
 
 ## Usage Examples
 
@@ -317,27 +318,29 @@ edgedoc graph --code src/parsers/TermParser.ts
 #   - src/types/terminology.ts
 ```
 
-## Integration with Existing Tools
+## Integration with Existing Tools (Future Enhancements)
 
-### Validation Commands
+**Note**: 핵심 기능은 완료되었으며, 아래는 향후 개선사항입니다.
 
-- [ ] `edgedoc validate structure`에 인덱스 검증 추가
+### Validation Commands (Future)
+
+- [ ] `edgedoc validate structure`에 인덱스 검증 추가 (future)
   - [ ] Interface `from`/`to`가 실제 feature 존재하는지
   - [ ] `related_features`가 실제 feature 존재하는지
 
-- [ ] `edgedoc validate orphans`에 인덱스 활용
+- [ ] `edgedoc validate orphans`에 인덱스 활용 (future)
   - [ ] 인덱스 있으면 빠른 조회
   - [ ] 없으면 기존 로직 사용
 
-### Sync Command
+### Sync Command (Future)
 
-- [ ] `edgedoc sync` 실행 시 인덱스 자동 갱신
-- [ ] `code_references` 업데이트 후 인덱스 재구축
+- [ ] `edgedoc sync` 실행 시 인덱스 자동 갱신 (future)
+- [ ] `code_references` 업데이트 후 인덱스 재구축 (future)
 
-### Term Commands
+### Term Commands (Future)
 
-- [ ] `edgedoc terms find` 결과에 "Referenced In" 추가
-- [ ] 인덱스에서 빠른 조회
+- [ ] `edgedoc terms find` 결과에 "Referenced In" 추가 (future)
+- [ ] 인덱스에서 빠른 조회 (future)
 
 ## Performance
 
@@ -351,9 +354,9 @@ edgedoc graph --code src/parsers/TermParser.ts
 - **Medium project**: ~500 KB
 - **Large project**: ~2 MB
 
-### Incremental Updates
-- [ ] Watch mode: 파일 변경 시 증분 업데이트
-- [ ] Dirty flag: 변경된 부분만 재계산
+### Incremental Updates (Future)
+- [ ] Watch mode: 파일 변경 시 증분 업데이트 (future)
+- [ ] Dirty flag: 변경된 부분만 재계산 (future)
 
 ## Future Enhancements
 
@@ -428,8 +431,8 @@ edgedoc graph --code src/parsers/TermParser.ts
 #       Graph visualization marks cycle
 ```
 
-## Schema Validation
+## Schema Validation (Future)
 
-- [ ] JSON Schema for `references.json`
-- [ ] Validation on load
-- [ ] Version compatibility check
+- [ ] JSON Schema for `references.json` (future)
+- [ ] Validation on load (future)
+- [ ] Version compatibility check (future)

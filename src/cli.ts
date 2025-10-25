@@ -473,6 +473,13 @@ tasks
         console.log(
           `   ${progressBar}${emptyBar} ${task.checkboxes.checked}/${task.checkboxes.total} (${task.checkboxes.progress}%)\n`
         );
+      } else {
+        // No checkboxes - show clear status message
+        if (task.status === 'active' || task.status === 'implemented') {
+          console.log('✅ Implemented (no pending tasks)\n');
+        } else if (task.status === 'planned') {
+          console.log('📋 Planned (no implementation yet)\n');
+        }
       }
 
       process.exit(0);

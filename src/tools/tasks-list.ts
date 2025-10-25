@@ -156,6 +156,13 @@ export function printTasksList(tasks: TaskInfo[], options?: { verbose?: boolean 
       console.log(
         `   Progress: ${progressBar}${emptyBar} ${task.checkboxes.checked}/${task.checkboxes.total} (${task.checkboxes.progress}%)`
       );
+    } else {
+      // No checkboxes - show clear status message
+      if (task.status === 'active' || task.status === 'implemented') {
+        console.log(`   ✅ Implemented (no pending tasks)`);
+      } else if (task.status === 'planned') {
+        console.log(`   📋 Planned (no implementation yet)`);
+      }
     }
 
     console.log(`   Status: ${task.status}`);
@@ -204,6 +211,11 @@ export interface ProgressSummary {
     checkedCheckboxes: number;
     percentage: number;
   };
+  withoutCheckboxes: {
+    total: number;
+    implemented: number;
+    planned: number;
+  };
 }
 
 export function calculateProgress(tasks: TaskInfo[]): ProgressSummary {
@@ -233,6 +245,11 @@ export function calculateProgress(tasks: TaskInfo[]): ProgressSummary {
       checkedCheckboxes: 0,
       percentage: 0,
     },
+    withoutCheckboxes: {
+      total: 0,
+      implemented: 0,
+      planned: 0,
+    },
   };
 
   for (const task of tasks) {
@@ -252,6 +269,16 @@ export function calculateProgress(tasks: TaskInfo[]): ProgressSummary {
     const priority = (task.priority || 'none') as keyof typeof summary.byPriority;
     if (priority in summary.byPriority) {
       summary.byPriority[priority]++;
+    }
+
+    // Track features without checkboxes
+    if (task.checkboxes.total === 0) {
+      summary.withoutCheckboxes.total++;
+      if (task.status === 'active' || task.status === 'implemented') {
+        summary.withoutCheckboxes.implemented++;
+      } else if (task.status === 'planned') {
+        summary.withoutCheckboxes.planned++;
+      }
     }
 
     // Accumulate checkboxes
@@ -347,6 +374,18 @@ export function printProgressDashboard(summary: ProgressSummary): void {
   console.log(
     `  ⬜ Remaining: ${summary.overallProgress.totalCheckboxes - summary.overallProgress.checkedCheckboxes}`
   );
+
+  // Features without checkboxes
+  if (summary.withoutCheckboxes.total > 0) {
+    console.log('\n━━━ Without Checkboxes ━━━');
+    console.log(`  Total: ${summary.withoutCheckboxes.total}`);
+    if (summary.withoutCheckboxes.implemented > 0) {
+      console.log(`  ✅ Implemented: ${summary.withoutCheckboxes.implemented}`);
+    }
+    if (summary.withoutCheckboxes.planned > 0) {
+      console.log(`  📋 Planned: ${summary.withoutCheckboxes.planned}`);
+    }
+  }
 
   console.log();
 }

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2025-10-25T00:45:22.884Z",
+  "generated": "2025-10-25T00:55:09.383Z",
   "features": {
     "00_Init": {
       "file": "tasks/features/00_Init.md",
@@ -1527,7 +1527,7 @@
       "references": [
         {
           "file": "docs/SYNTAX_GUIDE.md",
-          "line": 188,
+          "line": 419,
           "context": "| [[Frontmatter]] | 문서 메타데이터 | `validate structure` |"
         }
       ],

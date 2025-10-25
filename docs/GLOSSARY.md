@@ -39,6 +39,7 @@ edgedoc [[CLI]]는 [[MCP]]를 통해 [[Tree-sitter]] 기반 코드 분석을 수
 **Type**: entity
 **Scope**: global
 **Aliases**: 코드 인터페이스
+**Related**: [[Top-Level Interface]], [[Type Definition]]
 **Not to Confuse**: [[User Interface]]
 
 TypeScript의 interface, class, type 등 코드 수준에서 정의된 인터페이스를 의미한다.
@@ -115,6 +116,7 @@ class InternalHelper { }              // ❌ Not exported
 **Type**: process
 **Scope**: global
 **Aliases**: 인터페이스 수준 검증
+**Related**: [[File-level Validation]], [[Validation]], [[Orphan Detection]]
 **Contrast**: [[File-level Validation]]
 
 개별 코드 인터페이스 단위로 문서화 여부를 검증하는 프로세스를 의미한다.
@@ -142,6 +144,7 @@ class InternalHelper { }              // ❌ Not exported
 **Type**: process
 **Scope**: global
 **Aliases**: 파일 수준 검증
+**Related**: [[Interface-level Validation]], [[Validation]], [[Orphan Detection]]
 **Contrast**: [[Interface-level Validation]]
 
 파일 단위로 문서화 여부를 검증하는 프로세스를 의미한다 (현재 시스템).
@@ -315,6 +318,7 @@ edgedoc validate spec-orphans
 **Type**: entity
 **Scope**: global
 **Aliases**: 파싱 결과
+**Related**: [[Language Parser]], [[Tree-sitter]]
 
 소스 코드 파싱의 결과를 담는 데이터 구조를 의미한다.
 
@@ -489,6 +493,7 @@ code_references:
 **Type**: concept
 **Scope**: global
 **Aliases**: 타입 정의
+**Related**: [[Code Interface]]
 **Not to Confuse**: [[Term Definition]]
 
 코드에서 TypeScript 타입을 정의하는 것을 의미한다.
@@ -517,6 +522,7 @@ interface ILanguageParser {
 **Type**: concept
 **Scope**: global
 **Aliases**: 용어 정의
+**Related**: [[Documentation Symbol]], [[Validation]]
 **Not to Confuse**: [[Type Definition]]
 
 문서에서 용어를 정의하는 것을 의미한다.
@@ -575,6 +581,7 @@ interface ILanguageParser {
 **Scope**: global
 **Full Form**: Model Context Protocol
 **Aliases**: 모델 컨텍스트 프로토콜
+**Related**: [[CLI]], [[Tree-sitter]]
 
 LLM(Large Language Model)이 외부 도구 및 데이터 소스와 상호작용하기 위한 표준 프로토콜을 의미한다.
 
@@ -595,6 +602,7 @@ LLM(Large Language Model)이 외부 도구 및 데이터 소스와 상호작용�
 **Scope**: global
 **Full Form**: Command Line Interface
 **Aliases**: 커맨드라인 인터페이스, 명령줄 인터페이스
+**Related**: [[MCP]], [[Entry Point Module]]
 
 터미널 또는 명령 프롬프트에서 텍스트 명령으로 실행되는 사용자 인터페이스를 의미한다.
 
@@ -615,6 +623,7 @@ edgedoc analyze entry-points    # 진입점 분석
 **Type**: entity
 **Scope**: global
 **Aliases**: UI, 사용자 인터페이스
+**Related**: [[CLI]]
 **Not to Confuse**: [[Code Interface]]
 
 사용자와 소프트웨어가 상호작용하는 시각적/텍스트 인터페이스를 의미한다.

@@ -160,6 +160,28 @@ export class TermRegistry implements ITermRegistry {
       }
     }
 
+    // 4. Check isolated terms (no relationships)
+    const isolatedTerms: string[] = [];
+
+    for (const [term, def] of this.definitions) {
+      const hasRelationships = !!(
+        def.parent ||
+        (def.related && def.related.length > 0)
+      );
+
+      if (!hasRelationships) {
+        isolatedTerms.push(term);
+        warnings.push({
+          type: 'isolated_term',
+          severity: 'warning',
+          term,
+          message: `Term "${term}" has no relationships (no Parent or Related)`,
+          location: { file: def.file, line: def.line },
+          suggestion: 'Most concepts should relate to other concepts. Consider adding Parent or Related fields.',
+        });
+      }
+    }
+
     // Calculate stats
     const uniqueReferences = new Set(this.references.map((r) => r.term));
 
@@ -171,6 +193,7 @@ export class TermRegistry implements ITermRegistry {
       uniqueReferences: uniqueReferences.size,
       undefinedTerms: undefinedTerms.size,
       unusedDefinitions: unusedDefinitions.length,
+      isolatedTerms: isolatedTerms.length,
       conflicts: 0, // Conflicts throw errors during addDefinition
     };
 

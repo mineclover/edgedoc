@@ -196,6 +196,23 @@ function printValidationResults(result: ValidationResult): void {
     console.log(`   → 모든 정의가 사용되었습니다\n`);
   }
 
+  // 4. Isolated terms (no relationships)
+  const isolatedWarnings = warnings.filter((w) => w.type === 'isolated_term');
+  if (isolatedWarnings.length > 0) {
+    console.log('⚠️  4. 고립된 용어 (관계 없음)');
+    console.log(`   → ${isolatedWarnings.length}개 발견\n`);
+
+    for (const warning of isolatedWarnings) {
+      console.log(`   🔗 "${warning.term}"`);
+      console.log(`      ${warning.location?.file}:${warning.location?.line}`);
+      console.log(`      ${warning.suggestion}`);
+    }
+    console.log();
+  } else {
+    console.log('✅ 4. 고립된 용어');
+    console.log(`   → 모든 용어가 다른 용어와 연결되었습니다\n`);
+  }
+
   // Summary
   console.log('━'.repeat(80));
   console.log('📊 검증 요약\n');
@@ -210,6 +227,7 @@ function printValidationResults(result: ValidationResult): void {
 
   console.log(`미정의 용어: ${stats.undefinedTerms}개`);
   console.log(`미사용 정의: ${stats.unusedDefinitions}개`);
+  console.log(`고립된 용어: ${stats.isolatedTerms}개`);
   console.log();
 
   console.log(`에러: ${errors.length}개`);

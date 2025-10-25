@@ -44,7 +44,8 @@ export interface ValidationError {
     | 'conflicting_definition'
     | 'scope_violation'
     | 'circular_reference'
-    | 'unused_definition';
+    | 'unused_definition'
+    | 'isolated_term';
   severity: 'error' | 'warning';
   term: string;
   message: string;
@@ -68,6 +69,7 @@ export interface ValidationResult {
     uniqueReferences: number;
     undefinedTerms: number;
     unusedDefinitions: number;
+    isolatedTerms: number;
     conflicts: number;
   };
 }

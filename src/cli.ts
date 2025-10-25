@@ -43,6 +43,10 @@ import {
   printCoverageReport,
   printSyncValidation,
 } from './tools/test-doc-lookup.js';
+import {
+  generateImplementationCoverage,
+  printImplementationCoverage,
+} from './tools/implementation-coverage.js';
 
 const program = new Command();
 
@@ -863,9 +867,23 @@ test
   .description('테스트 커버리지 확인')
   .option('-f, --feature <id>', 'Feature ID')
   .option('-m, --missing', '테스트되지 않은 feature만 표시')
+  .option('-c, --code', '구현 커버리지 확인 (문서 정의 vs 실제 구현)')
+  .option('-v, --verbose', '상세 출력')
   .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
   .action(async (options) => {
     try {
+      // Implementation coverage
+      if (options.code) {
+        const coverage = generateImplementationCoverage(options.project);
+        printImplementationCoverage(coverage, {
+          verbose: options.verbose,
+          featureId: options.feature,
+        });
+        process.exit(0);
+        return;
+      }
+
+      // Test coverage
       const report = generateCoverageReport(options.project, {
         featureId: options.feature,
         missingOnly: options.missing,

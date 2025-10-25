@@ -1,14 +1,6 @@
 ---
 feature: "00_Init"
 entry_point: "src/cli.ts"
-interfaces:
-  - "00--01"
-  - "00--02"
-  - "00--03"
-  - "00--04"
-  - "00--05"
-  - "00--06"
-  - "00--07"
 type: "initialization"
 status: "implemented"
 code_references:

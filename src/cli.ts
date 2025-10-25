@@ -189,11 +189,97 @@ validate
   });
 
 validate
+  .command('dependencies [feature-id]')
+  .description('의존성 준비 상태 검증 (재귀)')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (featureId, options) => {
+    try {
+      const { checkDependencyReadiness, printDependencyReadiness } = await import(
+        './tools/validate-cross.js'
+      );
+      const results = await checkDependencyReadiness(options.project, featureId);
+      printDependencyReadiness(results);
+
+      const hasBlockers = results.some((r) => r.readiness === 'blocked');
+      process.exit(hasBlockers ? 1 : 0);
+    } catch (error: any) {
+      console.error('❌ 오류:', error.message);
+      process.exit(1);
+    }
+  });
+
+validate
+  .command('quality [feature-id]')
+  .description('진행도-품질 교차 검증')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (featureId, options) => {
+    try {
+      const { checkProgressQuality, printProgressQuality } = await import(
+        './tools/validate-cross.js'
+      );
+      const results = await checkProgressQuality(options.project, featureId);
+      printProgressQuality(results);
+
+      const hasErrors = results.some((r) => r.recommendation === 'not_ready');
+      process.exit(hasErrors ? 1 : 0);
+    } catch (error: any) {
+      console.error('❌ 오류:', error.message);
+      process.exit(1);
+    }
+  });
+
+validate
+  .command('impact [interface-id]')
+  .description('인터페이스 영향 분석')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (interfaceId, options) => {
+    try {
+      const { analyzeInterfaceImpact, printInterfaceImpact } = await import(
+        './tools/validate-cross.js'
+      );
+      const results = await analyzeInterfaceImpact(options.project, interfaceId);
+      printInterfaceImpact(results);
+
+      const hasIssues = results.some(
+        (r) => r.impact.blockedConsumers > 0 || r.impact.atRiskConsumers > 0
+      );
+      process.exit(hasIssues ? 1 : 0);
+    } catch (error: any) {
+      console.error('❌ 오류:', error.message);
+      process.exit(1);
+    }
+  });
+
+validate
+  .command('terms-recursive')
+  .description('재귀 용어 검증 (우선순위 기반)')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .action(async (options) => {
+    try {
+      const { validateTermsRecursive, printRecursiveTerms } = await import(
+        './tools/validate-cross.js'
+      );
+      const results = await validateTermsRecursive(options.project);
+      printRecursiveTerms(results);
+
+      const hasCritical = results.some((r) => r.severity === 'critical');
+      process.exit(hasCritical ? 1 : 0);
+    } catch (error: any) {
+      console.error('❌ 오류:', error.message);
+      process.exit(1);
+    }
+  });
+
+validate
   .command('all')
-  .description('전체 검증 실행')
+  .description('전체 검증 실행 (재귀 검증 포함)')
   .option('-p, --project <path>', '프로젝트 디렉토리 경로 (기본값: 현재 디렉토리)', process.cwd())
+  .option('--skip-cross', '재귀 검증 스킵')
   .action(async (options) => {
     console.log('🔄 전체 검증 실행...\n');
+
+    // Phase 1: Individual validations
+    console.log('━━━ Phase 1: Individual Validations ━━━\n');
 
     // 마이그레이션 검증
     const migrationResult = await validateMigration({ projectPath: options.project });
@@ -213,33 +299,136 @@ validate
 
     // 스펙 고아 코드 검증
     const specOrphansResult = await validateSpecOrphans({ projectPath: options.project });
+    console.log('\n');
 
-    const success =
-      migrationResult.success &&
-      namingResult.success &&
-      structureResult.success &&
-      orphansResult.success &&
-      specOrphansResult.success;
+    // 인터페이스 검증
+    const interfaceResult = validateInterfaceLinks(options.project);
+    printValidationResults(interfaceResult);
+    console.log('\n');
 
-    console.log('\n━'.repeat(40));
-    console.log('📊 전체 검증 요약\n');
-    console.log(`마이그레이션: ${migrationResult.success ? '✅ 통과' : '❌ 실패'}`);
-    console.log(`네이밍 컨벤션: ${namingResult.success ? '✅ 통과' : '❌ 실패'}`);
-    console.log(`구조 검증: ${structureResult.success ? '✅ 통과' : '❌ 실패'}`);
-    console.log(
-      `고아 파일: ${orphansResult.success ? '✅ 통과' : `⚠️  ${orphansResult.orphanFiles}개 발견`}`
-    );
-    console.log(
-      `스펙 고아 코드: ${specOrphansResult.success ? '✅ 통과' : `❌ ${specOrphansResult.orphanExports.length}개 발견`}`
-    );
+    // 용어 검증
+    const termsResult = await validateTerms({ projectPath: options.project });
+    console.log('\n');
 
-    if (success) {
-      console.log('\n✅ 전체 검증 통과');
+    // Phase 2: Cross validations (unless skipped)
+    if (!options.skipCross) {
+      console.log('━━━ Phase 2: Cross Validations (Recursive) ━━━\n');
+
+      const {
+        checkDependencyReadiness,
+        checkProgressQuality,
+        analyzeInterfaceImpact,
+        validateTermsRecursive,
+        printDependencyReadiness,
+        printProgressQuality,
+        printInterfaceImpact,
+        printRecursiveTerms,
+      } = await import('./tools/validate-cross.js');
+
+      const dependencyResults = await checkDependencyReadiness(options.project);
+      printDependencyReadiness(dependencyResults);
+
+      const qualityResults = await checkProgressQuality(options.project);
+      printProgressQuality(qualityResults);
+
+      const impactResults = await analyzeInterfaceImpact(options.project);
+      printInterfaceImpact(impactResults);
+
+      const recursiveTermsResults = await validateTermsRecursive(options.project);
+      printRecursiveTerms(recursiveTermsResults);
+
+      // Overall summary with cross-validation results
+      console.log('━'.repeat(80));
+      console.log('📊 전체 검증 요약\n');
+
+      const blockedFeatures = dependencyResults.filter((r) => r.readiness === 'blocked').length;
+      const unsafeFeatures = qualityResults.filter((r) => r.recommendation === 'not_ready').length;
+      const highImpactInterfaces = impactResults.filter(
+        (r) => r.impact.blockedConsumers > 0 || r.impact.atRiskConsumers > 0
+      ).length;
+      const criticalTerms = recursiveTermsResults.filter((r) => r.severity === 'critical').length;
+
+      console.log('Individual Validations:');
+      console.log(`  마이그레이션: ${migrationResult.success ? '✅ 통과' : '❌ 실패'}`);
+      console.log(`  네이밍 컨벤션: ${namingResult.success ? '✅ 통과' : '❌ 실패'}`);
+      console.log(`  구조 검증: ${structureResult.success ? '✅ 통과' : '❌ 실패'}`);
+      console.log(
+        `  고아 파일: ${orphansResult.success ? '✅ 통과' : `⚠️  ${orphansResult.orphanFiles}개 발견`}`
+      );
+      console.log(
+        `  스펙 고아 코드: ${specOrphansResult.success ? '✅ 통과' : `❌ ${specOrphansResult.orphanExports.length}개 발견`}`
+      );
+      console.log(
+        `  인터페이스: ${interfaceResult.summary.errorCount === 0 ? '✅ 통과' : `❌ ${interfaceResult.summary.errorCount}개 에러`}`
+      );
+      console.log(`  용어: ${termsResult.success ? '✅ 통과' : '❌ 실패'}`);
+
+      console.log('\nCross Validations:');
+      console.log(
+        `  의존성 준비도: ${blockedFeatures === 0 ? '✅ 통과' : `❌ ${blockedFeatures}개 blocked`}`
+      );
+      console.log(
+        `  진행도-품질: ${unsafeFeatures === 0 ? '✅ 통과' : `⚠️  ${unsafeFeatures}개 not ready`}`
+      );
+      console.log(
+        `  인터페이스 영향: ${highImpactInterfaces === 0 ? '✅ 통과' : `⚠️  ${highImpactInterfaces}개 high impact`}`
+      );
+      console.log(
+        `  재귀 용어: ${criticalTerms === 0 ? '✅ 통과' : `❌ ${criticalTerms}개 critical`}`
+      );
+
+      const hasErrors =
+        !migrationResult.success ||
+        !namingResult.success ||
+        !structureResult.success ||
+        !specOrphansResult.success ||
+        interfaceResult.summary.errorCount > 0 ||
+        !termsResult.success ||
+        blockedFeatures > 0 ||
+        criticalTerms > 0;
+
+      console.log();
+      if (hasErrors) {
+        console.log('❌ 검증 실패 - 에러를 수정하세요');
+        process.exit(1);
+      } else {
+        console.log('✅ 모든 검증 통과');
+        process.exit(0);
+      }
     } else {
-      console.log('\n❌ 일부 검증 실패');
-    }
+      // Original summary (without cross-validation)
+      const success =
+        migrationResult.success &&
+        namingResult.success &&
+        structureResult.success &&
+        orphansResult.success &&
+        specOrphansResult.success &&
+        interfaceResult.summary.errorCount === 0 &&
+        termsResult.success;
 
-    process.exit(success ? 0 : 1);
+      console.log('\n━'.repeat(40));
+      console.log('📊 전체 검증 요약\n');
+      console.log(`마이그레이션: ${migrationResult.success ? '✅ 통과' : '❌ 실패'}`);
+      console.log(`네이밍 컨벤션: ${namingResult.success ? '✅ 통과' : '❌ 실패'}`);
+      console.log(`구조 검증: ${structureResult.success ? '✅ 통과' : '❌ 실패'}`);
+      console.log(
+        `고아 파일: ${orphansResult.success ? '✅ 통과' : `⚠️  ${orphansResult.orphanFiles}개 발견`}`
+      );
+      console.log(
+        `스펙 고아 코드: ${specOrphansResult.success ? '✅ 통과' : `❌ ${specOrphansResult.orphanExports.length}개 발견`}`
+      );
+      console.log(
+        `인터페이스: ${interfaceResult.summary.errorCount === 0 ? '✅ 통과' : `❌ ${interfaceResult.summary.errorCount}개 에러`}`
+      );
+      console.log(`용어: ${termsResult.success ? '✅ 통과' : '❌ 실패'}`);
+
+      if (success) {
+        console.log('\n✅ 전체 검증 통과');
+      } else {
+        console.log('\n❌ 일부 검증 실패');
+      }
+      process.exit(success ? 0 : 1);
+    }
   });
 
 // Sync commands

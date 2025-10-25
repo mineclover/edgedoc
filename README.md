@@ -198,7 +198,185 @@ edgedoc graph query --term "Entry Point Module"
 - Term 정의 및 사용처 추적
 - 빌드 시간: ~20ms (17 features, 31 code files, 24 terms)
 
-#### 5. 옵션
+#### 5. Tasks 관리
+
+**모든 feature task 목록 조회**:
+```bash
+edgedoc tasks list
+```
+
+**출력 예시**:
+```
+📋 전체 Tasks (12개)
+
+[#01] validate-migration (feature) ████████████████████ 100% (14/14)
+  Status: active | Priority: high
+  File: tasks/features/01_ValidateMigration.md
+  Title: Validate Migration Progress
+
+[#02] validate-naming (feature) ██████████████████░░ 85% (11/13)
+  Status: active | Priority: medium
+  File: tasks/features/02_ValidateNaming.md
+  Title: Interface & Shared Type Naming Convention Validation
+```
+
+**특정 feature 상세 조회**:
+```bash
+edgedoc tasks get mcp-server
+```
+
+**전체 진행 현황 대시보드**:
+```bash
+edgedoc tasks progress
+```
+
+**출력 예시**:
+```
+📊 Tasks Progress Dashboard
+
+📝 Total Tasks: 12
+
+Status Distribution:
+  ✅ active: 8 (67%)
+  🔄 in_progress: 2 (17%)
+  📋 planned: 2 (17%)
+
+Overall Progress:
+  Total Checkboxes: 156
+  Checked: 89
+  Progress: ████████████░░░░░░░░ 57%
+```
+
+**코드 파일로 역참조 조회**:
+```bash
+# 특정 코드 파일이 어떤 feature에 문서화되어 있는지 + 해당 feature의 tasks 조회
+edgedoc tasks list --code src/tools/validate-naming.ts
+
+# 미완료 tasks만 필터링
+edgedoc tasks list --code src/tools/validate-naming.ts --incomplete
+```
+
+**인터페이스로 역참조 조회**:
+```bash
+# 특정 인터페이스를 제공하거나 사용하는 feature의 tasks 조회
+edgedoc tasks list --interface validation/naming
+
+# 미완료만
+edgedoc tasks list --interface validation/naming --incomplete
+```
+
+**용어로 역참조 조회**:
+```bash
+# 특정 용어를 정의한 feature의 tasks 조회
+edgedoc tasks list --term interface-naming
+```
+
+**미완료 tasks만 필터링**:
+```bash
+edgedoc tasks list --incomplete
+```
+
+**주요 기능**:
+- 체크박스 기반 진행도 계산 (`[x]` vs `[ ]`)
+- 상태별/타입별/우선순위별 분류
+- 역참조: Code → Feature → Tasks
+- 역참조: Interface → Feature → Tasks
+- 역참조: Term → Feature → Tasks
+- 미완료 필터링으로 집중 워크플로우 지원
+
+#### 6. 인터페이스 검증
+
+**양방향 링크 및 Sibling Coverage 검증**:
+```bash
+edgedoc validate interfaces
+```
+
+**출력 예시**:
+```
+🔍 Validating interface links...
+
+✅ Bidirectional Links: OK
+   - All used interfaces have providers
+   - No unused interfaces found
+
+⚠️  Sibling Coverage Issues (2):
+
+  Namespace: api
+  Feature: api-client
+  Provided: api/client, api/request (2/4 siblings)
+  Missing: api/response, api/websocket
+
+💡 When documenting interfaces in a namespace, consider documenting all siblings
+   to maintain complete "field of view" coverage.
+```
+
+**특정 feature만 검증**:
+```bash
+edgedoc validate interfaces --feature api-client
+```
+
+**특정 namespace만 검증**:
+```bash
+edgedoc validate interfaces --namespace api
+```
+
+**상세 출력**:
+```bash
+edgedoc validate interfaces --verbose
+```
+
+**검증 항목**:
+- **Bidirectional Links**: `provides` ↔ `uses` 관계 일치 여부
+  - Missing Providers: 사용되지만 제공되지 않는 인터페이스
+  - Unused Interfaces: 제공되지만 사용되지 않는 인터페이스
+- **Sibling Coverage** (Field of View): 네임스페이스 내 부분 문서화 감지
+  - 한 feature가 `auth/login`을 문서화하면 `auth/logout`, `auth/refresh` 등 sibling도 문서화해야 함
+
+#### 7. Details 블록 관리
+
+**마크다운 파일의 details 블록 목록 조회**:
+```bash
+edgedoc docs list tasks/features/01_ValidateMigration.md
+```
+
+**출력 예시**:
+```
+📄 File: tasks/features/01_ValidateMigration.md
+
+Total <details> blocks: 3
+
+[0] ⬇️  Implementation Details (closed)
+    Lines: 45-89
+
+[1] ⬆️  Example Output (open)
+    Lines: 95-128
+
+[2] ⬇️  Technical Notes (closed)
+    Lines: 142-167
+```
+
+**특정 블록 열기**:
+```bash
+edgedoc docs open tasks/features/01_ValidateMigration.md --index 0 2
+```
+
+**모든 블록 열기**:
+```bash
+edgedoc docs open tasks/features/01_ValidateMigration.md --all
+```
+
+**모든 블록 닫기**:
+```bash
+edgedoc docs close tasks/features/01_ValidateMigration.md --all
+```
+
+**주요 기능**:
+- `<details>` 태그 파싱 (단일/다중 라인 summary 지원)
+- 인덱스 기반 선택적 토글
+- 일괄 열기/닫기
+- 변경 사항 자동 저장
+
+#### 8. 옵션
 
 - \`-p, --project <path>\`: 프로젝트 디렉토리 경로 (기본값: 현재 디렉토리)
 - \`-m, --markdown\`: 마크다운 리포트 생성 (tasks-v2/MIGRATION_REPORT.md, migration 전용)
@@ -279,14 +457,24 @@ edgedoc/
 ### Phase 2: MCP 서버 ✅ (완료)
 - [x] MCP 서버 구현
 - [x] AI 에이전트 통합
-- [x] 도구 노출 (validate, graph, terms)
+- [x] 검증 도구 노출 (validate migration, naming, orphans, interfaces)
+- [x] 그래프 도구 노출 (graph build, query)
+- [x] 용어 도구 노출 (terms validate, list, find)
+- [x] Tasks 관리 도구 (list, get, progress, 역참조)
+- [x] Docs 관리 도구 (list, open, close details 블록)
 - [x] 동적 리소스 제공 (reference index, features, terms)
 - [x] 개별 feature/term/code 조회
+- [x] **총 18개 MCP 도구 완료**
 
-### Phase 3: 추가 기능 (예정)
-- [ ] 코드 참조 동기화
-- [ ] details 블록 관리
+### Phase 3: 추가 기능 (일부 완료)
+- [x] Tasks 관리 시스템 (체크박스 기반 진행도)
+- [x] 역참조 조회 (Code/Interface/Term → Feature → Tasks)
+- [x] 인터페이스 양방향 검증
+- [x] Sibling Coverage 검증 (Field of View)
+- [x] Details 블록 관리 (단일/다중라인 summary)
+- [ ] 코드 참조 자동 동기화
 - [ ] CI/CD 통합
+- [ ] 테스트 커버리지
 
 ## 기술 스택
 
@@ -306,5 +494,5 @@ MIT
 
 ---
 
-**작성일**: 2025-10-23
-**상태**: CLI 완성, MCP 개발 중
+**작성일**: 2025-10-23 (최종 수정: 2025-10-25)
+**상태**: CLI + MCP 완성 (18개 도구), 추가 기능 개발 중

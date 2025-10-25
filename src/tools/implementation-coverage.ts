@@ -165,6 +165,11 @@ function parseFrontmatter(content: string): Record<string, any> {
 
 /**
  * Extract components from Architecture/Components section
+ *
+ * Supports multiple documentation patterns:
+ * 1. "1. **Name** (`path`)" - numbered list with inline path
+ * 2. "### Name" + "**File**: `path`" - heading + file field
+ * 3. "### Name" + "**Location**: `path`" - heading + location field
  */
 export function extractDocumentedComponents(
   docContent: string,
@@ -173,23 +178,23 @@ export function extractDocumentedComponents(
   const components: DocumentedComponent[] = [];
   const lines = docContent.split('\n');
 
-  let inComponentsSection = false;
+  let inArchitectureSection = false;
   let currentComponent: Partial<DocumentedComponent> | null = null;
   let currentMethods: string[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Detect Components section
-    if (line.match(/^###?\s+(Components|Architecture)/i)) {
-      inComponentsSection = true;
+    // Detect Architecture/Components/Implementation section
+    if (line.match(/^##\s+(Components|Architecture|Implementation)/i)) {
+      inArchitectureSection = true;
       continue;
     }
 
-    // Exit section on next major heading
-    if (inComponentsSection && line.match(/^##[^#]/)) {
+    // Exit section on next ## heading (but not ###)
+    if (inArchitectureSection && line.match(/^##\s+[^#]/)) {
       // Save last component
-      if (currentComponent && currentComponent.name) {
+      if (currentComponent && currentComponent.name && currentComponent.filePath) {
         components.push({
           ...currentComponent,
           publicMethods: currentMethods,
@@ -198,14 +203,13 @@ export function extractDocumentedComponents(
       break;
     }
 
-    if (!inComponentsSection) continue;
+    if (!inArchitectureSection) continue;
 
-    // Match component definition: "1. **ComponentName** (`path/to/file.ts`)"
-    // Also handle variations with spaces
-    const componentMatch = line.match(/^\s*\d+\.\s+\*\*([^*]+)\*\*\s+\(`([^`]+)`\)/);
-    if (componentMatch) {
+    // Pattern 1: "1. **ComponentName** (`path/to/file.ts`)"
+    const numberedMatch = line.match(/^\s*\d+\.\s+\*\*([^*]+)\*\*\s+\(`([^`]+)`\)/);
+    if (numberedMatch) {
       // Save previous component
-      if (currentComponent && currentComponent.name) {
+      if (currentComponent && currentComponent.name && currentComponent.filePath) {
         components.push({
           ...currentComponent,
           publicMethods: currentMethods,
@@ -213,13 +217,42 @@ export function extractDocumentedComponents(
       }
 
       currentComponent = {
-        name: componentMatch[1].trim(),
-        filePath: componentMatch[2].trim(),
+        name: numberedMatch[1].trim(),
+        filePath: numberedMatch[2].trim(),
         description: '',
         featureId,
         docLine: i + 1,
       };
       currentMethods = [];
+      continue;
+    }
+
+    // Pattern 2 & 3: "### ComponentName" heading
+    const headingMatch = line.match(/^###\s+([A-Z][A-Za-z0-9_\s]+)/);
+    if (headingMatch) {
+      // Save previous component
+      if (currentComponent && currentComponent.name && currentComponent.filePath) {
+        components.push({
+          ...currentComponent,
+          publicMethods: currentMethods,
+        } as DocumentedComponent);
+      }
+
+      currentComponent = {
+        name: headingMatch[1].trim(),
+        filePath: '', // Will be filled by **File**: or **Location**:
+        description: '',
+        featureId,
+        docLine: i + 1,
+      };
+      currentMethods = [];
+      continue;
+    }
+
+    // Extract file path: "**File**: `path`" or "**Location**: `path`"
+    const fileMatch = line.match(/^\*\*(File|Location)\*\*:\s*`([^`]+)`/);
+    if (fileMatch && currentComponent) {
+      currentComponent.filePath = fileMatch[2].trim();
       continue;
     }
 
@@ -239,15 +272,19 @@ export function extractDocumentedComponents(
         continue;
       }
 
-      // Capture description (first non-bullet line after component)
-      if (!currentComponent.description && line.trim() && !line.trim().startsWith('-')) {
+      // Capture description (first non-bullet, non-code line after component)
+      if (!currentComponent.description &&
+          line.trim() &&
+          !line.trim().startsWith('-') &&
+          !line.trim().startsWith('**') &&
+          !line.trim().startsWith('```')) {
         currentComponent.description = line.trim();
       }
     }
   }
 
   // Save last component
-  if (currentComponent && currentComponent.name) {
+  if (currentComponent && currentComponent.name && currentComponent.filePath) {
     components.push({
       ...currentComponent,
       publicMethods: currentMethods,
@@ -415,8 +452,36 @@ export function calculateFeatureCoverage(
   const checked = checkboxes.filter(cb => cb.match(/\[x\]/i)).length;
 
   // Calculate interface coverage (all exported names)
-  const allDocumentedInterfaces = new Set(documentedComponents.map(c => c.name));
-  const allImplementedInterfaces = new Set(implementedInterfaces.map(i => i.name));
+  // For documented interfaces: only add component name if it matches an actual export
+  // Otherwise, documentation component names are just descriptive labels
+  const allDocumentedInterfaces = new Set<string>();
+  for (const component of documentedComponents) {
+    // Find the implementation for this component
+    const impl = implementedInterfaces.find(i =>
+      i.name === component.name || i.filePath === component.filePath
+    );
+
+    // Only add component name if it matches an actual export name
+    if (impl && impl.name === component.name) {
+      allDocumentedInterfaces.add(component.name);
+    }
+
+    // Add documented public methods as well
+    for (const method of component.publicMethods) {
+      allDocumentedInterfaces.add(method);
+    }
+  }
+
+  // For implemented interfaces: collect all exports from all files
+  const allImplementedInterfaces = new Set<string>();
+  for (const impl of implementedInterfaces) {
+    // Add the main export name
+    allImplementedInterfaces.add(impl.name);
+    // Add all other exports from the file
+    for (const exportName of impl.exports) {
+      allImplementedInterfaces.add(exportName);
+    }
+  }
 
   // Check test files
   const testFiles: string[] = frontmatter.test_files || [];

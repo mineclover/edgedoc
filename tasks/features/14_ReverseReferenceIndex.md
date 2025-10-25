@@ -220,9 +220,9 @@ export interface TermIndex {
 - [ ] Test with actual project docs
 - [ ] Validate generated JSON schema
 
-### Task 10: Documentation
-- [ ] README에 `edgedoc graph` 사용법 추가
-- [ ] SYNTAX_GUIDE에 인덱스 설명 추가
+### Task 10: Documentation ✅
+- [x] README에 `edgedoc graph` 사용법 추가
+- [x] SYNTAX_GUIDE에 인덱스 설명 추가
 - [ ] JSON schema 문서화
 
 ## Usage Examples

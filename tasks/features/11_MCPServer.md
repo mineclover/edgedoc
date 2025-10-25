@@ -1,6 +1,6 @@
 ---
 type: feature
-status: in_progress
+status: active
 feature: mcp-server
 priority: low
 entry_point: "src/index.ts"
@@ -21,7 +21,7 @@ Model Context Protocol (MCP) server for AI agent integration. Exposes validation
 
 ## Status
 
-🚧 **In Development** - Infrastructure in place, tools not yet exposed.
+✅ **Phase 1 Complete** - 18 tools fully exposed with CLI proxy pattern.
 
 ## Architecture
 
@@ -61,10 +61,16 @@ The MCP server provides:
 
 ## Implementation Plan
 
-### Phase 1: Basic Server (Current)
+### Phase 1: Basic Server ✅
 - [x] MCP server infrastructure
-- [ ] Tool registration
-- [ ] Basic validation exposure
+- [x] Tool registration (18 tools)
+- [x] Basic validation exposure
+- [x] Graph tools (build, query)
+- [x] Term tools (validate, list, find)
+- [x] Task tools (list, get, progress) with reverse lookup
+- [x] Docs tools (list, open, close)
+- [x] Interface validation
+- [x] Resources (static docs + dynamic project data)
 
 ### Phase 2: Advanced Features (Future)
 - [ ] Real-time validation events

@@ -1,6 +1,6 @@
 ---
 type: feature
-status: planned
+status: active
 feature: tasks-management
 priority: high
 entry_point: "src/cli.ts"
@@ -8,9 +8,7 @@ related_features:
   - 14_ReverseReferenceIndex
   - 13_ValidateTerms
 code_references:
-  - "src/tools/tasks-manager.ts"
-  - "src/parsers/TaskParser.ts"
-  - "src/types/tasks.ts"
+  - "src/tools/tasks-list.ts"
 ---
 
 # Tasks Management
@@ -159,69 +157,66 @@ export interface ReferenceInfo {
 ## Implementation Tasks
 
 ### Task 1: Type Definitions
-- [ ] `src/types/tasks.ts` 작성
-- [ ] `Task`, `TaskItem`, `TaskCheckbox` 타입
-- [ ] `TaskSummary`, `ReferenceInfo` 타입
+- [x] `src/types/tasks.ts` 작성 (TaskInfo, TasksListOptions in tasks-list.ts)
+- [x] `Task`, `TaskItem`, `TaskCheckbox` 타입 (simplified as TaskInfo)
+- [x] `TaskSummary`, `ReferenceInfo` 타입 (ProgressSummary)
 
 ### Task 2: Task Parser
-- [ ] `src/parsers/TaskParser.ts` 작성
-- [ ] `parseTaskDocument()` 함수
-- [ ] Frontmatter 파싱
-- [ ] 체크박스 정규식: `- [ ]` vs `- [x]`
-- [ ] Task 계층 구조 파싱 (헤딩 레벨)
+- [x] Task parsing logic (in tasks-list.ts)
+- [x] `parseTaskDocument()` 함수 (parseFrontmatter, extractTitle)
+- [x] Frontmatter 파싱
+- [x] 체크박스 정규식: `- [ ]` vs `- [x]` (countCheckboxes)
+- [ ] Task 계층 구조 파싱 (헤딩 레벨) - simplified to flat count
 
 ### Task 3: Checkbox Counter
-- [ ] `countCheckboxes()` 함수
-- [ ] Task별 체크박스 그룹화
-- [ ] 진행률 계산 (checked/total)
-- [ ] 다음 미완료 항목 찾기
+- [x] `countCheckboxes()` 함수
+- [x] Task별 체크박스 그룹화 (per feature)
+- [x] 진행률 계산 (checked/total)
+- [x] 다음 미완료 항목 찾기 (filterIncompleteTasks)
 
 ### Task 4: Task Manager Core
-- [ ] `src/tools/tasks-manager.ts` 작성
-- [ ] `loadAllTasks()` 함수 (tasks/ 디렉토리 스캔)
-- [ ] `filterTasks()` 함수
-- [ ] `sortTasks()` 함수
-- [ ] `calculateSummary()` 함수
+- [x] Task management (in tasks-list.ts, no separate file)
+- [x] `loadAllTasks()` 함수 (listTasks)
+- [x] `filterTasks()` 함수 (status, priority filters + filterIncompleteTasks)
+- [x] `sortTasks()` 함수 (by priority, progress)
+- [x] `calculateSummary()` 함수 (calculateProgress)
 
 ### Task 5: tasks list Command
-- [ ] `edgedoc tasks list` CLI 명령어
-- [ ] 기본 출력: 전체 feature 목록
-- [ ] `--status` 필터 (planned, in_progress, active)
-- [ ] `--priority` 필터 (high, medium, low)
-- [ ] `--type` 필터 (feature, test, interface)
-- [ ] Progress bar 표시
-- [ ] 색상 지원 (chalk)
+- [x] `edgedoc tasks list` CLI 명령어
+- [x] 기본 출력: 전체 feature 목록
+- [x] `--status` 필터 (planned, in_progress, active)
+- [x] `--priority` 필터 (high, medium, low)
+- [x] `--type` 필터 (feature, test, interface) - via status
+- [x] Progress bar 표시
+- [ ] 색상 지원 (chalk) - using emojis instead
 
 ### Task 6: tasks get Command
-- [ ] `edgedoc tasks get <feature-id>` CLI 명령어
-- [ ] Feature 상세 정보 출력
-- [ ] Task 계층 구조 표시 (들여쓰기)
-- [ ] 체크박스 상태 표시 (✅ ⬜)
-- [ ] "다음 할 일" 하이라이트
-- [ ] 관련 참조 정보 (code, features, terms)
+- [x] `edgedoc tasks get <feature-id>` CLI 명령어
+- [x] Feature 상세 정보 출력
+- [ ] Task 계층 구조 표시 (들여쓰기) - simplified
+- [x] 체크박스 상태 표시 (✅ ⬜)
+- [ ] "다음 할 일" 하이라이트 - not implemented
+- [x] 관련 참조 정보 (code, features, terms) - via reverse lookup
 
 ### Task 7: tasks progress Command
-- [ ] `edgedoc tasks progress` CLI 명령어
-- [ ] 전체 프로젝트 진행률 대시보드
-- [ ] 타입별 통계 (feature, test, interface)
-- [ ] 상태별 통계 (planned, in_progress, active)
-- [ ] 최근 완료 항목 (git log 활용)
-- [ ] Progress bar visualization
+- [x] `edgedoc tasks progress` CLI 명령어
+- [x] 전체 프로젝트 진행률 대시보드
+- [x] 타입별 통계 (feature, test, interface)
+- [x] 상태별 통계 (planned, in_progress, active)
+- [ ] 최근 완료 항목 (git log 활용) - not implemented
+- [x] Progress bar visualization
 
 ### Task 8: tasks next Command (Optional)
-- [ ] `edgedoc tasks next` CLI 명령어
-- [ ] 다음 할 일 추천 알고리즘:
-  - [ ] 우선순위 높은 것
-  - [ ] 의존성 해결된 것
-  - [ ] 진행 중인 것 우선
-- [ ] 추천 이유 설명
+- [ ] `edgedoc tasks next` CLI 명령어 - not needed
+- [x] Alternative: `--incomplete` filter for context-specific workflow
+- [x] Filter by code/interface/term + incomplete
 
 ### Task 9: Reference Tracking Integration
-- [ ] 14_ReverseReferenceIndex와 통합
-- [ ] `--references` 옵션: 참조 정보 표시
-- [ ] 코드 파일 → 어떤 feature가 사용?
-- [ ] Feature → 어떤 interface 제공?
-- [ ] Term → 어떤 문서에서 사용?
+- [x] 14_ReverseReferenceIndex와 통합
+- [x] Reverse lookup: 참조 정보 표시
+- [x] 코드 파일 → 어떤 feature가 사용? (--code)
+- [x] Feature → 어떤 interface 제공? (--interface)
+- [x] Term → 어떤 문서에서 사용? (--term)
 
 ### Task 10: Testing
 - [ ] Unit tests for TaskParser

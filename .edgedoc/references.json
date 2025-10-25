@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "generated": "2025-10-24T14:40:57.986Z",
+  "generated": "2025-10-25T00:45:22.884Z",
   "features": {
     "00_Init": {
       "file": "tasks/features/00_Init.md",
@@ -60,6 +60,7 @@
       "code": {
         "uses": [
           "src/tools/build-reference-index.ts",
+          "src/tools/graph-query.ts",
           "src/types/reference-index.ts"
         ],
         "used_by": []
@@ -467,9 +468,7 @@
       "file": "tasks/features/15_TasksManagement.md",
       "code": {
         "uses": [
-          "src/tools/tasks-manager.ts",
-          "src/parsers/TaskParser.ts",
-          "src/types/tasks.ts"
+          "src/tools/tasks-list.ts"
         ],
         "used_by": []
       },
@@ -865,6 +864,14 @@
       "imports": [],
       "imported_by": []
     },
+    "src/tools/graph-query.ts": {
+      "type": "source",
+      "documented_in": [
+        "reverse-reference-index"
+      ],
+      "imports": [],
+      "imported_by": []
+    },
     "src/types/reference-index.ts": {
       "type": "source",
       "documented_in": [
@@ -970,23 +977,7 @@
       "imports": [],
       "imported_by": []
     },
-    "src/tools/tasks-manager.ts": {
-      "type": "source",
-      "documented_in": [
-        "tasks-management"
-      ],
-      "imports": [],
-      "imported_by": []
-    },
-    "src/parsers/TaskParser.ts": {
-      "type": "source",
-      "documented_in": [
-        "tasks-management"
-      ],
-      "imports": [],
-      "imported_by": []
-    },
-    "src/types/tasks.ts": {
+    "src/tools/tasks-list.ts": {
       "type": "source",
       "documented_in": [
         "tasks-management"
@@ -1451,7 +1442,7 @@
       "references": [
         {
           "file": "tasks/features/14_ReverseReferenceIndex.md",
-          "line": 376,
+          "line": 377,
           "context": "- [[Validation]]: 구조 검증과 통합"
         },
         {
@@ -1461,7 +1452,7 @@
         },
         {
           "file": "tasks/features/15_TasksManagement.md",
-          "line": 530,
+          "line": 525,
           "context": "- [[Validation]]: 전체 검증 시스템"
         },
         {
@@ -1501,12 +1492,12 @@
       "references": [
         {
           "file": "tasks/features/14_ReverseReferenceIndex.md",
-          "line": 377,
+          "line": 378,
           "context": "- [[Code References]]: Frontmatter 필드"
         },
         {
           "file": "tasks/features/15_TasksManagement.md",
-          "line": 531,
+          "line": 526,
           "context": "- [[Code References]]: Frontmatter 필드"
         },
         {

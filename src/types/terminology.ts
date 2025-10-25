@@ -45,7 +45,8 @@ export interface ValidationError {
     | 'scope_violation'
     | 'circular_reference'
     | 'unused_definition'
-    | 'isolated_term';
+    | 'isolated_term'
+    | 'duplicate_term';
   severity: 'error' | 'warning';
   term: string;
   message: string;

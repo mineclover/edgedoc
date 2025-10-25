@@ -203,7 +203,7 @@ function printValidationResults(result: ValidationResult): void {
     console.log(`   → ${isolatedWarnings.length}개 발견\n`);
 
     for (const warning of isolatedWarnings) {
-      console.log(`   🔗 "${warning.term}"`);
+      console.log(`   🔗 ${warning.message}`);
       console.log(`      ${warning.location?.file}:${warning.location?.line}`);
       console.log(`      ${warning.suggestion}`);
     }
@@ -211,6 +211,23 @@ function printValidationResults(result: ValidationResult): void {
   } else {
     console.log('✅ 4. 고립된 용어');
     console.log(`   → 모든 용어가 다른 용어와 연결되었습니다\n`);
+  }
+
+  // 5. Duplicate terms (similar definitions)
+  const duplicateWarnings = warnings.filter((w) => w.type === 'duplicate_term');
+  if (duplicateWarnings.length > 0) {
+    console.log('⚠️  5. 중복 가능성 (유사한 정의)');
+    console.log(`   → ${duplicateWarnings.length}개 발견\n`);
+
+    for (const warning of duplicateWarnings) {
+      console.log(`   🔄 ${warning.message}`);
+      console.log(`      ${warning.location?.file}:${warning.location?.line}`);
+      console.log(`      ${warning.suggestion}`);
+    }
+    console.log();
+  } else {
+    console.log('✅ 5. 중복 가능성');
+    console.log(`   → 중복된 정의 없음\n`);
   }
 
   // Summary

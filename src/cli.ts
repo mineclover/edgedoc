@@ -24,6 +24,7 @@ import {
   printTasksForReference,
   calculateProgress,
   printProgressDashboard,
+  filterIncompleteTasks,
 } from './tools/tasks-list.js';
 import {
   listDetailsBlocks,
@@ -390,36 +391,51 @@ tasks
   .option('--code <file>', '코드 파일 경로로 feature 찾기')
   .option('--interface <id>', '인터페이스 ID로 feature 찾기')
   .option('--term <name>', '용어 이름으로 feature 찾기')
+  .option('--incomplete', '미완료 tasks만 표시')
   .option('-v, --verbose', '상세 출력')
   .action(async (options) => {
     try {
       // Code file lookup
       if (options.code) {
-        const { featureIds, tasks } = await getTasksByCode(options.project, options.code);
+        let { featureIds, tasks } = await getTasksByCode(options.project, options.code);
+        if (options.incomplete) {
+          tasks = filterIncompleteTasks(tasks);
+        }
         printTasksForReference('code', options.code, featureIds, tasks);
         process.exit(0);
       }
 
       // Interface lookup
       if (options.interface) {
-        const { featureIds, tasks } = await getTasksByInterface(options.project, options.interface);
+        let { featureIds, tasks } = await getTasksByInterface(options.project, options.interface);
+        if (options.incomplete) {
+          tasks = filterIncompleteTasks(tasks);
+        }
         printTasksForReference('interface', options.interface, featureIds, tasks);
         process.exit(0);
       }
 
       // Term lookup
       if (options.term) {
-        const { featureIds, tasks } = await getTasksByTerm(options.project, options.term);
+        let { featureIds, tasks } = await getTasksByTerm(options.project, options.term);
+        if (options.incomplete) {
+          tasks = filterIncompleteTasks(tasks);
+        }
         printTasksForReference('term', options.term, featureIds, tasks);
         process.exit(0);
       }
 
       // Normal list
-      const taskList = await listTasks({
+      let taskList = await listTasks({
         projectPath: options.project,
         status: options.status,
         priority: options.priority,
       });
+
+      if (options.incomplete) {
+        taskList = filterIncompleteTasks(taskList);
+      }
+
       printTasksList(taskList, { verbose: options.verbose });
       process.exit(0);
     } catch (error) {

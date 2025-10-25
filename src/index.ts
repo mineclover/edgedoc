@@ -306,6 +306,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               type: 'string',
               description: 'Reverse lookup: find tasks by term name',
             },
+            incomplete: {
+              type: 'boolean',
+              description: 'Show only incomplete tasks (progress < 100%)',
+            },
           },
         },
       },
@@ -556,6 +560,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
         if (args?.term) {
           cliArgs.push('--term', args.term as string);
+        }
+        if (args?.incomplete) {
+          cliArgs.push('--incomplete');
         }
         break;
       }

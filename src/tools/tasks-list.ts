@@ -352,6 +352,15 @@ export function printProgressDashboard(summary: ProgressSummary): void {
 }
 
 /**
+ * Filter incomplete tasks
+ */
+export function filterIncompleteTasks(tasks: TaskInfo[]): TaskInfo[] {
+  return tasks.filter(
+    (t) => t.status !== 'implemented' && t.checkboxes.progress < 100
+  );
+}
+
+/**
  * Get tasks by code file (reverse lookup via reference index)
  */
 export async function getTasksByCode(

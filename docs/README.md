@@ -58,6 +58,12 @@ edgedoc 프로젝트의 사용자 가이드입니다.
    - 프로젝트 전역 용어 정의
    - [[CLI]], [[MCP]] 등의 형식으로 참조
 
+8. **[SYNTAX_GUIDE.md](SYNTAX_GUIDE.md)** - 문법 가이드
+   - Frontmatter 문법
+   - 용어 참조 문법 (`[[Term]]`)
+   - 테스트-문서 참조 시스템
+   - JSDoc 어노테이션 (@feature, @doc)
+
 ---
 
 ## 🗄️ Archive (보관)
@@ -99,9 +105,10 @@ edgedoc 프로젝트의 사용자 가이드입니다.
 
 ### 문서 작성할 때
 1. [TASKS_README.md](TASKS_README.md) - 구조 확인
-2. [tasks/features/04_ValidateStructure.md](../tasks/features/04_ValidateStructure.md) - Frontmatter 규칙
-3. [tasks/features/13_ValidateTerms.md](../tasks/features/13_ValidateTerms.md) - `[[Term]]` 문법
-4. [GLOSSARY.md](GLOSSARY.md) - 용어 확인
+2. [SYNTAX_GUIDE.md](SYNTAX_GUIDE.md) - 문법 가이드 (Frontmatter, 용어, 테스트 참조)
+3. [tasks/features/04_ValidateStructure.md](../tasks/features/04_ValidateStructure.md) - Frontmatter 구현 스펙
+4. [tasks/features/13_ValidateTerms.md](../tasks/features/13_ValidateTerms.md) - 용어 검증 구현 스펙
+5. [GLOSSARY.md](GLOSSARY.md) - 용어 확인
 
 ### 검증할 때
 1. [VALIDATION_GUIDE.md](VALIDATION_GUIDE.md) - 검증 명령어
@@ -125,6 +132,7 @@ edgedoc 프로젝트의 사용자 가이드입니다.
 | VALIDATION_GUIDE.md | 검증 가이드 (재귀) | Guide | 2025-10-25 |
 | PROGRESS_TRACKING_GUIDE.md | 진행도 추적 | Guide | 2025-10-25 |
 | WORKFLOWS.md | 워크플로우 | Guide | 2025-10-24 |
+| SYNTAX_GUIDE.md | 문법 가이드 | Reference | 2025-10-25 |
 | GLOSSARY.md | 용어집 | Reference | 2025-10-24 |
 | MCP_SETUP.md | MCP 설정 | Guide | 2025-10-24 |
 | LANGUAGE_EXTENSION_GUIDE.md | 언어 확장 | Guide | 2025-10-24 |
@@ -133,20 +141,28 @@ edgedoc 프로젝트의 사용자 가이드입니다.
 
 ## Recent Changes (2025-10-25)
 
-### ✨ Restructured
+### ✨ Added
+- **SYNTAX_GUIDE.md** - Comprehensive syntax documentation
+  - Test-Document Reference system
+  - Frontmatter syntax (test_files, test_coverage)
+  - JSDoc annotations (@feature, @doc, @related)
+  - Bidirectional lookup examples
+  - Validation rules and CLI commands
+
+### ✨ Restructured (Earlier)
 - **Separated Specs from Guides**
   - Implementation specs → `tasks/features/`
   - User guides → `docs/`
 
-### 🗑️ Removed (duplicates in tasks/features/)
-- `SYNTAX_GUIDE.md` (→ Feature 04 & 13)
+### 🗑️ Removed (Earlier - duplicates in tasks/features/)
+- Old `SYNTAX_GUIDE.md` (→ Feature 04 & 13)
 - `TOOLS_README.md` (→ each feature defines own CLI)
 - `I18N_IMPLEMENTATION_STATUS.md` (→ Feature 10)
 
 ### 📊 Result
 - **Before**: 10 documents (mixed specs & guides)
-- **After**: 7 documents (user guides only)
-- **Principle**: Single source of truth in `tasks/features/`
+- **After**: 8 documents (7 guides + 1 comprehensive syntax reference)
+- **Principle**: Implementation specs in `tasks/features/`, user-facing syntax in `docs/`
 
 ---
 

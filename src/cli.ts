@@ -962,6 +962,107 @@ validate
     }
   });
 
+// Syntax validation
+validate
+  .command('syntax [term]')
+  .description('문법 검증 (Component Definition, Frontmatter Field, Term Definition)')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('-v, --verbose', '상세 출력')
+  .action(async (termName, options) => {
+    try {
+      const { validateComponentDefinition, validateFrontmatterField, validateTermDefinition, reportSyntaxErrors, findSyntaxTerm } = await import('./validators/syntax-validator.js');
+      const { collectSyntaxTerms } = await import('./tools/syntax-manager.js');
+
+      if (!termName) {
+        // Show available syntax validators
+        console.log(`📋 Syntax Validation\n`);
+        console.log(`사용 가능한 문법 검증:\n`);
+        console.log(`  edgedoc validate syntax component      # Component Definition 검증`);
+        console.log(`  edgedoc validate syntax frontmatter    # Frontmatter Field 검증`);
+        console.log(`  edgedoc validate syntax term           # Term Definition 검증\n`);
+        console.log(`전체 검증:`);
+        console.log(`  edgedoc validate all`);
+        process.exit(0);
+        return;
+      }
+
+      const lowerTerm = termName.toLowerCase();
+      let errors: any[] = [];
+
+      // Route to appropriate validator
+      if (lowerTerm.includes('component')) {
+        console.log(`🔍 [[Component Definition]] 검증\n`);
+        // Validate all feature files for component definitions
+        const fs = require('fs');
+        const path = require('path');
+        const featuresDir = path.join(options.project, 'tasks', 'features');
+
+        if (fs.existsSync(featuresDir)) {
+          const files = fs.readdirSync(featuresDir).filter((f: string) => f.endsWith('.md'));
+          for (const file of files) {
+            const filePath = path.join(featuresDir, file);
+            const fileErrors = validateComponentDefinition(filePath, options.project);
+            errors = errors.concat(fileErrors);
+          }
+        }
+      } else if (lowerTerm.includes('frontmatter') || lowerTerm.includes('field')) {
+        console.log(`🔍 [[Frontmatter Field]] 검증\n`);
+        // Validate all markdown files for frontmatter
+        const fs = require('fs');
+        const path = require('path');
+        const tasksDir = path.join(options.project, 'tasks');
+
+        if (fs.existsSync(tasksDir)) {
+          const walkDir = (dir: string) => {
+            const files = fs.readdirSync(dir);
+            for (const file of files) {
+              const filePath = path.join(dir, file);
+              const stat = fs.statSync(filePath);
+              if (stat.isDirectory()) {
+                walkDir(filePath);
+              } else if (file.endsWith('.md')) {
+                const fileErrors = validateFrontmatterField(filePath, options.project);
+                errors = errors.concat(fileErrors);
+              }
+            }
+          };
+          walkDir(tasksDir);
+        }
+      } else if (lowerTerm.includes('term')) {
+        console.log(`🔍 [[Term Definition]] 검증\n`);
+        // Validate term definitions in docs/terms/
+        const fs = require('fs');
+        const path = require('path');
+        const termsDir = path.join(options.project, 'docs', 'terms');
+
+        if (fs.existsSync(termsDir)) {
+          const files = fs.readdirSync(termsDir).filter((f: string) => f.endsWith('.md'));
+          for (const file of files) {
+            const filePath = path.join(termsDir, file);
+            const fileErrors = validateTermDefinition(filePath, options.project);
+            errors = errors.concat(fileErrors);
+          }
+        }
+      } else {
+        console.error(`❌ Unknown syntax term: ${termName}`);
+        console.log(`\nAvailable: component, frontmatter, term`);
+        process.exit(1);
+      }
+
+      // Report results
+      if (errors.length === 0) {
+        console.log(`✅ No syntax errors found\n`);
+        process.exit(0);
+      } else {
+        reportSyntaxErrors(errors, options.verbose);
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
 // Syntax management commands
 const syntax = program
   .command('syntax')

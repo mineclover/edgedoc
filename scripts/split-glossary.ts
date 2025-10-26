@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Split GLOSSARY.md into individual term files in docs/terms/
  */

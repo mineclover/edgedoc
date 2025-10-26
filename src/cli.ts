@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import { Command } from 'commander';
 import { initProject } from './tools/init.js';
@@ -57,7 +57,7 @@ const program = new Command();
 
 program
   .name('edgedoc')
-  .version('1.0.0')
+  .version('1.3.0')
   .description('Edge-based documentation validation and sync tool');
 
 // Init command

@@ -23,7 +23,8 @@ async function executeMdocCommand(
 ): Promise<{ stdout: string; stderr: string; exitCode: number }> {
   return new Promise((resolve) => {
     const mdocPath = join(__dirname, 'cli.js');
-    const child = spawn('bun', [mdocPath, ...args], {
+    const child = spawn('node', [mdocPath, ...args], {
+      stdio: ['pipe', 'pipe', 'pipe'],
       cwd: process.cwd(),
       env: process.env,
     });

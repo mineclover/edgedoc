@@ -1,3 +1,6 @@
+// Re-export error system
+export { EdgeDocError, ErrorCode, ErrorSeverity, ErrorContext, ErrorCollector } from '../errors/index.js';
+
 export interface ValidationResult {
   success: boolean;
   totalFiles: number;

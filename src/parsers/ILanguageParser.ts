@@ -25,11 +25,23 @@ export interface ILanguageParser {
 }
 
 /**
+ * Parser 에러 정보
+ */
+export interface ParseError {
+  message: string;
+  line?: number;
+  column?: number;
+  code: 'SYNTAX_ERROR' | 'TIMEOUT' | 'UNKNOWN_ERROR';
+}
+
+/**
  * Result of parsing a source file
  */
 export interface ParseResult {
   imports: ImportInfo[];
   exports: ExportInfo[];
+  /** 파싱 중 발생한 에러들 */
+  errors?: ParseError[];
 }
 
 /**

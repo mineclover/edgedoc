@@ -1,6 +1,6 @@
 import Parser from 'tree-sitter';
 import TypeScript from 'tree-sitter-typescript';
-import type { ILanguageParser, ParseResult, ImportInfo, ExportInfo } from './ILanguageParser.js';
+import type { ILanguageParser, ParseResult, ImportInfo, ExportInfo, ParseError } from './ILanguageParser.js';
 
 export class TypeScriptParser implements ILanguageParser {
   readonly supportedExtensions = ['ts', 'tsx', 'js', 'jsx'];
@@ -29,22 +29,33 @@ export class TypeScriptParser implements ILanguageParser {
    * Parse TypeScript/TSX source code
    */
   parse(sourceCode: string, filePath: string): ParseResult {
+    const errors: ParseError[] = [];
+
     try {
       const isTsx = filePath.endsWith('.tsx') || filePath.endsWith('.jsx');
       const parser = isTsx ? this.tsxParser : this.typescriptParser;
       const tree = parser.parse(sourceCode);
 
       return {
-        imports: this.extractImports(tree, sourceCode, isTsx),
-        exports: this.extractExports(tree, sourceCode, isTsx),
+        imports: this.extractImports(tree, sourceCode, isTsx, errors),
+        exports: this.extractExports(tree, sourceCode, isTsx, errors),
+        errors: errors.length > 0 ? errors : undefined,
       };
     } catch (error) {
-      // If parsing fails, return empty results
+      // If parsing fails, return empty results with error info
       // This can happen with syntax errors or malformed code
-      console.warn(`Failed to parse ${filePath}:`, error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`Failed to parse ${filePath}:`, errorMessage);
+
+      errors.push({
+        message: `Failed to parse file: ${errorMessage}`,
+        code: 'SYNTAX_ERROR',
+      });
+
       return {
         imports: [],
         exports: [],
+        errors,
       };
     }
   }
@@ -52,7 +63,7 @@ export class TypeScriptParser implements ILanguageParser {
   /**
    * Extract all imports using Tree-sitter query
    */
-  private extractImports(tree: Parser.Tree, sourceCode: string, isTsx: boolean): ImportInfo[] {
+  private extractImports(tree: Parser.Tree, sourceCode: string, isTsx: boolean, errors: ParseError[]): ImportInfo[] {
     const imports: ImportInfo[] = [];
 
     try {
@@ -90,7 +101,7 @@ export class TypeScriptParser implements ILanguageParser {
         if (!sourceNode) continue;
 
         const source = this.extractStringValue(sourceNode.text);
-        const names = this.extractImportNames(importNode, sourceCode, isTsx);
+        const names = this.extractImportNames(importNode, sourceCode, isTsx, errors);
         const isTypeOnly = importNode.text.includes('import type');
 
         imports.push({
@@ -104,8 +115,14 @@ export class TypeScriptParser implements ILanguageParser {
         });
       }
     } catch (error) {
-      // Query parsing failed, return empty imports
-      console.warn('Failed to extract imports:', error instanceof Error ? error.message : String(error));
+      // Query parsing failed, collect error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn('Failed to extract imports:', errorMessage);
+
+      errors.push({
+        message: `Failed to extract imports: ${errorMessage}`,
+        code: 'SYNTAX_ERROR',
+      });
     }
 
     return imports;
@@ -114,7 +131,7 @@ export class TypeScriptParser implements ILanguageParser {
   /**
    * Extract export declarations using Tree-sitter query
    */
-  private extractExports(tree: Parser.Tree, sourceCode: string, isTsx: boolean): ExportInfo[] {
+  private extractExports(tree: Parser.Tree, sourceCode: string, isTsx: boolean, errors: ParseError[]): ExportInfo[] {
     const exports: ExportInfo[] = [];
 
     try {
@@ -196,8 +213,14 @@ export class TypeScriptParser implements ILanguageParser {
         });
       }
     } catch (error) {
-      // Query parsing failed, return empty exports
-      console.warn('Failed to extract exports:', error instanceof Error ? error.message : String(error));
+      // Query parsing failed, collect error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn('Failed to extract exports:', errorMessage);
+
+      errors.push({
+        message: `Failed to extract exports: ${errorMessage}`,
+        code: 'SYNTAX_ERROR',
+      });
     }
 
     return exports;
@@ -206,7 +229,7 @@ export class TypeScriptParser implements ILanguageParser {
   /**
    * Extract import names from import statement
    */
-  private extractImportNames(importNode: Parser.SyntaxNode, sourceCode: string, isTsx: boolean): string[] {
+  private extractImportNames(importNode: Parser.SyntaxNode, sourceCode: string, isTsx: boolean, errors: ParseError[]): string[] {
     const names: string[] = [];
 
     try {
@@ -249,8 +272,14 @@ export class TypeScriptParser implements ILanguageParser {
         }
       }
     } catch (error) {
-      // Query parsing failed, return empty names list
-      console.warn('Failed to extract import names:', error instanceof Error ? error.message : String(error));
+      // Query parsing failed, collect error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn('Failed to extract import names:', errorMessage);
+
+      errors.push({
+        message: `Failed to extract import names: ${errorMessage}`,
+        code: 'SYNTAX_ERROR',
+      });
     }
 
     return names;

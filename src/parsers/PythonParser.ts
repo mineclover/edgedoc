@@ -1,6 +1,6 @@
 import Parser from 'tree-sitter';
 import Python from 'tree-sitter-python';
-import type { ILanguageParser, ParseResult, ImportInfo, ExportInfo } from './ILanguageParser.js';
+import type { ILanguageParser, ParseResult, ImportInfo, ExportInfo, ParseError } from './ILanguageParser.js';
 
 /**
  * Parser for Python source files
@@ -35,20 +35,31 @@ export class PythonParser implements ILanguageParser {
    * Parse Python source code
    */
   parse(sourceCode: string, filePath: string): ParseResult {
+    const errors: ParseError[] = [];
+
     try {
       const tree = this.parser.parse(sourceCode);
 
       return {
-        imports: this.extractImports(tree),
-        exports: this.extractExports(tree),
+        imports: this.extractImports(tree, errors),
+        exports: this.extractExports(tree, errors),
+        errors: errors.length > 0 ? errors : undefined,
       };
     } catch (error) {
       // If parsing fails, return empty results
       // This can happen with syntax errors or malformed code
-      console.warn(`Failed to parse ${filePath}:`, error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`Failed to parse ${filePath}:`, errorMessage);
+
+      errors.push({
+        message: `Failed to parse file: ${errorMessage}`,
+        code: 'SYNTAX_ERROR',
+      });
+
       return {
         imports: [],
         exports: [],
+        errors,
       };
     }
   }
@@ -63,7 +74,7 @@ export class PythonParser implements ILanguageParser {
    * - from module import name as alias
    * - from module import *
    */
-  private extractImports(tree: Parser.Tree): ImportInfo[] {
+  private extractImports(tree: Parser.Tree, errors: ParseError[]): ImportInfo[] {
     const imports: ImportInfo[] = [];
 
     try {
@@ -115,8 +126,14 @@ export class PythonParser implements ILanguageParser {
         }
       }
     } catch (error) {
-      // Query parsing failed, return empty imports
-      console.warn('Failed to extract Python imports:', error instanceof Error ? error.message : String(error));
+      // Query parsing failed, collect error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn('Failed to extract Python imports:', errorMessage);
+
+      errors.push({
+        message: `Failed to extract imports: ${errorMessage}`,
+        code: 'SYNTAX_ERROR',
+      });
     }
 
     return imports;
@@ -165,7 +182,7 @@ export class PythonParser implements ILanguageParser {
    * - Class definitions (class)
    * - Top-level variable assignments
    */
-  private extractExports(tree: Parser.Tree): ExportInfo[] {
+  private extractExports(tree: Parser.Tree, errors: ParseError[]): ExportInfo[] {
     const exports: ExportInfo[] = [];
 
     try {
@@ -232,8 +249,14 @@ export class PythonParser implements ILanguageParser {
         }
       } while (cursor.gotoNextSibling());
     } catch (error) {
-      // Tree walk failed, return empty exports
-      console.warn('Failed to extract Python exports:', error instanceof Error ? error.message : String(error));
+      // Tree walk failed, collect error
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn('Failed to extract Python exports:', errorMessage);
+
+      errors.push({
+        message: `Failed to extract exports: ${errorMessage}`,
+        code: 'SYNTAX_ERROR',
+      });
     }
 
     return exports;

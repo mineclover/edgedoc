@@ -22,24 +22,32 @@ export function loadConfig(projectPath: string): MdocConfig {
     // Deep merge with defaults
     const config: MdocConfig = {
       language: userConfig.language || DEFAULT_CONFIG.language,
-      migration: {
-        ...DEFAULT_CONFIG.migration,
-        ...userConfig.migration,
-      },
-      validation: {
-        sharedTypes: {
-          ...DEFAULT_CONFIG.validation?.sharedTypes,
-          ...userConfig.validation?.sharedTypes,
+      ...(userConfig.migration && {
+        migration: {
+          ...DEFAULT_CONFIG.migration,
+          ...userConfig.migration,
         },
-      },
-      tasks: {
-        ...DEFAULT_CONFIG.tasks,
-        ...userConfig.tasks,
-      },
-      terminology: {
-        ...DEFAULT_CONFIG.terminology,
-        ...userConfig.terminology,
-      },
+      }),
+      ...(userConfig.validation && {
+        validation: {
+          sharedTypes: {
+            ...DEFAULT_CONFIG.validation?.sharedTypes,
+            ...userConfig.validation.sharedTypes,
+          },
+        },
+      }),
+      ...(userConfig.tasks && {
+        tasks: {
+          ...DEFAULT_CONFIG.tasks,
+          ...userConfig.tasks,
+        },
+      }),
+      ...(userConfig.terminology && {
+        terminology: {
+          ...DEFAULT_CONFIG.terminology,
+          ...userConfig.terminology,
+        },
+      }),
     };
 
     // Set global language

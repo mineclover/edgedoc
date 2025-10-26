@@ -129,7 +129,7 @@ export async function checkDependencyReadiness(
       const provider = interfaceData.from;
       const providerTask = tasksMap.get(provider);
 
-      const providerProgress = providerTask?.progress || 0;
+      const providerProgress = providerTask?.checkboxes.progress || 0;
       const providerStatus = providerTask?.status || 'unknown';
 
       dependencies.push({
@@ -154,7 +154,7 @@ export async function checkDependencyReadiness(
     results.push({
       feature: fid,
       status: taskInfo.status,
-      progress: taskInfo.progress,
+      progress: taskInfo.checkboxes.progress,
       dependencies,
       readiness,
       blockers,
@@ -191,7 +191,7 @@ export async function checkProgressQuality(
     if (feature.tests.tested_by.length === 0) {
       qualityIssues.push({
         type: 'no_tests',
-        severity: taskInfo.progress >= 80 ? 'error' : 'warning',
+        severity: taskInfo.checkboxes.progress >= 80 ? 'error' : 'warning',
         message: 'No tests found',
         details: { suggestion: `Add tests in tests/${fid}.test.ts` },
       });
@@ -219,14 +219,14 @@ export async function checkProgressQuality(
       recommendation = 'not_ready';
     } else if (
       qualityIssues.some((i) => i.type === 'no_tests') &&
-      taskInfo.progress >= 100
+      taskInfo.checkboxes.progress >= 100
     ) {
       recommendation = 'use_with_caution';
     }
 
     results.push({
       feature: fid,
-      progress: taskInfo.progress,
+      progress: taskInfo.checkboxes.progress,
       status: taskInfo.status,
       qualityIssues,
       recommendation,
@@ -263,9 +263,9 @@ export async function analyzeInterfaceImpact(
       if (feature.interfaces.uses.includes(iid)) {
         const consumerTask = tasksMap.get(fid);
 
-        const consumerProgress = consumerTask?.progress || 0;
+        const consumerProgress = consumerTask?.checkboxes.progress || 0;
         const consumerStatus = consumerTask?.status || 'unknown';
-        const providerProgress = providerTask?.progress || 0;
+        const providerProgress = providerTask?.checkboxes.progress || 0;
 
         consumers.push({
           feature: fid,
@@ -278,7 +278,7 @@ export async function analyzeInterfaceImpact(
 
     const blockedConsumers = consumers.filter((c) => c.isBlocked).length;
     const atRiskConsumers = consumers.filter(
-      (c) => c.progress > (providerTask?.progress || 0)
+      (c) => c.progress > (providerTask?.checkboxes.progress || 0)
     ).length;
 
     results.push({
@@ -286,7 +286,7 @@ export async function analyzeInterfaceImpact(
       provider: {
         feature: interfaceData.from,
         status: providerTask?.status || 'unknown',
-        progress: providerTask?.progress || 0,
+        progress: providerTask?.checkboxes.progress || 0,
       },
       consumers,
       impact: {
@@ -340,7 +340,7 @@ export async function validateTermsRecursive(
         if (feature.file === file) {
           featureId = fid;
           const task = tasksMap.get(fid);
-          featureProgress = task?.progress;
+          featureProgress = task?.checkboxes.progress;
           featureStatus = task?.status;
           break;
         }

@@ -332,7 +332,7 @@ function validateBidirectionalReferences(tasksDir: string): {
       if (!interfaceSharedTypes) {
         warnings.push({
           file: `shared/${sharedTypeName}.md`,
-          type: 'reference',
+          type: 'style',
           message: `interfaces에 "${interfaceName}"를 포함하지만 해당 인터페이스가 없거나 shared_types 필드 없음`,
         });
         continue;

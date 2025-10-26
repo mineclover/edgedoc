@@ -377,12 +377,12 @@ export function extractImplementedInterfaces(
     try {
       const parser = ParserFactory.getParser(fullPath);
       if (parser) {
-        const { exports } = parser.parse(content, fullPath);
-        return exports.map(exp => ({
+        const { exports: parsedExports } = parser.parse(content, fullPath);
+        return parsedExports.map((exp: any) => ({
           name: exp.name,
           type: exp.type as 'class' | 'function' | 'const' | 'type',
           filePath,
-          exports: exp.type === 'class' ? [] : [],
+          exports: (exp.type === 'class' ? [] : []) as string[],
         }));
       }
     } catch (parserError) {

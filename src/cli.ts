@@ -970,7 +970,7 @@ validate
   .option('-v, --verbose', '상세 출력')
   .action(async (termName, options) => {
     try {
-      const { validateComponentDefinition, validateFrontmatterField, validateTermDefinition, reportSyntaxErrors, findSyntaxTerm } = await import('./validators/syntax-validator.js');
+      const { validateComponentDefinition, validateFrontmatterField, validateTermDefinition, reportSyntaxErrors } = await import('./validators/syntax-validator.js');
       const { collectSyntaxTerms } = await import('./tools/syntax-manager.js');
 
       if (!termName) {
@@ -1310,7 +1310,7 @@ syntax
       } else if (lowerTerm.includes('frontmatter') || lowerTerm.includes('field')) {
         console.log(`🔍 [[Frontmatter Field]] 검증\n`);
         console.log(`Structure Validation 실행...\n`);
-        validateStructure({ project: options.project });
+        validateStructure({ projectPath: options.project });
       } else if (lowerTerm.includes('term')) {
         console.log(`🔍 [[Term Definition]] 검증\n`);
         console.log(`Term Validation 실행...\n`);

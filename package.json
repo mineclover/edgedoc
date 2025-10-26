@@ -7,12 +7,12 @@
     "edgedoc": "./dist/cli.js"
   },
   "scripts": {
-    "dev": "bun run src/cli.ts",
-    "dev:mcp": "bun run src/index.ts",
-    "build": "bun build src/cli.ts --outdir dist --target bun",
-    "build:mcp": "bun build src/index.ts --outdir dist --target bun",
-    "build:binary": "bun build src/cli.ts --compile --outfile mdoc",
-    "test": "bun test"
+    "dev": "tsx src/cli.ts",
+    "dev:mcp": "tsx src/index.ts",
+    "build": "tsc",
+    "build:mcp": "tsc",
+    "build:binary": "tsc && esbuild dist/cli.js --platform=node --target=node18 --bundle --splitting --outdir=dist --out-extension:.js=.mjs --external:commander --external:tree-sitter --external:tree-sitter-typescript --external:tree-sitter-python --external:@modelcontextprotocol/sdk --external:zod && echo '#!/usr/bin/env node' > mdoc && cat dist/cli.mjs >> mdoc && chmod +x mdoc",
+    "test": "node --loader=tsx/cjs src/cli.ts test"
   },
   "keywords": [
     "documentation",
@@ -45,7 +45,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.0",
+    "esbuild": "^0.24.0"
   },
   "trustedDependencies": [
     "tree-sitter",

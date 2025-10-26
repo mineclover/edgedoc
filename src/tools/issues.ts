@@ -125,14 +125,14 @@ async function collectOrphanIssues(projectPath: string): Promise<Issue[]> {
   try {
     const result = await validateOrphans({ projectPath });
 
-    if (result.orphanFiles && result.orphanFiles.length > 0) {
-      for (const file of result.orphanFiles) {
+    if (result.orphans && result.orphans.length > 0) {
+      for (const file of result.orphans) {
         issues.push({
           type: 'orphan',
           severity: 'warning',
-          title: `Orphan file: ${file}`,
+          title: `Orphan file: ${file.path}`,
           description: 'File is not referenced in any documentation and not imported by other code',
-          location: file,
+          location: file.path,
           details: [
             'This file may be unused or need documentation',
             'Add to code_references in a feature document or verify imports',
@@ -166,8 +166,8 @@ async function collectTermIssues(projectPath: string): Promise<Issue[]> {
             severity: 'warning',
             title: 'Circular term reference',
             description: error.message,
-            location: typeof error.location === 'string' ? error.location : error.location?.file,
-            details: error.path ? [`Path: ${error.path.join(' → ')}`] : undefined,
+            location: typeof error.location === 'string' ? error.location : (error.location as any)?.file,
+            details: (error as any).path ? [`Path: ${(error as any).path.join(' → ')}`] : undefined,
           });
         }
       }
@@ -181,8 +181,8 @@ async function collectTermIssues(projectPath: string): Promise<Issue[]> {
             severity: 'warning',
             title: 'Circular term reference',
             description: warning.message,
-            location: typeof warning.location === 'string' ? warning.location : warning.location?.file,
-            details: warning.path ? [`Path: ${warning.path.join(' → ')}`] : undefined,
+            location: typeof warning.location === 'string' ? warning.location : (warning.location as any)?.file,
+            details: (warning as any).path ? [`Path: ${(warning as any).path.join(' → ')}`] : undefined,
           });
         }
       }
@@ -192,12 +192,13 @@ async function collectTermIssues(projectPath: string): Promise<Issue[]> {
     if (result.errors && result.errors.length > 0) {
       for (const error of result.errors) {
         if (error.type === 'undefined_term') {
+          const loc = typeof error.location === 'string' ? error.location : (error.location as any)?.file;
           issues.push({
             type: 'term',
             severity: 'warning',
             title: `Undefined term: ${error.term}`,
             description: error.message,
-            location: error.location,
+            location: loc,
           });
         }
       }

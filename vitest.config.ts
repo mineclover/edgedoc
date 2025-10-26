@@ -10,6 +10,7 @@ export default defineConfig({
     environment: 'node',
     root: __dirname,
     include: ['tests/**/*.test.ts'],
+    exclude: ['tests/manual/**', 'node_modules/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

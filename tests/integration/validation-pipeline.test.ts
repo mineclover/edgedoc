@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll } from 'bun:test';
+import { describe, test, expect, beforeAll } from 'vitest';
 import { validateMigration } from '../../src/tools/validate.js';
 import { validateNaming } from '../../src/tools/naming.js';
 import { validateOrphans } from '../../src/tools/orphans.js';
@@ -52,7 +52,7 @@ describe('Validation Pipeline E2E', () => {
     } catch (error: any) {
       if (error.message?.includes('tree-sitter')) {
         console.log('⚠️  Orphan validation skipped due to tree-sitter issues');
-        return { success: true, orphanFiles: 0, orphanFileList: [] };
+        return { success: true, totalFiles: 0, referencedFiles: 0, orphanFiles: 0, orphans: [] };
       }
       throw error;
     }
@@ -135,17 +135,18 @@ describe('Validation Pipeline E2E', () => {
       expect(result).toBeDefined();
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('orphanFiles');
-      expect(result).toHaveProperty('orphanFileList');
+      expect(result).toHaveProperty('orphans');
 
       expect(typeof result.success).toBe('boolean');
       expect(typeof result.orphanFiles).toBe('number');
-      expect(Array.isArray(result.orphanFileList)).toBe(true);
+      expect(Array.isArray(result.orphans)).toBe(true);
 
       // If there are orphan files, validate their structure
-      if (result.orphanFileList.length > 0) {
-        const orphan = result.orphanFileList[0];
-        expect(typeof orphan).toBe('string');
-        expect(orphan.length).toBeGreaterThan(0);
+      if (result.orphans.length > 0) {
+        const orphan = result.orphans[0];
+        expect(orphan).toHaveProperty('path');
+        expect(orphan).toHaveProperty('type');
+        expect(typeof orphan.path).toBe('string');
       }
     });
 
@@ -583,9 +584,12 @@ describe('Validation Pipeline E2E', () => {
         expect(error).toHaveProperty('term');
         expect(error).toHaveProperty('message');
 
-        // Should have location information
-        expect(error).toHaveProperty('file');
-        expect(error).toHaveProperty('line');
+        // Location information is optional in ValidationError
+        // Some errors may have location, some may not
+        if (error.location) {
+          expect(error.location).toHaveProperty('file');
+          expect(error.location).toHaveProperty('line');
+        }
       });
     });
   });

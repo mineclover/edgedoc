@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect } from 'vitest';
 import { TermRegistry } from '../../src/tools/term-registry.js';
 import type { TermDefinition, TermReference } from '../../src/types/terminology.js';
 

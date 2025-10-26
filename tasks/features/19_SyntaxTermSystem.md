@@ -340,14 +340,14 @@ edgedoc syntax index
   - [x] Generate usage statistics
   - [x] Update docs/syntax/INDEX.md
 
-### Phase 5: Additional Syntax Terms
+### Phase 5: Additional Syntax Terms ✅
 
-- [ ] [[Frontmatter Field]]
-- [ ] [[Term Definition]]
-- [ ] [[Test Reference]]
-- [ ] [[Public Interface]]
-- [ ] [[Entry Point]]
-- [ ] [[Architecture Section]]
+- [x] [[Frontmatter Field]]
+- [x] [[Term Definition]]
+- [x] [[Test Reference]]
+- [x] [[Public Interface]]
+- [x] [[Entry Point]]
+- [x] [[Architecture Section]]
 
 ## Benefits
 

@@ -1,6 +1,6 @@
 # Syntax Terms Index
 
-**Last Updated**: 2025-10-25
+**Last Updated**: 2025-10-26
 **Auto-Generated**: Run `edgedoc syntax index` to update
 
 edgedoc 문서 작성 문법 용어 색인입니다. 각 문법 용어는 [[Term]] 형식으로 참조할 수 있습니다.
@@ -16,8 +16,8 @@ Feature 문서의 구조와 섹션 정의 관련 문법입니다.
 | Term | Description | Parser | Status | Location |
 |------|-------------|--------|--------|----------|
 | [[Component Definition]] | Architecture 섹션의 컴포넌트 정의 | implementation-coverage.ts:165 | ✅ Documented | [tasks/syntax/Component-Definition.md](../../tasks/syntax/Component-Definition.md) |
-| [[Architecture Section]] | 구조 설계 섹션 | TBD | 📝 Planned | - |
-| [[Frontmatter Field]] | YAML 메타데이터 필드 | structure-validator.ts | 📝 Planned | - |
+| [[Architecture Section]] | 구조 설계 섹션 | structure-validator.ts:85 | ✅ Documented | [tasks/syntax/Architecture-Section.md](../../tasks/syntax/Architecture-Section.md) |
+| [[Frontmatter Field]] | YAML 메타데이터 필드 | structure-validator.ts:45 | ✅ Documented | [tasks/syntax/Frontmatter-Field.md](../../tasks/syntax/Frontmatter-Field.md) |
 
 ---
 
@@ -27,9 +27,9 @@ Feature 문서의 구조와 섹션 정의 관련 문법입니다.
 
 | Term | Description | Parser | Status |
 |------|-------------|--------|--------|
-| [[Term Definition]] | 용어 정의 문법 | TermParser.ts:45 | 📝 Planned |
-| [[Term Reference]] | 용어 참조 문법 | TermParser.ts:78 | 📝 Planned |
-| [[Term Scope]] | 용어 범위 (global/local) | TermRegistry.ts | 📝 Planned |
+| [[Term Definition]] | 용어 정의 문법 | src/parsers/TermParser.ts:45 | ✅ Documented | [tasks/syntax/Term-Definition.md](../../tasks/syntax/Term-Definition.md) |
+| [[Term Reference]] | 용어 참조 문법 | src/parsers/TermParser.ts:78 | ✅ Documented | (위와 동일) |
+| [[Term Scope]] | 용어 범위 (global/local) | src/tools/term-registry.ts | 📝 Planned | - |
 
 ---
 
@@ -39,9 +39,9 @@ Feature 문서의 구조와 섹션 정의 관련 문법입니다.
 
 | Term | Description | Parser | Status |
 |------|-------------|--------|--------|
-| [[Test Reference]] | 테스트 파일 참조 | test-doc-lookup.ts:113 | 📝 Planned |
-| [[JSDoc Annotation]] | @feature, @doc 어노테이션 | test-doc-lookup.ts:152 | 📝 Planned |
-| [[Test Coverage Field]] | test_coverage frontmatter | test-doc-lookup.ts:135 | 📝 Planned |
+| [[Test Reference]] | 테스트 파일 참조 | src/tools/test-doc-lookup.ts:113 | ✅ Documented | [tasks/syntax/Test-Reference.md](../../tasks/syntax/Test-Reference.md) |
+| [[JSDoc Annotation]] | @feature, @doc 어노테이션 | src/tools/test-doc-lookup.ts:152 | 📝 Planned | - |
+| [[Test Coverage Field]] | test_coverage frontmatter | src/tools/test-doc-lookup.ts:135 | 📝 Planned | - |
 
 ---
 
@@ -51,9 +51,9 @@ Feature 문서의 구조와 섹션 정의 관련 문법입니다.
 
 | Term | Description | Parser | Status |
 |------|-------------|--------|--------|
-| [[Public Interface]] | 공개 인터페이스 정의 | implementation-coverage.ts:320 | 📝 Planned |
-| [[Entry Point]] | 진입점 정의 | entry-point-detector.ts | 📝 Planned |
-| [[Code Reference]] | code_references 필드 | implementation-coverage.ts:426 | 📝 Planned |
+| [[Public Interface]] | 공개 인터페이스 정의 | src/tools/implementation-coverage.ts:320 | ✅ Documented | [tasks/syntax/Public-Interface.md](../../tasks/syntax/Public-Interface.md) |
+| [[Entry Point]] | 진입점 정의 | src/tools/entry-point-detector.ts:45 | ✅ Documented | [tasks/syntax/Entry-Point.md](../../tasks/syntax/Entry-Point.md) |
+| [[Code Reference]] | code_references 필드 | src/tools/implementation-coverage.ts:426 | 📝 Planned | - |
 
 ---
 
@@ -112,11 +112,13 @@ edgedoc syntax usage "Component Definition"
 ```
 tasks/
   syntax/                             # Syntax term definitions (managed as features)
-    Component-Definition.md           # [[Component Definition]]
-    Frontmatter-Field.md              # (planned)
-    Term-Definition.md                # (planned)
-    Test-Reference.md                 # (planned)
-    Public-Interface.md               # (planned)
+    Component-Definition.md           # [[Component Definition]] ✅
+    Architecture-Section.md           # [[Architecture Section]] ✅
+    Frontmatter-Field.md              # [[Frontmatter Field]] ✅
+    Term-Definition.md                # [[Term Definition]] ✅
+    Test-Reference.md                 # [[Test Reference]] ✅
+    Public-Interface.md               # [[Public Interface]] ✅
+    Entry-Point.md                    # [[Entry Point]] ✅
 
   features/
     19_SyntaxTermSystem.md            # Syntax management system

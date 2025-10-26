@@ -35,12 +35,22 @@ export class PythonParser implements ILanguageParser {
    * Parse Python source code
    */
   parse(sourceCode: string, filePath: string): ParseResult {
-    const tree = this.parser.parse(sourceCode);
+    try {
+      const tree = this.parser.parse(sourceCode);
 
-    return {
-      imports: this.extractImports(tree),
-      exports: this.extractExports(tree),
-    };
+      return {
+        imports: this.extractImports(tree),
+        exports: this.extractExports(tree),
+      };
+    } catch (error) {
+      // If parsing fails, return empty results
+      // This can happen with syntax errors or malformed code
+      console.warn(`Failed to parse ${filePath}:`, error instanceof Error ? error.message : String(error));
+      return {
+        imports: [],
+        exports: [],
+      };
+    }
   }
 
   /**
@@ -56,52 +66,57 @@ export class PythonParser implements ILanguageParser {
   private extractImports(tree: Parser.Tree): ImportInfo[] {
     const imports: ImportInfo[] = [];
 
-    // Query for both import and from...import statements
-    const queryString = `
-      [
-        ; import module
-        ; import module as alias
-        (import_statement
-          name: (dotted_name) @module)
+    try {
+      // Query for both import and from...import statements
+      const queryString = `
+        [
+          ; import module
+          ; import module as alias
+          (import_statement
+            name: (dotted_name) @module)
 
-        ; from module import name
-        (import_from_statement
-          module_name: (dotted_name) @module)
+          ; from module import name
+          (import_from_statement
+            module_name: (dotted_name) @module)
 
-        ; from . import name (relative import)
-        (import_from_statement
-          module_name: (relative_import) @module)
-      ]
-    `;
+          ; from . import name (relative import)
+          (import_from_statement
+            module_name: (relative_import) @module)
+        ]
+      `;
 
-    const query = new Parser.Query(this.language, queryString);
-    const captures = query.captures(tree.rootNode);
+      const query = new Parser.Query(this.language, queryString);
+      const captures = query.captures(tree.rootNode);
 
-    const processedImports = new Set<string>();
+      const processedImports = new Set<string>();
 
-    for (const capture of captures) {
-      if (capture.name === 'module') {
-        const moduleName = capture.node.text;
-        const importKey = `${moduleName}-${capture.node.startPosition.row}`;
+      for (const capture of captures) {
+        if (capture.name === 'module') {
+          const moduleName = capture.node.text;
+          const importKey = `${moduleName}-${capture.node.startPosition.row}`;
 
-        // Avoid duplicates from the same line
-        if (processedImports.has(importKey)) {
-          continue;
+          // Avoid duplicates from the same line
+          if (processedImports.has(importKey)) {
+            continue;
+          }
+          processedImports.add(importKey);
+
+          // Extract imported names for from...import statements
+          const names = this.extractImportNames(capture.node.parent!);
+
+          imports.push({
+            source: moduleName,
+            names,
+            location: {
+              line: capture.node.startPosition.row + 1,
+              column: capture.node.startPosition.column,
+            },
+          });
         }
-        processedImports.add(importKey);
-
-        // Extract imported names for from...import statements
-        const names = this.extractImportNames(capture.node.parent!);
-
-        imports.push({
-          source: moduleName,
-          names,
-          location: {
-            line: capture.node.startPosition.row + 1,
-            column: capture.node.startPosition.column,
-          },
-        });
       }
+    } catch (error) {
+      // Query parsing failed, return empty imports
+      console.warn('Failed to extract Python imports:', error instanceof Error ? error.message : String(error));
     }
 
     return imports;
@@ -153,68 +168,73 @@ export class PythonParser implements ILanguageParser {
   private extractExports(tree: Parser.Tree): ExportInfo[] {
     const exports: ExportInfo[] = [];
 
-    // Walk the tree to find top-level definitions
-    const cursor = tree.walk();
+    try {
+      // Walk the tree to find top-level definitions
+      const cursor = tree.walk();
 
-    // Navigate to module node
-    if (cursor.nodeType !== 'module') {
-      return exports;
-    }
+      // Navigate to module node
+      if (cursor.nodeType !== 'module') {
+        return exports;
+      }
 
-    // Iterate through top-level children
-    cursor.gotoFirstChild();
+      // Iterate through top-level children
+      cursor.gotoFirstChild();
 
-    do {
-      const node = cursor.currentNode;
+      do {
+        const node = cursor.currentNode;
 
-      if (node.type === 'function_definition') {
-        const name = this.extractFunctionName(node);
-        if (name && !name.startsWith('_')) {
-          exports.push({
-            name,
-            type: 'function',
-            isDefault: false,
-            location: {
-              line: node.startPosition.row + 1,
-              column: node.startPosition.column,
-            },
-          });
-        }
-      } else if (node.type === 'class_definition') {
-        const name = this.extractClassName(node);
-        if (name && !name.startsWith('_')) {
-          exports.push({
-            name,
-            type: 'class',
-            isDefault: false,
-            location: {
-              line: node.startPosition.row + 1,
-              column: node.startPosition.column,
-            },
-          });
-        }
-      } else if (node.type === 'expression_statement') {
-        // Check if it's an assignment
-        const assignment = node.firstChild;
-        if (assignment && assignment.type === 'assignment') {
-          const left = assignment.childForFieldName('left');
-          if (left && left.type === 'identifier') {
-            const name = left.text;
-            if (!name.startsWith('_')) {
-              exports.push({
-                name,
-                type: 'variable',
-                isDefault: false,
-                location: {
-                  line: node.startPosition.row + 1,
-                  column: node.startPosition.column,
-                },
-              });
+        if (node.type === 'function_definition') {
+          const name = this.extractFunctionName(node);
+          if (name && !name.startsWith('_')) {
+            exports.push({
+              name,
+              type: 'function',
+              isDefault: false,
+              location: {
+                line: node.startPosition.row + 1,
+                column: node.startPosition.column,
+              },
+            });
+          }
+        } else if (node.type === 'class_definition') {
+          const name = this.extractClassName(node);
+          if (name && !name.startsWith('_')) {
+            exports.push({
+              name,
+              type: 'class',
+              isDefault: false,
+              location: {
+                line: node.startPosition.row + 1,
+                column: node.startPosition.column,
+              },
+            });
+          }
+        } else if (node.type === 'expression_statement') {
+          // Check if it's an assignment
+          const assignment = node.firstChild;
+          if (assignment && assignment.type === 'assignment') {
+            const left = assignment.childForFieldName('left');
+            if (left && left.type === 'identifier') {
+              const name = left.text;
+              if (!name.startsWith('_')) {
+                exports.push({
+                  name,
+                  type: 'variable',
+                  isDefault: false,
+                  location: {
+                    line: node.startPosition.row + 1,
+                    column: node.startPosition.column,
+                  },
+                });
+              }
             }
           }
         }
-      }
-    } while (cursor.gotoNextSibling());
+      } while (cursor.gotoNextSibling());
+    } catch (error) {
+      // Tree walk failed, return empty exports
+      console.warn('Failed to extract Python exports:', error instanceof Error ? error.message : String(error));
+    }
 
     return exports;
   }

@@ -5,13 +5,16 @@ import type { ILanguageParser, ParseResult, ImportInfo, ExportInfo } from './ILa
 export class TypeScriptParser implements ILanguageParser {
   readonly supportedExtensions = ['ts', 'tsx', 'js', 'jsx'];
   readonly languageName = 'TypeScript';
-  private parser: Parser;
-  private language: any;
+  private typescriptParser: Parser;
+  private tsxParser: Parser;
 
   constructor() {
-    this.parser = new Parser();
-    this.language = TypeScript.typescript;
-    this.parser.setLanguage(this.language);
+    // Create separate parser instances for TypeScript and TSX to avoid race conditions
+    this.typescriptParser = new Parser();
+    this.typescriptParser.setLanguage(TypeScript.typescript as any);
+
+    this.tsxParser = new Parser();
+    this.tsxParser.setLanguage(TypeScript.tsx as any);
   }
 
   /**
@@ -26,75 +29,83 @@ export class TypeScriptParser implements ILanguageParser {
    * Parse TypeScript/TSX source code
    */
   parse(sourceCode: string, filePath: string): ParseResult {
-    const isTsx = filePath.endsWith('.tsx') || filePath.endsWith('.jsx');
+    try {
+      const isTsx = filePath.endsWith('.tsx') || filePath.endsWith('.jsx');
+      const parser = isTsx ? this.tsxParser : this.typescriptParser;
+      const tree = parser.parse(sourceCode);
 
-    if (isTsx) {
-      this.language = TypeScript.tsx;
-      this.parser.setLanguage(this.language);
-    } else {
-      this.language = TypeScript.typescript;
-      this.parser.setLanguage(this.language);
+      return {
+        imports: this.extractImports(tree, sourceCode, isTsx),
+        exports: this.extractExports(tree, sourceCode, isTsx),
+      };
+    } catch (error) {
+      // If parsing fails, return empty results
+      // This can happen with syntax errors or malformed code
+      console.warn(`Failed to parse ${filePath}:`, error instanceof Error ? error.message : String(error));
+      return {
+        imports: [],
+        exports: [],
+      };
     }
-
-    const tree = this.parser.parse(sourceCode);
-
-    return {
-      imports: this.extractImports(tree, sourceCode),
-      exports: this.extractExports(tree, sourceCode),
-    };
   }
 
   /**
    * Extract all imports using Tree-sitter query
    */
-  private extractImports(tree: Parser.Tree, sourceCode: string): ImportInfo[] {
+  private extractImports(tree: Parser.Tree, sourceCode: string, isTsx: boolean): ImportInfo[] {
     const imports: ImportInfo[] = [];
 
-    // Query for import statements (using Parser.Query API)
-    const queryString = `
-      (import_statement
-        source: (string) @source) @import
-    `;
+    try {
+      // Query for import statements (using Parser.Query API)
+      const queryString = `
+        (import_statement
+          source: (string) @source) @import
+      `;
 
-    const query = new Parser.Query(this.language, queryString);
-    const captures = query.captures(tree.rootNode);
+      const language = (isTsx ? TypeScript.tsx : TypeScript.typescript) as any;
+      const query = new Parser.Query(language, queryString);
+      const captures = query.captures(tree.rootNode);
 
-    // Group captures by import statement
-    const importNodes = new Map<number, Parser.SyntaxNode>();
-    const sourceNodes = new Map<number, Parser.SyntaxNode>();
+      // Group captures by import statement
+      const importNodes = new Map<number, Parser.SyntaxNode>();
+      const sourceNodes = new Map<number, Parser.SyntaxNode>();
 
-    for (const capture of captures) {
-      if (capture.name === 'import') {
-        importNodes.set(capture.node.id, capture.node);
-      } else if (capture.name === 'source') {
-        // Find parent import_statement
-        let parent = capture.node.parent;
-        while (parent && parent.type !== 'import_statement') {
-          parent = parent.parent;
-        }
-        if (parent) {
-          sourceNodes.set(parent.id, capture.node);
+      for (const capture of captures) {
+        if (capture.name === 'import') {
+          importNodes.set(capture.node.id, capture.node);
+        } else if (capture.name === 'source') {
+          // Find parent import_statement
+          let parent = capture.node.parent;
+          while (parent && parent.type !== 'import_statement') {
+            parent = parent.parent;
+          }
+          if (parent) {
+            sourceNodes.set(parent.id, capture.node);
+          }
         }
       }
-    }
 
-    for (const [nodeId, importNode] of importNodes) {
-      const sourceNode = sourceNodes.get(nodeId);
-      if (!sourceNode) continue;
+      for (const [nodeId, importNode] of importNodes) {
+        const sourceNode = sourceNodes.get(nodeId);
+        if (!sourceNode) continue;
 
-      const source = this.extractStringValue(sourceNode.text);
-      const names = this.extractImportNames(importNode, sourceCode);
-      const isTypeOnly = importNode.text.includes('import type');
+        const source = this.extractStringValue(sourceNode.text);
+        const names = this.extractImportNames(importNode, sourceCode, isTsx);
+        const isTypeOnly = importNode.text.includes('import type');
 
-      imports.push({
-        source,
-        names,
-        isTypeOnly,
-        location: {
-          line: importNode.startPosition.row + 1,
-          column: importNode.startPosition.column,
-        },
-      });
+        imports.push({
+          source,
+          names,
+          isTypeOnly,
+          location: {
+            line: importNode.startPosition.row + 1,
+            column: importNode.startPosition.column,
+          },
+        });
+      }
+    } catch (error) {
+      // Query parsing failed, return empty imports
+      console.warn('Failed to extract imports:', error instanceof Error ? error.message : String(error));
     }
 
     return imports;
@@ -103,84 +114,90 @@ export class TypeScriptParser implements ILanguageParser {
   /**
    * Extract export declarations using Tree-sitter query
    */
-  private extractExports(tree: Parser.Tree, sourceCode: string): ExportInfo[] {
+  private extractExports(tree: Parser.Tree, sourceCode: string, isTsx: boolean): ExportInfo[] {
     const exports: ExportInfo[] = [];
 
-    // Query for export statements (using Parser.Query API)
-    const queryString = `
-      [
-        ; Named exports
-        (export_statement
-          declaration: [
-            (class_declaration name: (type_identifier) @export_name)
-            (function_declaration name: (identifier) @export_name)
-            (interface_declaration name: (type_identifier) @export_name)
-            (type_alias_declaration name: (type_identifier) @export_name)
-            (lexical_declaration
-              (variable_declarator name: (identifier) @export_name))
-          ]) @export
+    try {
+      // Query for export statements (using Parser.Query API)
+      const queryString = `
+        [
+          ; Named exports
+          (export_statement
+            declaration: [
+              (class_declaration name: (type_identifier) @export_name)
+              (function_declaration name: (identifier) @export_name)
+              (interface_declaration name: (type_identifier) @export_name)
+              (type_alias_declaration name: (type_identifier) @export_name)
+              (lexical_declaration
+                (variable_declarator name: (identifier) @export_name))
+            ]) @export
 
-        ; Export clause (export { A, B })
-        (export_statement
-          (export_clause
-            (export_specifier name: (identifier) @export_name))) @export
+          ; Export clause (export { A, B })
+          (export_statement
+            (export_clause
+              (export_specifier name: (identifier) @export_name))) @export
 
-        ; Default exports
-        (export_statement
-          "default"
-          [
-            (class_declaration name: (type_identifier)? @export_name)
-            (function_declaration name: (identifier)? @export_name)
-            (identifier) @export_name
-          ]) @default_export
-      ]
-    `;
+          ; Default exports
+          (export_statement
+            "default"
+            [
+              (class_declaration name: (type_identifier)? @export_name)
+              (function_declaration name: (identifier)? @export_name)
+              (identifier) @export_name
+            ]) @default_export
+        ]
+      `;
 
-    const query = new Parser.Query(this.language, queryString);
-    const captures = query.captures(tree.rootNode);
+      const language = (isTsx ? TypeScript.tsx : TypeScript.typescript) as any;
+      const query = new Parser.Query(language, queryString);
+      const captures = query.captures(tree.rootNode);
 
-    // Group captures by export node
-    const exportMap = new Map<number, { export?: Parser.SyntaxNode; name?: string; isDefault: boolean }>();
+      // Group captures by export node
+      const exportMap = new Map<number, { export?: Parser.SyntaxNode; name?: string; isDefault: boolean }>();
 
-    for (const capture of captures) {
-      if (capture.name === 'export' || capture.name === 'default_export') {
-        const nodeId = capture.node.id;
-        if (!exportMap.has(nodeId)) {
-          exportMap.set(nodeId, { isDefault: capture.name === 'default_export' });
-        }
-        exportMap.get(nodeId)!.export = capture.node;
-        exportMap.get(nodeId)!.isDefault = capture.name === 'default_export';
-      } else if (capture.name === 'export_name') {
-        // Find parent export_statement
-        let parent = capture.node.parent;
-        while (parent && parent.type !== 'export_statement') {
-          parent = parent.parent;
-        }
-        if (parent) {
-          const nodeId = parent.id;
+      for (const capture of captures) {
+        if (capture.name === 'export' || capture.name === 'default_export') {
+          const nodeId = capture.node.id;
           if (!exportMap.has(nodeId)) {
-            exportMap.set(nodeId, { isDefault: false });
+            exportMap.set(nodeId, { isDefault: capture.name === 'default_export' });
           }
-          exportMap.get(nodeId)!.name = capture.node.text;
+          exportMap.get(nodeId)!.export = capture.node;
+          exportMap.get(nodeId)!.isDefault = capture.name === 'default_export';
+        } else if (capture.name === 'export_name') {
+          // Find parent export_statement
+          let parent = capture.node.parent;
+          while (parent && parent.type !== 'export_statement') {
+            parent = parent.parent;
+          }
+          if (parent) {
+            const nodeId = parent.id;
+            if (!exportMap.has(nodeId)) {
+              exportMap.set(nodeId, { isDefault: false });
+            }
+            exportMap.get(nodeId)!.name = capture.node.text;
+          }
         }
       }
-    }
 
-    for (const entry of exportMap.values()) {
-      if (!entry.export) continue;
+      for (const entry of exportMap.values()) {
+        if (!entry.export) continue;
 
-      const name = entry.name || 'default';
-      const type = this.inferExportType(entry.export.text);
+        const name = entry.name || 'default';
+        const type = this.inferExportType(entry.export.text);
 
-      exports.push({
-        name,
-        type,
-        isDefault: entry.isDefault,
-        location: {
-          line: entry.export.startPosition.row + 1,
-          column: entry.export.startPosition.column,
-        },
-      });
+        exports.push({
+          name,
+          type,
+          isDefault: entry.isDefault,
+          location: {
+            line: entry.export.startPosition.row + 1,
+            column: entry.export.startPosition.column,
+          },
+        });
+      }
+    } catch (error) {
+      // Query parsing failed, return empty exports
+      console.warn('Failed to extract exports:', error instanceof Error ? error.message : String(error));
     }
 
     return exports;
@@ -189,44 +206,51 @@ export class TypeScriptParser implements ILanguageParser {
   /**
    * Extract import names from import statement
    */
-  private extractImportNames(importNode: Parser.SyntaxNode, sourceCode: string): string[] {
+  private extractImportNames(importNode: Parser.SyntaxNode, sourceCode: string, isTsx: boolean): string[] {
     const names: string[] = [];
 
-    // Named imports query
-    const namedQueryString = `
-      (named_imports
-        (import_specifier name: (identifier) @name))
-    `;
-    const namedQuery = new Parser.Query(this.language, namedQueryString);
-    const namedCaptures = namedQuery.captures(importNode);
-    for (const capture of namedCaptures) {
-      if (capture.name === 'name') {
-        names.push(capture.node.text);
-      }
-    }
+    try {
+      const language = (isTsx ? TypeScript.tsx : TypeScript.typescript) as any;
 
-    // Default import query
-    const defaultQueryString = `
-      (import_clause (identifier) @name)
-    `;
-    const defaultQuery = new Parser.Query(this.language, defaultQueryString);
-    const defaultCaptures = defaultQuery.captures(importNode);
-    for (const capture of defaultCaptures) {
-      if (capture.name === 'name') {
-        names.push(capture.node.text);
+      // Named imports query
+      const namedQueryString = `
+        (named_imports
+          (import_specifier name: (identifier) @name))
+      `;
+      const namedQuery = new Parser.Query(language, namedQueryString);
+      const namedCaptures = namedQuery.captures(importNode);
+      for (const capture of namedCaptures) {
+        if (capture.name === 'name') {
+          names.push(capture.node.text);
+        }
       }
-    }
 
-    // Namespace import (import * as Foo)
-    const namespaceQueryString = `
-      (namespace_import (identifier) @name)
-    `;
-    const namespaceQuery = new Parser.Query(this.language, namespaceQueryString);
-    const namespaceCaptures = namespaceQuery.captures(importNode);
-    for (const capture of namespaceCaptures) {
-      if (capture.name === 'name') {
-        names.push(capture.node.text);
+      // Default import query
+      const defaultQueryString = `
+        (import_clause (identifier) @name)
+      `;
+      const defaultQuery = new Parser.Query(language, defaultQueryString);
+      const defaultCaptures = defaultQuery.captures(importNode);
+      for (const capture of defaultCaptures) {
+        if (capture.name === 'name') {
+          names.push(capture.node.text);
+        }
       }
+
+      // Namespace import (import * as Foo)
+      const namespaceQueryString = `
+        (namespace_import (identifier) @name)
+      `;
+      const namespaceQuery = new Parser.Query(language, namespaceQueryString);
+      const namespaceCaptures = namespaceQuery.captures(importNode);
+      for (const capture of namespaceCaptures) {
+        if (capture.name === 'name') {
+          names.push(capture.node.text);
+        }
+      }
+    } catch (error) {
+      // Query parsing failed, return empty names list
+      console.warn('Failed to extract import names:', error instanceof Error ? error.message : String(error));
     }
 
     return names;

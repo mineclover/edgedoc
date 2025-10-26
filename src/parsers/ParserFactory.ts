@@ -1,4 +1,6 @@
 import type { ILanguageParser } from './ILanguageParser.js';
+import { TypeScriptParser } from './TypeScriptParser.js';
+import { PythonParser } from './PythonParser.js';
 
 /**
  * Factory for managing and retrieving language parsers
@@ -57,11 +59,7 @@ export class ParserFactory {
   private static ensureInitialized(): void {
     if (this.initialized) return;
 
-    // Import and register parsers
-    // Note: Dynamic imports are async, so we use sync requires for simplicity
-    const TypeScriptParser = require('./TypeScriptParser.js').TypeScriptParser;
-    const PythonParser = require('./PythonParser.js').PythonParser;
-
+    // Register all available parsers
     this.register(new TypeScriptParser());
     this.register(new PythonParser());
 

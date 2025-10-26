@@ -1,0 +1,17 @@
+{
+  "language": "en",
+  "validation": {
+    "sharedTypes": {
+      "maxPairs": 12,
+      "warnAtPairs": 8,
+      "description": "Shared type filename validation (e.g., 00--01_00--02.md)"
+    }
+  },
+  "terminology": {
+    "globalScopePaths": [
+      "docs/terms/",
+      "tasks/syntax/"
+    ],
+    "description": "Paths where term definitions are treated as global scope"
+  }
+}

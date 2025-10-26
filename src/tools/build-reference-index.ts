@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { loadConfig } from '../utils/config.js';
 import type {
   ReferenceIndex,
   BuildIndexOptions,
@@ -234,13 +235,20 @@ async function extractTermUsage(
   verbose: boolean
 ): Promise<void> {
   const allMdFiles = findMarkdownFiles(projectPath);
+  const config = loadConfig(projectPath);
 
   // Extract definitions
   for (const file of allMdFiles) {
     const relativePath = relative(projectPath, file);
+
+    // Skip GLOSSARY.md (output file, not source)
+    if (relativePath === 'docs/GLOSSARY.md') {
+      continue;
+    }
+
     const content = readFileSync(file, 'utf-8');
 
-    const definitions = TermParser.extractDefinitions(content, relativePath);
+    const definitions = TermParser.extractDefinitions(content, relativePath, config);
 
     for (const def of definitions) {
       if (!index.terms[def.term]) {

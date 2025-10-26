@@ -1,4 +1,5 @@
 import type { TermDefinition, TermReference } from '../types/terminology.js';
+import type { MdocConfig } from '../types/config.js';
 
 /**
  * Parse term definitions and references from markdown
@@ -6,13 +7,18 @@ import type { TermDefinition, TermReference } from '../types/terminology.js';
 export class TermParser {
   /**
    * Extract term definitions from markdown
-   * Pattern: ## [[Term Name]]
+   * Pattern: # [[Term Name]], ## [[Term Name]], or ### [[Term Name]]
+   * Supports H1-H3 heading levels
    */
-  static extractDefinitions(markdown: string, file: string): TermDefinition[] {
+  static extractDefinitions(
+    markdown: string,
+    file: string,
+    config?: MdocConfig
+  ): TermDefinition[] {
     const definitions: TermDefinition[] = [];
 
-    // Pattern: ## [[Term]]
-    const headingPattern = /^(#{2,})\s+\[\[([^\]]+)\]\]/gm;
+    // Pattern: # [[Term]], ## [[Term]], or ### [[Term]] (H1-H3)
+    const headingPattern = /^(#{1,3})\s+\[\[([^\]]+)\]\]/gm;
 
     const lines = markdown.split('\n');
 
@@ -32,8 +38,14 @@ export class TermParser {
         continue;
       }
 
-      // Determine scope
-      const scope = file.includes('GLOSSARY') ? 'global' : 'document';
+      // Determine scope from config
+      const globalPaths = config?.terminology?.globalScopePaths || [
+        'docs/GLOSSARY.md',
+        'tasks/syntax/',
+      ];
+
+      const isGlobal = globalPaths.some((path) => file.includes(path));
+      const scope = isGlobal ? 'global' : 'document';
 
       // Parse metadata and definition from content below heading
       const metadata = this.parseMetadata(markdown, match.index, lines, line - 1);
@@ -67,7 +79,7 @@ export class TermParser {
     let contentEnd = contentStart;
 
     for (let i = contentStart; i < lines.length; i++) {
-      if (lines[i].match(/^#{2,}\s/)) {
+      if (lines[i].match(/^#{1,}\s/)) {
         contentEnd = i;
         break;
       }
@@ -179,8 +191,8 @@ export class TermParser {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
-      // Skip headings (definitions)
-      if (line.match(/^#{2,}\s+\[\[/)) {
+      // Skip headings (definitions) - H1 to H3
+      if (line.match(/^#{1,3}\s+\[\[/)) {
         continue;
       }
 
@@ -210,16 +222,32 @@ export class TermParser {
   }
 
   /**
-   * Find all code block ranges in markdown
+   * Find all code block and frontmatter ranges in markdown
    */
   private static findCodeBlockRanges(lines: string[]): Array<[number, number]> {
     const ranges: Array<[number, number]> = [];
     let inCodeBlock = false;
+    let inFrontmatter = false;
     let blockStart = -1;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
 
+      // Handle frontmatter (YAML between ---)
+      if (line === '---') {
+        if (i === 0 || !inFrontmatter) {
+          // Start of frontmatter
+          inFrontmatter = true;
+          blockStart = i + 1;
+        } else {
+          // End of frontmatter
+          inFrontmatter = false;
+          ranges.push([blockStart, i + 1]);
+        }
+        continue;
+      }
+
+      // Handle code blocks
       if (line.startsWith('```')) {
         if (!inCodeBlock) {
           // Start of code block

@@ -33,6 +33,12 @@ mdoc-tools의 설정 시스템을 관리합니다. `mdoc.config.json` 파일을 
       "maxPairs": 12,
       "warnAtPairs": 8
     }
+  },
+  "terminology": {
+    "globalScopePaths": [
+      "docs/GLOSSARY.md",
+      "tasks/syntax/"
+    ]
   }
 }
 ```
@@ -64,6 +70,10 @@ export interface MdocConfig {
     interfaces: string;
     shared: string;
   };
+  terminology?: {
+    globalScopePaths?: string[];  // Paths for global-scoped terms
+    description?: string;
+  };
 }
 ```
 
@@ -89,6 +99,12 @@ export const DEFAULT_CONFIG: MdocConfig = {
     features: 'features',
     interfaces: 'interfaces',
     shared: 'shared',
+  },
+  terminology: {
+    globalScopePaths: [
+      'docs/GLOSSARY.md',    // Main glossary
+      'tasks/syntax/',       // Syntax term definitions
+    ],
   },
 };
 ```
@@ -130,6 +146,36 @@ export const DEFAULT_CONFIG: MdocConfig = {
 - 12개 쌍 이상: ❌ 에러 (Global type으로 격상 필수)
 
 **적용**: `src/tools/structure.ts` (validateStructure 함수)
+
+### Terminology Global Scope Paths
+
+**규칙**:
+- 지정된 경로의 용어 정의는 `global` scope로 자동 인식
+- 다른 경로의 용어는 `document` scope (파일 내부에서만 유효)
+
+**기본값**:
+- `docs/GLOSSARY.md`: 프로젝트 전체 용어집
+- `tasks/syntax/`: Syntax Term 정의 (문법 용어)
+
+**적용**: `src/parsers/TermParser.ts` (extractDefinitions 함수)
+
+**사용 예시**:
+```json
+{
+  "terminology": {
+    "globalScopePaths": [
+      "docs/GLOSSARY.md",
+      "tasks/syntax/",
+      "docs/architecture/terms.md"  // 커스텀 경로 추가
+    ]
+  }
+}
+```
+
+**효과**:
+- `docs/GLOSSARY.md`의 `## [[Entry Point]]` → global scope
+- `tasks/syntax/Component-Definition.md`의 `# [[Component Definition]]` → global scope
+- `tasks/features/13_ValidateTerms.md`의 `### [[Local Term]]` → document scope
 
 ## 구현 상태
 

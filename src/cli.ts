@@ -588,6 +588,27 @@ terms
     }
   });
 
+terms
+  .command('generate')
+  .description('GLOSSARY.md 자동 생성')
+  .option('-p, --project <path>', '프로젝트 디렉토리 경로', process.cwd())
+  .option('-o, --output <path>', '출력 파일 경로 (default: docs/GLOSSARY.md)')
+  .option('--include-document', 'Document-scoped 용어도 포함', false)
+  .action(async (options) => {
+    try {
+      const { generateGlossary } = await import('./tools/generate-glossary.js');
+      await generateGlossary({
+        projectPath: options.project,
+        outputPath: options.output,
+        includeDocumentScoped: options.includeDocument,
+      });
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ 오류:', error);
+      process.exit(1);
+    }
+  });
+
 // Tasks commands
 const tasks = program.command('tasks').description('작업 관리');
 

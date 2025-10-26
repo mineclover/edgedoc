@@ -4,6 +4,7 @@ import { TermParser } from '../parsers/TermParser.js';
 import { TermRegistry } from './term-registry.js';
 import type { ValidationResult } from '../types/terminology.js';
 import { t } from '../shared/i18n.js';
+import { loadConfig } from '../utils/config.js';
 
 export interface ValidateTermsOptions {
   projectPath: string;
@@ -23,6 +24,9 @@ export async function validateTerms(
 
   console.log('🔍 ' + t().terms.validation_start + '\n');
 
+  // Load config
+  const config = loadConfig(projectPath);
+
   // Initialize registry
   const registry = new TermRegistry();
 
@@ -36,10 +40,16 @@ export async function validateTerms(
 
   for (const file of mdFiles) {
     const relativePath = file.replace(projectPath + '/', '');
+
+    // Skip GLOSSARY.md (output file, not source)
+    if (relativePath === 'docs/GLOSSARY.md') {
+      continue;
+    }
+
     const content = readFileSync(file, 'utf-8');
 
     try {
-      const definitions = TermParser.extractDefinitions(content, relativePath);
+      const definitions = TermParser.extractDefinitions(content, relativePath, config);
 
       for (const def of definitions) {
         registry.addDefinition(def);

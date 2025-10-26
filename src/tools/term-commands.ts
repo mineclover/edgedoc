@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { TermParser } from '../parsers/TermParser.js';
 import { TermRegistry } from './term-registry.js';
 import type { TermDefinition } from '../types/terminology.js';
+import { loadConfig } from '../utils/config.js';
 
 export interface TermCommandOptions {
   projectPath: string;
@@ -13,6 +14,7 @@ export interface TermCommandOptions {
  */
 async function buildRegistry(projectPath: string): Promise<TermRegistry> {
   const registry = new TermRegistry();
+  const config = loadConfig(projectPath);
 
   // Find all markdown files
   const mdFiles = findMarkdownFiles(projectPath);
@@ -20,10 +22,16 @@ async function buildRegistry(projectPath: string): Promise<TermRegistry> {
   // Extract definitions
   for (const file of mdFiles) {
     const relativePath = file.replace(projectPath + '/', '');
+
+    // Skip GLOSSARY.md (output file, not source)
+    if (relativePath === 'docs/GLOSSARY.md') {
+      continue;
+    }
+
     const content = readFileSync(file, 'utf-8');
 
     try {
-      const definitions = TermParser.extractDefinitions(content, relativePath);
+      const definitions = TermParser.extractDefinitions(content, relativePath, config);
       for (const def of definitions) {
         registry.addDefinition(def);
       }

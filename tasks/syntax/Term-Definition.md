@@ -32,7 +32,9 @@ examples:
 ### 기본 형식
 
 ```markdown
+# [[Term Name]]
 ## [[Term Name]]
+### [[Term Name]]
 
 **Type**: concept | class | function | module
 **Scope**: global | local
@@ -42,21 +44,148 @@ examples:
 Definition text here...
 ```
 
+**Note**: H1-H3 헤딩 레벨 모두 지원
+
 ## Required Fields
 
 ### Term Heading
 
-용어는 `##` 헤딩으로 정의하며 `[[Term]]` 형식으로 감쌉니다:
+용어는 `#`, `##`, `###` 헤딩으로 정의하며 `[[Term]]` 형식으로 감쌉니다:
 
 ```markdown
 ✅ Valid:
-## [[Entry Point Module]]
+# [[Component Definition]]          # H1
+## [[Entry Point Module]]           # H2
+### [[Helper Function]]             # H3
 
 ❌ Invalid:
-# [[Entry Point Module]]           # Wrong level (use ##)
 ## Entry Point Module               # Missing [[ ]]
-### [[Entry Point Module]]          # Wrong level (use ##)
+#### [[Too Deep]]                   # H4+ not supported
 ```
+
+## 헤딩 레벨 시멘틱 가이드
+
+용어 정의 시 문서 구조와 의미에 맞는 헤딩 레벨을 선택하세요:
+
+### H1 (`#`) - 문서의 주요 주제
+
+**용도**:
+- Syntax Term 문서의 핵심 개념
+- 단독 문서로 존재하는 최상위 용어
+- Feature 문서의 핵심 개념
+
+**예시**:
+```markdown
+# tasks/syntax/Component-Definition.md
+# [[Component Definition]]
+
+# tasks/features/13_ValidateTerms.md
+# [[Term Validation System]]
+```
+
+**특징**:
+- 문서당 1개 권장
+- 문서 제목과 일치하는 경우가 많음
+- 가장 높은 중요도
+
+### H2 (`##`) - 주요 섹션 개념
+
+**용도**:
+- GLOSSARY 내 개별 용어 항목
+- 문서 내 주요 섹션별 용어
+- 카테고리별 용어 그룹
+
+**예시**:
+```markdown
+# docs/GLOSSARY.md
+## [[Entry Point Module]]
+## [[Code Interface]]
+## [[Top-Level Interface]]
+```
+
+**특징**:
+- 문서당 여러 개 가능
+- GLOSSARY에서 주로 사용
+- 중간 중요도
+
+### H3 (`###`) - 하위 섹션 개념
+
+**용도**:
+- H2 용어의 하위 개념
+- 특정 컨텍스트 내 세부 용어
+- 로컬 스코프 용어
+
+**예시**:
+```markdown
+## [[Parser System]]
+
+### [[TypeScript Parser]]
+### [[Python Parser]]
+### [[Parser Factory]]
+```
+
+**특징**:
+- 계층 구조 표현
+- 상위 용어의 세부 개념
+- 낮은 중요도, 문맥 의존적
+
+### H4+ (`####`) - 지원 안 함
+
+**이유**:
+- 용어 정의는 최대 3단계 계층까지만 허용
+- H4 이상은 문서 구조용 섹션 헤딩으로 사용
+- 너무 깊은 계층은 복잡도 증가
+
+```markdown
+❌ Not Supported:
+#### [[Too Deep Term]]              # H4는 용어 정의로 인식 안 됨
+##### [[Even Deeper]]               # H5도 마찬가지
+```
+
+## 헤딩 레벨 선택 가이드
+
+### 문서 유형별 권장사항
+
+| 문서 유형 | 권장 레벨 | 예시 |
+|----------|----------|------|
+| **Syntax Term 문서** | H1 | `# [[Component Definition]]` |
+| **GLOSSARY** | H2 | `## [[Entry Point Module]]` |
+| **Feature 문서** | H1 또는 H3 | `# [[Main Concept]]`, `### [[Sub Concept]]` |
+| **Guide 문서** | H2 또는 H3 | `## [[Key Pattern]]`, `### [[Variant]]` |
+
+### 계층 구조 예시
+
+```markdown
+# [[Documentation System]]          # H1: 최상위 개념 (문서 주제)
+
+## [[Term Validation]]               # H2: 주요 기능
+### [[Term Parser]]                  # H3: 구성 요소
+### [[Term Registry]]                # H3: 구성 요소
+
+## [[Syntax Validation]]             # H2: 주요 기능
+### [[Component Parser]]             # H3: 구성 요소
+### [[Frontmatter Parser]]           # H3: 구성 요소
+```
+
+### 결정 기준
+
+**H1 사용 조건**:
+- ✅ 문서의 핵심 주제
+- ✅ 독립적인 개념
+- ✅ 다른 문서에서 자주 참조
+- ✅ 최상위 카테고리
+
+**H2 사용 조건**:
+- ✅ H1의 주요 하위 개념
+- ✅ GLOSSARY 항목
+- ✅ 섹션별 구분이 필요한 용어
+- ✅ 중간 계층 개념
+
+**H3 사용 조건**:
+- ✅ H2의 세부 개념
+- ✅ 구현 레벨 용어
+- ✅ 특정 컨텍스트 내 용어
+- ✅ 계층의 마지막 단계
 
 ### Type Field
 
@@ -106,7 +235,21 @@ Related terms:
 **Related**: [[Top-Level Interface]], [[Public API]]
 ```
 
-## Complete Example
+## Complete Examples
+
+### Example 1: H1 용어 정의 (Syntax Term)
+
+```markdown
+# [[Component Definition]]
+
+**Type**: Documentation Structure Syntax
+**Scope**: Feature Documents
+**Used By**: Implementation Coverage Analysis
+
+Feature 문서의 Architecture 섹션에서 컴포넌트를 정의하는 문법입니다.
+```
+
+### Example 2: H2 용어 정의 (GLOSSARY)
 
 ```markdown
 ## [[Entry Point Module]]
@@ -204,15 +347,20 @@ This term is only valid in this document.
 
 ## Parser Implementation
 
-**File**: src/parsers/TermParser.ts:45-120
+**File**: src/parsers/TermParser.ts:12-52
 
 **Function**: `extractDefinitions()`
 
 **Logic**:
-1. Find `## [[Term]]` headings
+1. Find `# [[Term]]`, `## [[Term]]`, or `### [[Term]]` headings (H1-H3)
 2. Extract term name from `[[...]]`
 3. Parse **Type**, **Scope**, **Aliases**, **Related** fields
 4. Extract definition text (first paragraph after fields)
+
+**Pattern**: `/^(#{1,3})\s+\[\[([^\]]+)\]\]/gm`
+- `#{1,3}`: H1-H3 헤딩 레벨만 인식
+- H4+ (`####`)는 용어 정의로 인식하지 않음
+- 문서 구조용 섹션 헤딩과 명확히 구분
 
 ```typescript
 export interface TermDefinition {
@@ -246,7 +394,7 @@ Global terms must be unique across all documents:
 **Scope**: global
 
 # In another-file.md
-## [[Entry Point Module]]    # Error: Duplicate global term
+# [[Entry Point Module]]    # Error: Duplicate global term
 **Scope**: global
 ```
 

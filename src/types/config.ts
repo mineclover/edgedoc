@@ -18,6 +18,10 @@ export interface MdocConfig {
     interfaces: string;
     shared: string;
   };
+  terminology?: {
+    globalScopePaths?: string[];  // Paths where term definitions are global scope
+    description?: string;
+  };
 }
 
 export const DEFAULT_CONFIG: MdocConfig = {
@@ -37,5 +41,11 @@ export const DEFAULT_CONFIG: MdocConfig = {
     features: 'features',
     interfaces: 'interfaces',
     shared: 'shared',
+  },
+  terminology: {
+    globalScopePaths: [
+      'docs/terms/',         // Global term definitions
+      'tasks/syntax/',       // Syntax term definitions
+    ],
   },
 };

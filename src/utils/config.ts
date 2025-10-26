@@ -36,6 +36,10 @@ export function loadConfig(projectPath: string): MdocConfig {
         ...DEFAULT_CONFIG.tasks,
         ...userConfig.tasks,
       },
+      terminology: {
+        ...DEFAULT_CONFIG.terminology,
+        ...userConfig.terminology,
+      },
     };
 
     // Set global language

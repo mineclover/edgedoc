@@ -1,5 +1,10 @@
 {
   "language": "en",
+  "migration": {
+    "sourceDir": "tasks",
+    "targetDir": "spec",
+    "description": "CLI architecture redesign based documentation structure migration"
+  },
   "docs": {
     "baseDir": "tasks",
     "features": "features",

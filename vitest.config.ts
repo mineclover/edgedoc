@@ -13,7 +13,22 @@ export default defineConfig({
     exclude: ['tests/manual/**', 'node_modules/**'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html'],
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        'tests/**',
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        'build.mjs',
+        'vitest.config.ts',
+      ],
+      thresholds: {
+        lines: 30,
+        functions: 30,
+        branches: 30,
+        statements: 30,
+      },
     },
   },
 });

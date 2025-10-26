@@ -15,7 +15,11 @@
     "bundle:cli": "node build.mjs cli",
     "bundle:mcp": "node build.mjs mcp",
     "bundle:all": "node build.mjs all",
-    "test": "node --loader=tsx/cjs src/cli.ts test"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "benchmark": "tsx scripts/benchmark.ts"
   },
   "keywords": [
     "documentation",
@@ -49,6 +53,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "^4.0.3",
     "@vitest/ui": "^4.0.3",
     "esbuild": "^0.25.11",
     "tsx": "^4.19.0",

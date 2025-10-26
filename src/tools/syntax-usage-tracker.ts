@@ -8,6 +8,8 @@
 import { readFileSync, readdirSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { SyntaxTerm, collectSyntaxTerms, findSyntaxTerm } from './syntax-manager.js';
+import { loadConfig } from '../utils/config.js';
+import { getDocsPath } from '../types/config.js';
 
 /**
  * Syntax usage statistics
@@ -90,7 +92,8 @@ export function trackSyntaxReferences(
   const usages: Array<{ file: string; line: number; context: string }> = [];
 
   // Search in tasks/features/
-  const featuresDir = join(projectPath, 'tasks', 'features');
+  const config = loadConfig(projectPath);
+  const featuresDir = join(projectPath, getDocsPath(config, 'features'));
   if (existsSync(featuresDir)) {
     const features = readdirSync(featuresDir)
       .filter(f => f.endsWith('.md'))

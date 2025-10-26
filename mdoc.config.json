@@ -1,5 +1,11 @@
 {
   "language": "en",
+  "docs": {
+    "baseDir": "tasks",
+    "features": "features",
+    "interfaces": "interfaces",
+    "shared": "shared"
+  },
   "validation": {
     "sharedTypes": {
       "maxPairs": 12,
@@ -9,6 +15,7 @@
   },
   "terminology": {
     "globalScopePaths": [
+      "docs/GLOSSARY.md",
       "docs/terms/",
       "tasks/syntax/"
     ],

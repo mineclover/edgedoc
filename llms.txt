@@ -270,15 +270,16 @@ mdoc validate all || exit 1
 # GitHub Actions
 - name: Validate Documentation
   run: |
-    cd mdoc-tools && bun install && bun run build
+    cd mdoc-tools && npm install && npm run build
     ./mdoc validate all
 ```
 
 ## Version
 
-- **CLI Version**: 1.0.0
-- **MCP Server**: Phase 2 (In Development)
-- **Last Updated**: 2025-10-24
+- **CLI Version**: 1.3.0
+- **MCP Server**: Phase 2 (Completed)
+- **Runtime**: Node.js 18+
+- **Last Updated**: 2025-10-26
 
 ## Resources
 

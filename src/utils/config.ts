@@ -36,10 +36,10 @@ export function loadConfig(projectPath: string): MdocConfig {
           },
         },
       }),
-      ...(userConfig.tasks && {
-        tasks: {
-          ...DEFAULT_CONFIG.tasks,
-          ...userConfig.tasks,
+      ...(userConfig.docs && {
+        docs: {
+          ...DEFAULT_CONFIG.docs,
+          ...userConfig.docs,
         },
       }),
       ...(userConfig.terminology && {

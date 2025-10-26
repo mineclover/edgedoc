@@ -109,13 +109,13 @@
 ### Language Tests
 ```bash
 # English (default)
-$ bun src/cli.ts sync --dry-run
+$ npm run dev sync --dry-run
 🔄 Starting code reference synchronization...
 
 # Korean (with config)
 $ cat mdoc.config.json
 {"language": "ko"}
-$ bun src/cli.ts sync --dry-run
+$ npm run dev sync --dry-run
 🔄 코드 참조 동기화 시작...
 ```
 

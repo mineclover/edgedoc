@@ -12,8 +12,8 @@ Claude Desktop 설정 파일에 다음을 추가하세요:
 {
   "mcpServers": {
     "edgedoc": {
-      "command": "bun",
-      "args": ["run", "/path/to/mdoc-tools/dist/index.js"],
+      "command": "node",
+      "args": ["/path/to/mdoc-tools/dist/index.js"],
       "env": {}
     }
   }
@@ -355,7 +355,7 @@ MCP 서버가 제대로 동작하는지 확인:
 
 ```bash
 # 빌드
-bun run build:mcp
+npm run build:mcp
 
 # 로컬 테스트 (Claude Desktop 재시작 필요)
 # 1. Claude Desktop 종료
@@ -395,7 +395,7 @@ edgedoc graph build
 2. `CallToolRequestSchema` 핸들러에 케이스 추가
 3. `ListResourcesRequestSchema`에 리소스 추가
 4. `ReadResourceRequestSchema`에 리소스 읽기 로직 추가
-5. `bun run build:mcp`로 빌드
+5. `npm run build:mcp`로 빌드
 
 모든 tool은 CLI 명령어를 프록시합니다:
 ```typescript

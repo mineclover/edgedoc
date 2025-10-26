@@ -1,9 +1,23 @@
 {
-  "$schema": "./schema/mdoc-config.schema.json",
+  "language": "en",
+  "docs": {
+    "baseDir": "edgedoc",
+    "features": "features",
+    "interfaces": "interfaces",
+    "shared": "shared"
+  },
   "validation": {
     "sharedTypes": {
       "maxPairs": 12,
-      "warnAtPairs": 8
+      "warnAtPairs": 8,
+      "description": "Shared type filename validation (e.g., 00--01_00--02.md)"
     }
+  },
+  "terminology": {
+    "globalScopePaths": [
+      "docs/GLOSSARY.md",
+      "docs/terms/"
+    ],
+    "description": "Paths where term definitions are treated as global scope"
   }
 }

@@ -10,6 +10,8 @@
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { join, relative } from 'path';
 import { ParserFactory } from '../parsers/ParserFactory.js';
+import { loadConfig } from '../utils/config.js';
+import { getDocsPath } from '../types/config.js';
 
 /**
  * Component definition extracted from documentation
@@ -585,8 +587,9 @@ export function calculateFeatureCoverage(
 export function generateImplementationCoverage(
   projectPath: string = process.cwd()
 ): ProjectCoverage {
-  const featuresDir = join(projectPath, 'tasks', 'features');
-  const syntaxDir = join(projectPath, 'tasks', 'syntax');
+  const config = loadConfig(projectPath);
+  const featuresDir = join(projectPath, getDocsPath(config, 'features'));
+  const syntaxDir = join(projectPath, getDocsPath(config, 'base'), 'syntax');
 
   if (!existsSync(featuresDir)) {
     throw new Error(`Features directory not found: ${featuresDir}`);

@@ -592,7 +592,7 @@ test_files:
  *   - Handle missing config
  */
 
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect } from 'vitest';
 import { loadConfig } from '../../src/utils/config.js';
 
 describe('Config Loading', () => {
@@ -652,7 +652,7 @@ related_features:
  *   - Duplicate term detection
  */
 
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect } from 'vitest';
 import { TermRegistry } from '../../src/tools/term-registry.js';
 
 describe('TermRegistry - Definition Management', () => {
@@ -681,7 +681,7 @@ describe('TermRegistry - Definition Management', () => {
  *   - Output formatting
  */
 
-import { describe, test, expect } from 'bun:test';
+import { describe, test, expect } from 'vitest';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 

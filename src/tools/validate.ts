@@ -8,6 +8,7 @@ import {
   formatDateTime,
   getMarkdownFiles,
 } from '../shared/utils.js';
+import { loadConfig } from '../utils/config.js';
 
 /**
  * 파일 검증
@@ -138,22 +139,7 @@ export async function validateMigration(
   const projectDir = options.projectPath || process.cwd();
 
   // Load config
-  const configPath = join(projectDir, 'mdoc.config.json');
-  let config: any = {
-    migration: {
-      sourceDir: 'tasks',
-      targetDir: 'tasks-v2',
-    }
-  };
-
-  if (fileExists(configPath)) {
-    try {
-      const configContent = readFileSync(configPath, 'utf-8');
-      config = JSON.parse(configContent);
-    } catch (error) {
-      console.warn(`⚠️  Failed to parse mdoc.config.json: ${error}`);
-    }
-  }
+  const config = loadConfig(projectDir);
 
   // Skip if no migration config
   if (!config.migration) {

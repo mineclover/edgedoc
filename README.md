@@ -4,7 +4,7 @@ Edge-based Documentation Validation & Sync Tool (CLI + MCP)
 
 ## 소개
 
-`edgedoc`는 edge 기반 양방향 참조 체계를 사용하는 문서 검증 및 동기화 도구입니다. 문서 간 관계를 그래프 구조로 관리하며, 점진적 마이그레이션과 문서 일관성을 검증합니다. TypeScript로 작성되었으며 Bun 런타임을 활용합니다.
+`edgedoc`는 edge 기반 양방향 참조 체계를 사용하는 문서 검증 및 동기화 도구입니다. 문서 간 관계를 그래프 구조로 관리하며, 점진적 마이그레이션과 문서 일관성을 검증합니다. TypeScript로 작성되었으며 Node.js 런타임을 사용합니다.
 
 ### 주요 기능
 
@@ -39,13 +39,14 @@ Python 지원:
 
 ### 사전 요구사항
 
-- [Bun](https://bun.sh) >= 1.0
+- [Node.js](https://nodejs.org) >= 18.0
+- npm >= 9.0 (Node.js와 함께 설치됨)
 
 ### 의존성 설치
 
 \`\`\`bash
 cd edgedoc
-bun install
+npm install
 \`\`\`
 
 ## Configuration (mdoc.config.json)
@@ -55,27 +56,76 @@ Create `mdoc.config.json` in your project root to customize validation rules:
 ```json
 {
   "language": "en",
+  "docs": {
+    "baseDir": "edgedoc",
+    "features": "features",
+    "interfaces": "interfaces",
+    "shared": "shared"
+  },
   "validation": {
     "sharedTypes": {
       "maxPairs": 12,
       "warnAtPairs": 8
     }
+  },
+  "terminology": {
+    "globalScopePaths": [
+      "docs/GLOSSARY.md",
+      "docs/terms/"
+    ]
   }
 }
 ```
 
 ### Configuration Options
 
+#### docs (문서 디렉토리 구조)
+- **baseDir**: 문서 저장 루트 디렉토리 (기본: `edgedoc`)
+  - **Type**: `string`
+  - **예시**: `edgedoc`, `tasks`, `docs/specs`, `specs` 등
+- **features**: 기능 문서 하위 디렉토리 (기본: `features`)
+- **interfaces**: 인터페이스 문서 하위 디렉토리 (기본: `interfaces`)
+- **shared**: 공용 타입 문서 하위 디렉토리 (기본: `shared`)
+
+**기본 디렉토리 구조**:
+```
+edgedoc/
+├── features/        # 기능 문서 (1_Feature.md)
+├── interfaces/      # 인터페이스 (A--B.md)
+└── shared/          # 공용 타입 (A--B_C--D.md)
+```
+
+**기존 tasks/ 프로젝트로 설정**:
+```json
+{
+  "docs": {
+    "baseDir": "tasks"
+  }
+}
+```
+
+**완전한 커스텀 구조**:
+```json
+{
+  "docs": {
+    "baseDir": "specs",
+    "features": "features",
+    "interfaces": "api-interfaces",
+    "shared": "common-types"
+  }
+}
+```
+
 #### language
 - **Type**: `"en"` | `"ko"`
 - **Default**: `"en"`
-- **Description**: Display language for command output
-  - `"en"` - English (default)
+- **Description**: 명령어 출력 언어
+  - `"en"` - English (기본값)
   - `"ko"` - Korean (한국어)
 
 ```json
 {
-  "language": "ko"  // Use Korean messages
+  "language": "ko"
 }
 ```
 
@@ -86,6 +136,35 @@ Create `mdoc.config.json` in your project root to customize validation rules:
   - 8개 쌍 이상: ⚠️ 경고 (Global type 고려 권장)
   - 12개 쌍 이상: ❌ 에러 (파일명이 너무 길어지므로 Global type으로 격상 필수)
 - **Global type 권장 사례**: `LayerNode.md`, `ImageAsset.md` 등 의미 있는 이름 사용
+
+```json
+{
+  "validation": {
+    "sharedTypes": {
+      "maxPairs": 15,
+      "warnAtPairs": 10
+    }
+  }
+}
+```
+
+#### terminology.globalScopePaths
+- **Type**: `string[]`
+- **Description**: 전역 범위로 취급할 용어 정의 경로
+- **기본값**: `["docs/GLOSSARY.md", "docs/terms/"]`
+- **용도**: 이 경로들의 용어 정의는 프로젝트 전역에서 참조 가능
+
+```json
+{
+  "terminology": {
+    "globalScopePaths": [
+      "docs/GLOSSARY.md",
+      "docs/terms/",
+      "tasks/syntax/"
+    ]
+  }
+}
+```
 
 ### 마이그레이션 검증
 
@@ -101,17 +180,17 @@ Create `mdoc.config.json` in your project root to customize validation rules:
 
 \`\`\`bash
 # 소스 코드 직접 실행
-bun run dev validate migration --help
+npm run dev validate migration --help
 \`\`\`
 
 ### CLI 빌드
 
 \`\`\`bash
 # JavaScript 번들 빌드
-bun run build
+npm run build
 
 # 실행 가능한 바이너리 빌드
-bun run build:binary
+npm run build:binary
 \`\`\`
 
 ### CLI 명령어
@@ -411,8 +490,9 @@ edgedoc/
 ├── llms.txt                # 🆕 최적화된 LLM 참조 문서
 ├── dist/                   # 빌드 결과물
 ├── package.json
+├── package-lock.json
 ├── tsconfig.json
-└── bunfig.toml
+└── build.mjs
 \`\`\`
 
 ## 문서
@@ -478,11 +558,13 @@ edgedoc/
 
 ## 기술 스택
 
-- **런타임**: Bun
+- **런타임**: Node.js
 - **언어**: TypeScript
+- **빌드**: esbuild
 - **CLI**: Commander.js
 - **검증**: Zod
 - **MCP**: @modelcontextprotocol/sdk
+- **파싱**: tree-sitter (TypeScript, JavaScript, Python, Markdown)
 
 ## 라이센스
 
@@ -490,9 +572,9 @@ MIT
 
 ## 버전
 
-1.0.0
+1.3.0
 
 ---
 
-**작성일**: 2025-10-23 (최종 수정: 2025-10-25)
-**상태**: CLI + MCP 완성 (18개 도구), 추가 기능 개발 중
+**작성일**: 2025-10-23 (최종 수정: 2025-10-26)
+**상태**: CLI + MCP 완성 (18개 도구), Node.js 마이그레이션 완료

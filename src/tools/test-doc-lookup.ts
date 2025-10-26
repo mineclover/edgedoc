@@ -7,6 +7,8 @@
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
 import { join, relative } from 'path';
+import { loadConfig } from '../utils/config.js';
+import { getDocsPath } from '../types/config.js';
 
 /**
  * Parse YAML frontmatter
@@ -268,7 +270,8 @@ export function validateTestDocSync(
  * Collect all features from tasks/features/
  */
 function collectAllFeatures(projectPath: string): CoverageReport['features'] {
-  const featuresDir = join(projectPath, 'tasks', 'features');
+  const config = loadConfig(projectPath);
+  const featuresDir = join(projectPath, getDocsPath(config, 'features'));
   if (!existsSync(featuresDir)) {
     return [];
   }
@@ -330,9 +333,10 @@ function collectAllTestFiles(projectPath: string): string[] {
  * Find feature document by feature ID
  */
 function findFeatureDoc(featureId: string, projectPath: string): string | null {
+  const config = loadConfig(projectPath);
   const possiblePaths = [
-    join(projectPath, 'tasks', 'features', `${featureId}.md`),
-    join(projectPath, 'tasks', 'interfaces', `${featureId}.md`),
+    join(projectPath, getDocsPath(config, 'features'), `${featureId}.md`),
+    join(projectPath, getDocsPath(config, 'interfaces'), `${featureId}.md`),
   ];
 
   for (const path of possiblePaths) {

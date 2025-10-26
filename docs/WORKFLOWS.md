@@ -388,16 +388,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: '18'
 
       - name: Install mdoc-tools
         run: |
           cd mdoc-tools
-          bun install
-          bun run build
+          npm install
+          npm run build
 
       - name: Validate Naming Conventions
         run: ./mdoc-tools/dist/cli.js validate naming

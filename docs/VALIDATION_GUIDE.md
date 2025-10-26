@@ -571,12 +571,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
       - name: Install dependencies
-        run: bun install
+        run: npm install
       - name: Build reference index
-        run: bun run src/cli.ts graph build
+        run: npm run dev graph build
       - name: Run comprehensive validation
-        run: bun run src/cli.ts validate all
+        run: npm run dev validate all
 ```
 
 ### 3. 검증 실패 시 대응

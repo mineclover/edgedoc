@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { loadConfig } from '../utils/config.js';
+import { getDocsPath } from '../types/config.js';
 import type {
   ReferenceIndex,
   BuildIndexOptions,
@@ -95,7 +96,8 @@ async function extractFeatureReferences(
   index: ReferenceIndex,
   verbose: boolean
 ): Promise<void> {
-  const featuresDir = join(projectPath, 'tasks', 'features');
+  const config = loadConfig(projectPath);
+  const featuresDir = join(projectPath, getDocsPath(config, 'features'));
   const files = findMarkdownFiles(featuresDir);
 
   for (const file of files) {
@@ -185,7 +187,8 @@ async function extractInterfaceConnections(
   index: ReferenceIndex,
   verbose: boolean
 ): Promise<void> {
-  const interfacesDir = join(projectPath, 'tasks', 'interfaces');
+  const config = loadConfig(projectPath);
+  const interfacesDir = join(projectPath, getDocsPath(config, 'interfaces'));
   if (!existsSync(interfacesDir)) {
     if (verbose) console.log('   → No interfaces directory\n');
     return;

@@ -589,11 +589,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
       - name: Check progress
         run: |
-          bun install
-          bun run src/cli.ts graph build
-          bun run src/cli.ts tasks progress
+          npm install
+          npm run dev graph build
+          npm run dev tasks progress
 
       - name: Fail if progress decreased
         run: |

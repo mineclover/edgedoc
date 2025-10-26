@@ -12,7 +12,7 @@ export interface MdocConfig {
       description?: string;
     };
   };
-  tasks?: {
+  docs?: {
     baseDir: string;
     features: string;
     interfaces: string;
@@ -27,8 +27,8 @@ export interface MdocConfig {
 export const DEFAULT_CONFIG: MdocConfig = {
   language: 'en',
   migration: {
-    sourceDir: 'tasks',
-    targetDir: 'tasks-v2',
+    sourceDir: 'edgedoc',
+    targetDir: 'edgedoc-v2',
   },
   validation: {
     sharedTypes: {
@@ -36,16 +36,34 @@ export const DEFAULT_CONFIG: MdocConfig = {
       warnAtPairs: 8,
     },
   },
-  tasks: {
-    baseDir: 'tasks',
+  docs: {
+    baseDir: 'edgedoc',
     features: 'features',
     interfaces: 'interfaces',
     shared: 'shared',
   },
   terminology: {
     globalScopePaths: [
-      'docs/terms/',         // Global term definitions
-      'tasks/syntax/',       // Syntax term definitions
+      'docs/GLOSSARY.md',    // Global term definitions
+      'docs/terms/',         // Term definitions directory
     ],
   },
 };
+
+/**
+ * Get documentation directory paths from config
+ */
+export function getDocsPath(config: MdocConfig, type: 'base' | 'features' | 'interfaces' | 'shared' = 'base'): string {
+  const docs = config.docs || DEFAULT_CONFIG.docs!;
+  switch (type) {
+    case 'features':
+      return `${docs.baseDir}/${docs.features}`;
+    case 'interfaces':
+      return `${docs.baseDir}/${docs.interfaces}`;
+    case 'shared':
+      return `${docs.baseDir}/${docs.shared}`;
+    case 'base':
+    default:
+      return docs.baseDir;
+  }
+}

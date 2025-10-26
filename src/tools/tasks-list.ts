@@ -1,6 +1,8 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { findMarkdownFiles } from '../shared/utils.js';
+import { loadConfig } from '../utils/config.js';
+import { getDocsPath } from '../types/config.js';
 import type { ReferenceIndex } from '../types/reference-index.js';
 
 export interface TasksListOptions {
@@ -126,7 +128,8 @@ function extractTitle(content: string): string {
 export async function listTasks(options: TasksListOptions): Promise<TaskInfo[]> {
   const { projectPath, status, priority } = options;
 
-  const featuresDir = join(projectPath, 'tasks', 'features');
+  const config = loadConfig(projectPath);
+  const featuresDir = join(projectPath, getDocsPath(config, 'features'));
   const files = findMarkdownFiles(featuresDir);
 
   const tasks: TaskInfo[] = [];

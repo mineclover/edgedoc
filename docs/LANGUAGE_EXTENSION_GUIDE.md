@@ -30,7 +30,7 @@ edgedoc uses Tree-sitter based parsers to extract imports and exports from sourc
 First, install the Tree-sitter grammar package for your target language:
 
 ```bash
-bun add tree-sitter-{language}
+npm install tree-sitter-{language}
 ```
 
 For example:

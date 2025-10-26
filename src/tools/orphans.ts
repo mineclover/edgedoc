@@ -3,6 +3,8 @@ import { join, relative, resolve, dirname } from 'node:path';
 import type { OrphanFile, OrphanFilesResult, OrphanOptions } from '../shared/types.js';
 import { fileExists, getMarkdownFiles } from '../shared/utils.js';
 import { ParserFactory } from '../parsers/ParserFactory.js';
+import { loadConfig } from '../utils/config.js';
+import { getDocsPath } from '../types/config.js';
 
 /**
  * 파일 경로 추출 정규식
@@ -72,8 +74,10 @@ function extractReferencedFiles(tasksDir: string): Set<string> {
 /**
  * 소스 파일 목록 수집
  */
-function collectSourceFiles(dir: string, baseDir: string, options: OrphanOptions): string[] {
+function collectSourceFiles(dir: string, baseDir: string, options: OrphanOptions, config: any): string[] {
   const files: string[] = [];
+  const docsBaseDir = getDocsPath(config, 'base');
+  const docsV2Dir = `${docsBaseDir}-v2`;
 
   try {
     const entries = readdirSync(dir);
@@ -90,8 +94,8 @@ function collectSourceFiles(dir: string, baseDir: string, options: OrphanOptions
       )
         continue;
       if (relativePath.startsWith('.git')) continue;
-      if (relativePath.startsWith('tasks')) continue;
-      if (relativePath.startsWith('tasks-v2')) continue;
+      if (relativePath.startsWith(docsBaseDir)) continue;
+      if (relativePath.startsWith(docsV2Dir)) continue;
       if (relativePath.startsWith('mdoc-tools')) continue;
       if (relativePath.startsWith('out')) continue; // Electron 빌드 아티팩트
       if (relativePath.startsWith('.vite')) continue; // Vite 빌드 캐시
@@ -100,7 +104,7 @@ function collectSourceFiles(dir: string, baseDir: string, options: OrphanOptions
       const stat = statSync(fullPath);
 
       if (stat.isDirectory()) {
-        files.push(...collectSourceFiles(fullPath, baseDir, options));
+        files.push(...collectSourceFiles(fullPath, baseDir, options, config));
       } else if (stat.isFile()) {
         // 소스 파일 및 설정 파일만
         const ext = fullPath.split('.').pop() || '';
@@ -264,10 +268,11 @@ export async function validateOrphans(options: OrphanOptions = {}): Promise<Orph
   console.log('🔍 고아 파일 검증 시작...\n');
 
   const projectDir = options.projectPath || process.cwd();
-  const tasksDir = join(projectDir, 'tasks');
+  const config = loadConfig(projectDir);
+  const tasksDir = join(projectDir, getDocsPath(config, 'base'));
 
   if (!fileExists(tasksDir)) {
-    console.log('⚠️  tasks/ 없음 - 검증 스킵');
+    console.log(`⚠️  ${getDocsPath(config, 'base')}/ 없음 - 검증 스킵`);
     return {
       success: true,
       totalFiles: 0,
@@ -279,14 +284,14 @@ export async function validateOrphans(options: OrphanOptions = {}): Promise<Orph
 
   console.log(`📁 프로젝트 경로: ${projectDir}\n`);
 
-  // 1. tasks에서 참조된 파일 추출
-  console.log('📖 tasks 문서에서 참조 파일 추출 중...');
+  // 1. 문서에서 참조된 파일 추출
+  console.log(`📖 ${getDocsPath(config, 'base')} 문서에서 참조 파일 추출 중...`);
   const referencedPaths = extractReferencedFiles(tasksDir);
   console.log(`   → ${referencedPaths.size}개 파일 참조됨\n`);
 
   // 2. 프로젝트의 모든 소스 파일 수집
   console.log('📂 프로젝트 파일 스캔 중...');
-  const allSourceFiles = collectSourceFiles(projectDir, projectDir, options);
+  const allSourceFiles = collectSourceFiles(projectDir, projectDir, options, config);
   console.log(`   → ${allSourceFiles.length}개 파일 발견\n`);
 
   // 3. Import 그래프 구축 (Tree-sitter 기반)

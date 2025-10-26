@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import type { ValidationOptions } from '../shared/types.js';
 import type { MdocConfig } from '../types/config.js';
+import { getDocsPath } from '../types/config.js';
 import { fileExists, getMarkdownFiles } from '../shared/utils.js';
 import { loadConfig } from '../utils/config.js';
 
@@ -81,7 +82,8 @@ function extractFrontmatterArray(content: string, field: string): string[] {
  */
 function checkCircularDependencies(projectPath: string): CircularDependency[] {
   const dependencies: CircularDependency[] = [];
-  const featuresPath = join(projectPath, 'tasks', 'features');
+  const config = loadConfig(projectPath);
+  const featuresPath = join(projectPath, getDocsPath(config, 'features'));
 
   if (!fileExists(featuresPath)) {
     return dependencies;
@@ -146,8 +148,9 @@ function checkCircularDependencies(projectPath: string): CircularDependency[] {
  */
 function checkInterfaceConsistency(projectPath: string): InterfaceError[] {
   const errors: InterfaceError[] = [];
-  const interfacesPath = join(projectPath, 'tasks', 'interfaces');
-  const featuresPath = join(projectPath, 'tasks', 'features');
+  const config = loadConfig(projectPath);
+  const interfacesPath = join(projectPath, getDocsPath(config, 'interfaces'));
+  const featuresPath = join(projectPath, getDocsPath(config, 'features'));
 
   if (!fileExists(interfacesPath)) {
     return errors;
@@ -204,10 +207,11 @@ function checkInterfaceConsistency(projectPath: string): InterfaceError[] {
  */
 function checkFrontmatterFields(projectPath: string): FrontmatterError[] {
   const errors: FrontmatterError[] = [];
-  const tasksPath = join(projectPath, 'tasks');
+  const config = loadConfig(projectPath);
+  const baseDocsPath = join(projectPath, getDocsPath(config, 'base'));
 
   // Check features
-  const featuresPath = join(tasksPath, 'features');
+  const featuresPath = join(projectPath, getDocsPath(config, 'features'));
   if (fileExists(featuresPath)) {
     const featureFiles = getMarkdownFiles(featuresPath);
 
@@ -274,7 +278,7 @@ function checkFrontmatterFields(projectPath: string): FrontmatterError[] {
   }
 
   // Check interfaces
-  const interfacesPath = join(tasksPath, 'interfaces');
+  const interfacesPath = join(projectPath, getDocsPath(config, 'interfaces'));
   if (fileExists(interfacesPath)) {
     const interfaceFiles = getMarkdownFiles(interfacesPath);
     const requiredFields = ['from', 'to', 'type'];
@@ -304,7 +308,8 @@ function checkFrontmatterFields(projectPath: string): FrontmatterError[] {
  */
 function checkExampleCode(projectPath: string): ExampleCodeError[] {
   const errors: ExampleCodeError[] = [];
-  const interfacesPath = join(projectPath, 'tasks', 'interfaces');
+  const config = loadConfig(projectPath);
+  const interfacesPath = join(projectPath, getDocsPath(config, 'interfaces'));
 
   if (!fileExists(interfacesPath)) {
     return errors;
@@ -341,14 +346,14 @@ function checkExampleCode(projectPath: string): ExampleCodeError[] {
  */
 function checkSharedTypeStructure(projectPath: string, config?: MdocConfig): SharedTypeError[] {
   const errors: SharedTypeError[] = [];
-  const sharedPath = join(projectPath, 'tasks', 'shared');
+  const cfg = config || loadConfig(projectPath);
+  const sharedPath = join(projectPath, getDocsPath(cfg, 'shared'));
 
   if (!fileExists(sharedPath)) {
     return errors;
   }
 
   const sharedFiles = getMarkdownFiles(sharedPath);
-  const cfg = config || loadConfig(projectPath);
 
   for (const filePath of sharedFiles) {
     const fileName = basename(filePath);

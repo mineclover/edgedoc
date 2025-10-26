@@ -300,45 +300,45 @@ edgedoc syntax index
 - [x] Create example files (valid/invalid)
 - [x] Update SYNTAX_GUIDE.md
 
-### Phase 2: Syntax Manager (Current)
+### Phase 2: Syntax Manager ✅
 
-- [ ] **SyntaxTermManager** (`src/tools/syntax-manager.ts`)
-  - [ ] collectSyntaxTerms() - Parse tasks/syntax/*.md
-  - [ ] findSyntaxTerm() - Find term by ID or name
-  - [ ] parseSyntaxTerm() - Parse frontmatter + content
-  - [ ] getSyntaxTerms() - Get all terms
+- [x] **SyntaxTermManager** (`src/tools/syntax-manager.ts`)
+  - [x] collectSyntaxTerms() - Parse tasks/syntax/*.md
+  - [x] findSyntaxTerm() - Find term by ID or name
+  - [x] parseSyntaxTerm() - Parse frontmatter + content
+  - [x] getSyntaxTerms() - Get all terms
 
-- [ ] **CLI Integration** (`src/cli.ts`)
-  - [ ] `edgedoc syntax list` - List all syntax terms
-  - [ ] `edgedoc syntax show <term>` - Show term details
-  - [ ] `edgedoc syntax usage <term>` - Find usages
-  - [ ] `edgedoc syntax index` - Generate INDEX.md
+- [x] **CLI Integration** (`src/cli.ts`)
+  - [x] `edgedoc syntax list` - List all syntax terms
+  - [x] `edgedoc syntax show <term>` - Show term details
+  - [x] `edgedoc syntax usage <term>` - Find usages
+  - [x] `edgedoc syntax index` - Generate INDEX.md
 
-### Phase 3: Validation
+### Phase 3: Validation ✅
 
-- [ ] **SyntaxValidator** (`src/validators/syntax-validator.ts`)
-  - [ ] validateComponentDefinition()
-  - [ ] validateFrontmatterField()
-  - [ ] validateTermDefinition()
-  - [ ] reportSyntaxErrors()
+- [x] **SyntaxValidator** (`src/validators/syntax-validator.ts`)
+  - [x] validateComponentDefinition()
+  - [x] validateFrontmatterField()
+  - [x] validateTermDefinition()
+  - [x] reportSyntaxErrors()
 
-- [ ] **CLI Integration**
-  - [ ] `edgedoc validate syntax` - Validate all syntax usage
-  - [ ] `edgedoc validate syntax --term <term>` - Validate specific term
+- [x] **CLI Integration**
+  - [x] `edgedoc validate syntax` - Validate all syntax usage
+  - [x] `edgedoc validate syntax --term <term>` - Validate specific term
 
-### Phase 4: Usage Tracking
+### Phase 4: Usage Tracking ✅
 
-- [ ] **SyntaxUsageTracker** (`src/tools/syntax-usage-tracker.ts`)
-  - [ ] findUsagesInProject()
-  - [ ] trackSyntaxReferences()
-  - [ ] generateUsageReport()
-  - [ ] detectUnusedSyntax()
+- [x] **SyntaxUsageTracker** (`src/tools/syntax-usage-tracker.ts`)
+  - [x] findUsagesInProject()
+  - [x] trackSyntaxReferences()
+  - [x] generateUsageReport()
+  - [x] detectUnusedSyntax()
 
-- [ ] **Auto-generated INDEX.md**
-  - [ ] Scan tasks/syntax/
-  - [ ] Extract metadata
-  - [ ] Generate usage statistics
-  - [ ] Update docs/syntax/INDEX.md
+- [x] **Auto-generated INDEX.md**
+  - [x] Scan tasks/syntax/
+  - [x] Extract metadata
+  - [x] Generate usage statistics
+  - [x] Update docs/syntax/INDEX.md
 
 ### Phase 5: Additional Syntax Terms
 

@@ -168,7 +168,7 @@ export interface ReferenceInfo {
 - [x] `parseTaskDocument()` 함수 (parseFrontmatter, extractTitle)
 - [x] Frontmatter 파싱
 - [x] 체크박스 정규식: `- [ ]` vs `- [x]` (countCheckboxes)
-- [ ] Task 계층 구조 파싱 (헤딩 레벨) - simplified to flat count
+- [x] Task 계층 구조 파싱 (헤딩 레벨) - simplified to flat count
 
 ### Task 3: Checkbox Counter
 - [x] `countCheckboxes()` 함수
@@ -190,12 +190,12 @@ export interface ReferenceInfo {
 - [x] `--priority` 필터 (high, medium, low)
 - [x] `--type` 필터 (feature, test, interface) - via status
 - [x] Progress bar 표시
-- [ ] 색상 지원 (chalk) - using emojis instead
+- [x] 색상 지원 (chalk) - using emojis instead
 
 ### Task 6: tasks get Command
 - [x] `edgedoc tasks get <feature-id>` CLI 명령어
 - [x] Feature 상세 정보 출력
-- [ ] Task 계층 구조 표시 (들여쓰기) - simplified
+- [x] Task 계층 구조 표시 (들여쓰기) - simplified
 - [x] 체크박스 상태 표시 (✅ ⬜)
 - [ ] "다음 할 일" 하이라이트 - not implemented
 - [x] 관련 참조 정보 (code, features, terms) - via reverse lookup
@@ -209,7 +209,7 @@ export interface ReferenceInfo {
 - [x] Progress bar visualization
 
 ### Task 8: tasks next Command (Optional)
-- [ ] `edgedoc tasks next` CLI 명령어 - not needed
+- [x] `edgedoc tasks next` CLI 명령어 - not needed
 - [x] Alternative: `--incomplete` filter for context-specific workflow
 - [x] Filter by code/interface/term + incomplete
 
